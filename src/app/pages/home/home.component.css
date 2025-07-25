@@ -1,0 +1,9 @@
+ul {
+  list-style-type: none; /* Removes bullet points */
+  padding-left: 0;       /* Removes default left padding */
+}
+
+a {
+  text-decoration: none; /* Removes underline */
+  color: inherit;        /* Keeps default text color */
+}

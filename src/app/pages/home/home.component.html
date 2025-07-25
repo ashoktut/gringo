@@ -1,0 +1,28 @@
+
+<mat-accordion>
+  <mat-expansion-panel
+    (opened)="panelOpenState = false"
+    (closed)="panelOpenState = true"
+  >
+    <mat-expansion-panel-header>
+      <mat-panel-title> Reps Forms </mat-panel-title>
+      <mat-panel-description>
+        Click to {{ panelOpenState ? "open" : "close" }}
+      </mat-panel-description>
+    </mat-expansion-panel-header>
+
+    <mat-nav-list aria-label="Select a form">
+      <ng-container *ngFor="let link of list; trackBy: trackLink">
+        <li
+          [routerLink]="[link.routePath]"
+          style="cursor: pointer"
+          class="mat-list-item"
+        >
+          {{ link.formName }}
+          <mat-divider></mat-divider>
+        </li>
+        <br />
+      </ng-container>
+    </mat-nav-list>
+  </mat-expansion-panel>
+</mat-accordion>
