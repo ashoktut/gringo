@@ -1,0 +1,54 @@
+<h2>Register</h2>
+
+<form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Username</mat-label>
+    <input matInput type="text" formControlName="username" required />
+    <mat-error *ngIf="registerForm.get('username')?.errors?.['required']">
+      Username is required.
+    </mat-error>
+    <mat-error *ngIf="registerForm.get('username')?.errors?.['minlength']">
+      Username must be at least 6 characters long.
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Password</mat-label>
+    <input matInput type="password" formControlName="password" required />
+    <mat-error *ngIf="registerForm.get('password')?.errors?.['required']">
+      Password is required.
+    </mat-error>
+    <mat-error *ngIf="registerForm.get('password')?.errors?.['minlength']">
+      Password must be at least 8 characters long.
+    </mat-error>
+  </mat-form-field>
+
+  <mat-form-field appearance="fill" class="full-width">
+    <mat-label>Confirm Password</mat-label>
+    <input matInput type="password" formControlName="confirmPassword" required />
+    <mat-error *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">
+      Confirmation required.
+    </mat-error>
+    <mat-error *ngIf="registerForm.get('confirmPassword')?.errors?.['minlength']">
+      Password must be at least 8 characters long.
+    </mat-error>
+    <mat-error
+      *ngIf="
+        registerForm.getError('passwordMismatch') &&
+        registerForm.get('confirmPassword')?.touched
+      "
+    >
+      Passwords do not match.
+    </mat-error>
+  </mat-form-field>
+</form>
+
+<div class="button-group">
+  <button mat-raised-button color="accent" type="submit">Register</button>
+  <br />
+
+  <small
+    >Already have an account?
+    <button mat-button color="primary" type="button" [routerLink]="['/login']">Login here</button>
+  </small>
+</div>

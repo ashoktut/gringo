@@ -1,0 +1,8 @@
+<button
+  mat-button="filled"
+  [ngClass]="type"
+  [disabled]="disabled"
+  (click)="action.emit()"
+>
+  {{ label }}
+</button>
