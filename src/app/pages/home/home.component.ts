@@ -21,7 +21,7 @@ import { RouterModule } from '@angular/router';
   styleUrl: './home.component.css'
 })
 export class HomeComponent {
-  panelOpenState: boolean = false;
+  panelOpenState: boolean = true;
   list = [
   {
     "formID": "1",

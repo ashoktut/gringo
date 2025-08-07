@@ -1,1 +1,44 @@
-<p>rfq works!</p>
+
+<!-- <app-reusable-form [fields]="[{
+  name: 'dateSubmittedField',
+  label: 'Date Submitted',
+  type: 'date',
+  required: true,
+  placeholder: 'Date Submitted'
+}]" (formSubmit)="onFormSubmit($event)"></app-reusable-form> -->
+
+<div class="page-container">
+  <div class="form-header">
+    <h1>Request For Quote (RFQ)</h1>
+    <p>This form demonstrates all available input types using our reusable form component.</p>
+  </div>
+
+  <app-reusable-form
+    [fields]="formFields"
+    [formTitle]="'RFQ Form'"
+    [submitButtonText]="'Submit RFQ'"
+    (formSubmit)="onFormSubmit($event)"
+    (formValueChange)="onFormValueChange($event)">
+  </app-reusable-form>
+
+  <div class="form-info">
+    <h3>Form Features:</h3>
+    <ul>
+      <li>✅ Text Input with minimum length validation</li>
+      <li>✅ Email Input with email format validation</li>
+      <li>✅ Password Input with minimum length (8 chars)</li>
+      <li>✅ Number Input with min/max age validation</li>
+      <li>✅ Telephone Input with pattern validation</li>
+      <li>✅ Date Picker with Material Design</li>
+      <li>✅ Single Select Dropdown</li>
+      <li>✅ Multiple Select Dropdown</li>
+      <li>✅ Textarea with character limit</li>
+      <li>✅ Radio Button Group</li>
+      <li>✅ Checkbox Inputs (optional & required)</li>
+      <li>✅ Real-time validation and error messages</li>
+      <li>✅ Responsive design</li>
+    </ul>
+  </div>
+</div>
+
+

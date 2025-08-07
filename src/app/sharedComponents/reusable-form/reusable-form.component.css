@@ -1,0 +1,54 @@
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.form-title {
+  text-align: center;
+  margin-bottom: 24px;
+  color: #333;
+}
+
+.dynamic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.checkbox-field,
+.radio-field {
+  margin: 16px 0;
+}
+
+.field-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.radio-button {
+  margin-bottom: 8px;
+}
+
+.form-actions {
+  margin-top: 24px;
+  text-align: center;
+}
+
+.mat-error {
+  color: #f44336;
+  font-size: 12px;
+  margin-top: 4px;
+}
