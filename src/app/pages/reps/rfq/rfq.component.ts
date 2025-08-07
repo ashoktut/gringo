@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { FormField, ReusableFormComponent } from '../../../sharedComponents/reusable-form/reusable-form.component';
+import {
+  FormField,
+  ReusableFormComponent,
+} from '../../../sharedComponents/reusable-form/reusable-form.component';
 import { CommonModule } from '@angular/common';
 import { Validators } from '@angular/forms';
 
@@ -7,33 +10,85 @@ import { Validators } from '@angular/forms';
   selector: 'app-rfq',
   imports: [CommonModule, ReusableFormComponent],
   templateUrl: './rfq.component.html',
-  styleUrl: './rfq.component.css'
+  styleUrl: './rfq.component.css',
 })
 export class RfqComponent {
-
   // To make a field not rquired, set required: false
   // To make a field required, set required: true
   // To remove validation, remove the validators array or set it to an empty array
 
   formFields: FormField[] = [
-    // Date Input
+    // Date submitted Input
     {
       name: 'dateSubmitted',
       label: 'Date Submitted',
       type: 'date',
       required: true,
       placeholder: 'Enter the date submitted',
-      validators: [Validators.required]
+      validators: [Validators.required],
     },
 
-    // Date Input
+    // Date due Input
     {
       name: 'dateDue',
       label: 'Date Due',
       type: 'date',
       required: true,
       placeholder: 'Enter realistic date the quote is needed by',
-      validators: [Validators.required]
+      validators: [Validators.required],
+    },
+
+    // Rep name Input
+    // Select Dropdown (Single)
+    {
+      name: 'repName',
+      label: 'Rep Name',
+      type: 'select',
+      required: true,
+      options: [
+        { value: 'bryan', label: 'Bryan Van Staden' },
+        { value: 'jeff', label: 'Jeff Nain' },
+        { value: 'roux', label: 'Roux Mahlerbe' },
+        { value: 'ruan', label: 'Ruan Schroder' },
+        { value: 'other', label: 'Other' },
+      ],
+    },
+
+        // Radio Buttons
+        // Roof Timeframe
+    {
+      name: 'roofTimeframe',
+      label: 'Roof Required Timeframe',
+      type: 'select',
+      required: true,
+      options: [
+        { value: '1 week', label: '1 week' },
+        { value: '2 weeks', label: '2 weeks' },
+        { value: '1 month', label: '1 month' },
+        { value: '2 months', label: '2 months' },
+        { value: '3 months', label: '3 months' },
+        { value: '6 months', label: '6 months' },
+        { value: '6 months plus', label: 'Above 6 months' },
+
+      ]
+    },
+
+        // Select Dropdown (Multiple)
+        // CC Mail
+    {
+      name: 'ccMail',
+      label: 'CC Mail To',
+      type: 'select',
+      multiple: true,
+      required: true,
+      options: [
+        { value: 'andri@roofing.com', label: 'Andri Pretorius' },
+        { value: 'bryan@roofing.com', label: 'Bryan Van Staden' },
+        { value: 'jeff@roofing.com', label: 'Jeff Nain' },
+        { value: 'roux@roofing.com', label: 'Roux Mahlerbe' },
+        { value: 'ruan@roofing.com', label: 'Ruan Schroder' },
+        { value: 'stacy@roofing.com', label: 'Stacy Burgess' },
+      ]
     },
 
     // Password Input
@@ -42,7 +97,7 @@ export class RfqComponent {
       label: 'Password',
       type: 'password',
       required: true,
-      placeholder: 'Enter a strong password'
+      placeholder: 'Enter a strong password',
     },
 
     // Number Input
@@ -52,7 +107,7 @@ export class RfqComponent {
       type: 'number',
       required: true,
       placeholder: 'Enter your age',
-      validators: [Validators.min(18), Validators.max(100)]
+      validators: [Validators.min(18), Validators.max(100)],
     },
 
     // Telephone Input
@@ -61,7 +116,7 @@ export class RfqComponent {
       label: 'Phone Number',
       type: 'tel',
       required: true,
-      placeholder: '+1234567890'
+      placeholder: '+1234567890',
     },
 
     // Date Input
@@ -69,7 +124,7 @@ export class RfqComponent {
       name: 'dateOfBirth',
       label: 'Date of Birth',
       type: 'date',
-      required: true
+      required: true,
     },
 
     // Select Dropdown (Single)
@@ -83,8 +138,8 @@ export class RfqComponent {
         { value: 'us', label: 'United States' },
         { value: 'uk', label: 'United Kingdom' },
         { value: 'ca', label: 'Canada' },
-        { value: 'au', label: 'Australia' }
-      ]
+        { value: 'au', label: 'Australia' },
+      ],
     },
 
     // Select Dropdown (Multiple)
@@ -100,8 +155,8 @@ export class RfqComponent {
         { value: 'vue', label: 'Vue.js' },
         { value: 'nodejs', label: 'Node.js' },
         { value: 'python', label: 'Python' },
-        { value: 'java', label: 'Java' }
-      ]
+        { value: 'java', label: 'Java' },
+      ],
     },
 
     // Textarea
@@ -111,7 +166,7 @@ export class RfqComponent {
       type: 'textarea',
       rows: 4,
       placeholder: 'Tell us about yourself...',
-      validators: [Validators.maxLength(500)]
+      validators: [Validators.maxLength(500)],
     },
 
     // Radio Buttons
@@ -124,15 +179,15 @@ export class RfqComponent {
         { value: 'male', label: 'Male' },
         { value: 'female', label: 'Female' },
         { value: 'other', label: 'Other' },
-        { value: 'prefer-not-to-say', label: 'Prefer not to say' }
-      ]
+        { value: 'prefer-not-to-say', label: 'Prefer not to say' },
+      ],
     },
 
     // Checkbox
     {
       name: 'newsletter',
       label: 'Subscribe to newsletter',
-      type: 'checkbox'
+      type: 'checkbox',
     },
 
     // Terms & Conditions Checkbox
@@ -140,15 +195,15 @@ export class RfqComponent {
       name: 'acceptTerms',
       label: 'I accept the terms and conditions',
       type: 'checkbox',
-      required: true
-    }
+      required: true,
+    },
   ];
 
-// onFormSubmit($event: any) {
-// throw new Error('Method not implemented.');
-// }
+  // onFormSubmit($event: any) {
+  // throw new Error('Method not implemented.');
+  // }
 
-onFormSubmit(formData: any) {
+  onFormSubmit(formData: any) {
     console.log('Form submitted successfully!', formData);
 
     // Here you would typically send the data to your backend
@@ -168,7 +223,4 @@ onFormSubmit(formData: any) {
     // You can perform real-time validation or other actions here
     // For example, enable/disable submit button, show live preview, etc.
   }
-
-
-
 }
