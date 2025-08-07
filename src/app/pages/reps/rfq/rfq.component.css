@@ -1,0 +1,66 @@
+.page-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fafafa;
+  min-height: 100vh;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-header h1 {
+  color: #1976d2;
+  margin-bottom: 10px;
+  font-size: 2rem;
+}
+
+.form-header p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.form-info {
+  margin-top: 30px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-info h3 {
+  color: #1976d2;
+  margin-bottom: 15px;
+}
+
+.form-info ul {
+  list-style: none;
+  padding: 0;
+}
+
+.form-info li {
+  padding: 5px 0;
+  color: #333;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 10px;
+  }
+
+  .form-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-header p {
+    font-size: 1rem;
+  }
+}

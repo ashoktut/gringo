@@ -1,0 +1,120 @@
+<div class="form-container">
+  <h2 *ngIf="formTitle" class="form-title">{{ formTitle }}</h2>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dynamic-form">
+    <ng-container *ngFor="let field of fields; trackBy: trackByFieldName">
+
+      <!-- Input Fields (text, email, password, number, tel) -->
+      <mat-form-field
+        *ngIf="isInputField(field.type)"
+        appearance="fill"
+        class="full-width">
+        <mat-label>{{ field.label }}</mat-label>
+        <input
+          matInput
+          [type]="field.type"
+          [formControlName]="field.name"
+          [placeholder]="field.placeholder || ''"
+          [required]="!!field.required">
+        <mat-error *ngIf="hasFieldError(field.name)">
+          {{ getFieldError(field.name) }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Date Picker -->
+      <mat-form-field
+        *ngIf="field.type === 'date'"
+        appearance="fill"
+        class="full-width">
+        <mat-label>{{ field.label }}</mat-label>
+        <input
+          matInput
+          [matDatepicker]="picker"
+          [formControlName]="field.name"
+          [placeholder]="field.placeholder || ''"
+          [required]="!!field.required">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="hasFieldError(field.name)">
+          {{ getFieldError(field.name) }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Select Dropdown -->
+      <mat-form-field
+        *ngIf="field.type === 'select'"
+        appearance="fill"
+        class="full-width">
+        <mat-label>{{ field.label }}</mat-label>
+        <mat-select
+          [formControlName]="field.name"
+          [multiple]="!!field.multiple"
+          [required]="!!field.required">
+          <mat-option
+            *ngFor="let option of field.options"
+            [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="hasFieldError(field.name)">
+          {{ getFieldError(field.name) }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Textarea -->
+      <mat-form-field
+        *ngIf="field.type === 'textarea'"
+        appearance="fill"
+        class="full-width">
+        <mat-label>{{ field.label }}</mat-label>
+        <textarea
+          matInput
+          [formControlName]="field.name"
+          [placeholder]="field.placeholder || ''"
+          [rows]="field.rows || 3"
+          [required]="!!field.required">
+        </textarea>
+        <mat-error *ngIf="hasFieldError(field.name)">
+          {{ getFieldError(field.name) }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Checkbox -->
+      <div *ngIf="field.type === 'checkbox'" class="checkbox-field">
+        <mat-checkbox [formControlName]="field.name">
+          {{ field.label }}
+        </mat-checkbox>
+        <div *ngIf="hasFieldError(field.name)" class="mat-error">
+          {{ getFieldError(field.name) }}
+        </div>
+      </div>
+
+      <!-- Radio Group -->
+      <div *ngIf="field.type === 'radio'" class="radio-field">
+        <label class="field-label">{{ field.label }}</label>
+        <mat-radio-group [formControlName]="field.name" class="radio-group">
+          <mat-radio-button
+            *ngFor="let option of field.options"
+            [value]="option.value"
+            class="radio-button">
+            {{ option.label }}
+          </mat-radio-button>
+        </mat-radio-group>
+        <div *ngIf="hasFieldError(field.name)" class="mat-error">
+          {{ getFieldError(field.name) }}
+        </div>
+      </div>
+
+    </ng-container>
+
+    <div class="form-actions">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="form.invalid">
+        {{ submitButtonText }}
+      </button>
+    </div>
+  </form>
+</div>
