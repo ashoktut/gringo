@@ -225,6 +225,136 @@ export class RfqComponent {
         },
       ],
     },
+
+    // Truss Details
+    {
+      title: 'Truss Details',
+      description: 'Truss specifications & requirements',
+      fields: [
+        {
+          name: 'structureType',
+          label: 'Structure Type',
+          type: 'select',
+          multiple: true,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'tiled', label: 'Tiled Roof' },
+            { value: 'sheeted', label: 'Sheeted Roof' },
+            { value: 'slated', label: 'Slated Roof' },
+          ],
+        },
+
+        // Max truss spacing
+        {
+          name: 'maxTrussSpacing',
+          label: 'Max Truss Spacing',
+          type: 'text',
+          required: true,
+          clearable: true,
+        },
+
+        // Main Pitch
+        {
+          name: 'mainPitch',
+          label: 'Main Pitch',
+          type: 'number',
+          required: true,
+          clearable: true,
+          placeholder: 'Decimal values accepted also',
+          validators: [Validators.min(1), Validators.max(100000)],
+        },
+
+        // Pitch 2
+        {
+          name: 'pitch2',
+          label: 'Pitch 2',
+          type: 'number',
+          required: false,
+          clearable: true,
+          placeholder: 'Decimal values accepted also',
+          validators: [Validators.min(1), Validators.max(100000)],
+        },
+
+        // Roofing Services Required
+        {
+          name: 'serviceType',
+          label: 'Roofing Service Required',
+          type: 'select',
+          multiple: true,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'supply-truss', label: 'Supply Truss' },
+            { value: 'supply-cover', label: 'Supply Cover' },
+            { value: 'erect-truss', label: 'Erect Truss' },
+            { value: 'erect-cover', label: 'Erect Cover' },
+          ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR COMPANY
+        {
+          name: 'companyName',
+          label: 'Company Name',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'Enter company name',
+          conditional: {
+            dependsOn: 'clientType',
+            showWhen: 'company',
+          },
+        },
+        {
+          name: 'clientName',
+          label: 'Client Full Name',
+          type: 'text',
+          required: true,
+          clearable: true,
+        },
+
+        //////////
+        {
+          name: 'clientPhone',
+          label: 'Client Phone Number',
+          type: 'tel',
+          required: true,
+          placeholder: '+27721549865',
+          clearable: true,
+        },
+        {
+          name: 'clientEmail',
+          label: 'Client Email Address',
+          type: 'email',
+          required: true,
+          placeholder: 'Enter client email address',
+          clearable: true,
+        },
+        {
+          name: 'buildingType',
+          label: 'Building Type',
+          type: 'select',
+          required: false,
+          clearable: true,
+          options: [
+            { value: '0', label: 'Residential' },
+            { value: 'commercial', label: 'Commercial' },
+            { value: 'addLess', label: 'Addition less than 80m²' },
+            { value: 'addMore', label: 'Addition more than 80m²' },
+            { value: 'directMatch', label: 'Direct Match' },
+            { value: 'public', label: 'Public Building' },
+            { value: 'other', label: 'Other Building Type' },
+          ],
+        },
+        {
+          name: 'municipality',
+          label: 'Municipality',
+          type: 'text',
+          required: false,
+          clearable: true,
+        },
+      ],
+    },
     {
       title: 'Additional Details', // NEW SECTION
       description: 'Personal and account information',
