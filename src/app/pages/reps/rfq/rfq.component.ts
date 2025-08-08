@@ -162,6 +162,67 @@ export class RfqComponent {
             { value: 'company', label: 'Company' },
           ],
         },
+        // ADD CONDITIONAL FIELD FOR COMPANY
+        {
+          name: 'companyName',
+          label: 'Company Name',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'Enter company name',
+          conditional: {
+            dependsOn: 'clientType',
+            showWhen: 'company',
+          },
+        },
+        {
+          name: 'clientName',
+          label: 'Client Full Name',
+          type: 'text',
+          required: true,
+          clearable: true,
+        },
+
+        //////////
+        {
+          name: 'clientPhone',
+          label: 'Client Phone Number',
+          type: 'tel',
+          required: true,
+          placeholder: '+27721549865',
+          clearable: true,
+        },
+        {
+          name: 'clientEmail',
+          label: 'Client Email Address',
+          type: 'email',
+          required: true,
+          placeholder: 'Enter client email address',
+          clearable: true,
+        },
+        {
+          name: 'buildingType',
+          label: 'Building Type',
+          type: 'select',
+          required: false,
+          clearable: true,
+          options: [
+            { value: '0', label: 'Residential' },
+            { value: 'commercial', label: 'Commercial' },
+            { value: 'addLess', label: 'Addition less than 80m²' },
+            { value: 'addMore', label: 'Addition more than 80m²' },
+            { value: 'directMatch', label: 'Direct Match' },
+            { value: 'public', label: 'Public Building' },
+            { value: 'other', label: 'Other Building Type' },
+          ],
+        },
+        {
+          name: 'municipality',
+          label: 'Municipality',
+          type: 'text',
+          required: false,
+          clearable: true,
+        },
       ],
     },
     {

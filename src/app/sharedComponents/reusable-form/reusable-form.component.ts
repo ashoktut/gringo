@@ -99,6 +99,11 @@ export interface FormField {
   rows?: number; // for textarea
   multiple?: boolean; // for select
   clearable?: boolean; // show a clear button
+  // ADD THESE NEW PROPERTIES FOR CONDITIONAL FIELDS
+  conditional?: {
+    dependsOn: string; // field name it depends on
+    showWhen: any; // value that triggers showing this field
+  };
 }
 
 export interface FormSection {
