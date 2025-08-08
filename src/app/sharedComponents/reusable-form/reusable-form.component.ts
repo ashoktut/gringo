@@ -27,6 +27,7 @@ import {
   MatNativeDateModule,
   NativeDateAdapter,
 } from '@angular/material/core';
+import { MatIconModule } from '@angular/material/icon';
 
 // Custom Date Adapter for DD/MM/YYYY format
 @Injectable()
@@ -93,6 +94,7 @@ export interface FormField {
   validators?: any[];
   rows?: number; // for textarea
   multiple?: boolean; // for select
+  clearable?: boolean; // show a clear button
 }
 
 @Component({
@@ -109,6 +111,7 @@ export interface FormField {
     MatDatepickerModule,
     MatButtonModule,
     MatNativeDateModule,
+    MatIconModule,
   ],
   providers: [
     { provide: DateAdapter, useClass: CustomDateAdapter },
@@ -222,5 +225,33 @@ export class ReusableFormComponent {
 
   isInputField(type: string): boolean {
     return ['text', 'email', 'password', 'number', 'tel'].includes(type);
+  }
+
+    clearField(field: FormField, event?: MouseEvent): void {
+    event?.preventDefault();
+    event?.stopPropagation();
+    const ctrl = this.form.get(field.name);
+    if (!ctrl) return;
+
+    switch (field.type) {
+      case 'checkbox':
+        ctrl.setValue(false);
+        break;
+      case 'radio':
+        ctrl.setValue(null);
+        break;
+      case 'select':
+        ctrl.setValue(field.multiple ? [] : null);
+        break;
+      case 'number':
+      case 'date':
+        ctrl.setValue(null);
+        break;
+      default:
+        ctrl.setValue('');
+    }
+    ctrl.markAsPristine();
+    ctrl.markAsUntouched();
+    ctrl.updateValueAndValidity();
   }
 }

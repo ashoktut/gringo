@@ -16,6 +16,18 @@
           [formControlName]="field.name"
           [placeholder]="field.placeholder || ''"
           [required]="!!field.required">
+
+          <!-- Clear button -->
+        <button
+          *ngIf="field.clearable"
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Clear"
+          (click)="clearField(field, $event)">
+          <mat-icon>close</mat-icon>
+        </button>
+
         <mat-error *ngIf="hasFieldError(field.name)">
           {{ getFieldError(field.name) }}
         </mat-error>
@@ -33,6 +45,18 @@
           [formControlName]="field.name"
           [placeholder]="field.placeholder || ''"
           [required]="!!field.required">
+
+           <!-- Clear button for date -->
+        <button
+          *ngIf="field.clearable"
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Clear date"
+          (click)="clearField(field, $event)">
+          <mat-icon>close</mat-icon>
+        </button>
+
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
         <mat-error *ngIf="hasFieldError(field.name)">
@@ -56,6 +80,18 @@
             {{ option.label }}
           </mat-option>
         </mat-select>
+
+         <!-- Clear button for select -->
+        <button
+          *ngIf="field.clearable"
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Clear selection"
+          (click)="clearField(field, $event)">
+          <mat-icon>close</mat-icon>
+        </button>
+
         <mat-error *ngIf="hasFieldError(field.name)">
           {{ getFieldError(field.name) }}
         </mat-error>
@@ -74,6 +110,18 @@
           [rows]="field.rows || 3"
           [required]="!!field.required">
         </textarea>
+
+         <!-- Clear button for textarea -->
+        <button
+          *ngIf="field.clearable"
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Clear text"
+          (click)="clearField(field, $event)">
+          <mat-icon>close</mat-icon>
+        </button>
+        
         <mat-error *ngIf="hasFieldError(field.name)">
           {{ getFieldError(field.name) }}
         </mat-error>

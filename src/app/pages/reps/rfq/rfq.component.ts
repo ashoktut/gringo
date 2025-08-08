@@ -54,8 +54,8 @@ export class RfqComponent {
       ],
     },
 
-        // Radio Buttons
-        // Roof Timeframe
+    // Radio Buttons
+    // Roof Timeframe
     {
       name: 'roofTimeframe',
       label: 'Roof Required Timeframe',
@@ -69,12 +69,11 @@ export class RfqComponent {
         { value: '3 months', label: '3 months' },
         { value: '6 months', label: '6 months' },
         { value: '6 months plus', label: 'Above 6 months' },
-
-      ]
+      ],
     },
 
-        // Select Dropdown (Multiple)
-        // CC Mail
+    // Select Dropdown (Multiple)
+    // CC Mail
     {
       name: 'ccMail',
       label: 'CC Mail To',
@@ -88,7 +87,55 @@ export class RfqComponent {
         { value: 'roux@roofing.com', label: 'Roux Mahlerbe' },
         { value: 'ruan@roofing.com', label: 'Ruan Schroder' },
         { value: 'stacy@roofing.com', label: 'Stacy Burgess' },
-      ]
+      ],
+    },
+
+    // Select Dropdown (Single)
+    // ABK Input
+    {
+      name: 'abk',
+      label: 'ABK',
+      type: 'select',
+      multiple: false,
+      required: false,
+      options: [
+        { value: '0', label: '0' },
+        { value: '1000', label: 'AA' },
+        { value: '2000', label: 'BB' },
+        { value: '3000', label: 'CC' },
+        { value: '4000', label: 'DD' },
+        { value: '5000', label: 'EE' },
+      ],
+      clearable: true,
+    },
+
+        // Select Dropdown (Single)
+    // P&G 2 Input
+    {
+      name: 'pg2',
+      label: 'P&G 2',
+      type: 'select',
+      multiple: false,
+      required: true,
+      options: [
+        { value: '0', label: '0' },
+        { value: '1000', label: 'AA' },
+        { value: '2000', label: 'BB' },
+        { value: '3000', label: 'CC' },
+        { value: '4000', label: 'DD' },
+        { value: '5000', label: 'EE' },
+        { value: '6000', label: 'FF' },
+        { value: '7000', label: 'GG' },
+        { value: '8000', label: 'HH' },
+        { value: '9000', label: 'II' },
+        { value: '10000', label: 'JJ' },
+        { value: '11000', label: 'KK' },
+        { value: '12000', label: 'LL' },
+        { value: '13000', label: 'MM' },
+        { value: '14000', label: 'NN' },
+        { value: '15000', label: 'OO' },
+      ],
+      clearable: true,
     },
 
     // Password Input
