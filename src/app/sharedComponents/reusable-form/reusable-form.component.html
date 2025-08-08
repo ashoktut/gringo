@@ -53,7 +53,7 @@
 <!-- NEW: Shared field template (moved all your existing field code here) -->
 <ng-template #fieldTemplate let-field>
 
-  <div [formGroup]="form">
+  <div [formGroup]="form" *ngIf="shouldShowField(field)">
     <!-- Input Fields (text, email, password, number, tel) -->
     <mat-form-field
       *ngIf="isInputField(field.type)"

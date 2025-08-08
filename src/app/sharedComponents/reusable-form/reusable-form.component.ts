@@ -164,9 +164,9 @@ export class ReusableFormComponent implements OnInit, OnChanges {
     }
   }
 
-    private getAllFields(): FormField[] {
+  private getAllFields(): FormField[] {
     if (this.sections?.length) {
-      return this.sections.flatMap(s => s.fields);
+      return this.sections.flatMap((s) => s.fields);
     }
     return this.fields;
   }
@@ -183,21 +183,52 @@ export class ReusableFormComponent implements OnInit, OnChanges {
   //   this.form = this.fb.group(group);
   // }
 
-    private buildForm(): void {
+  private buildForm(): void {
     const group: { [key: string]: FormControl } = {};
     const allFields = this.getAllFields();
 
     allFields.forEach((field) => {
       const validators = this.getValidators(field);
       const initialValue =
-        field.type === 'checkbox' ? false :
-        field.type === 'select' && field.multiple ? [] :
-        null;
+        field.type === 'checkbox'
+          ? false
+          : field.type === 'select' && field.multiple
+          ? []
+          : null;
       group[field.name] = new FormControl(initialValue, validators);
     });
 
     this.form = this.fb.group(group);
+
+      // Add value change listeners for conditional fields
+  this.setupConditionalFields();
   }
+
+  private setupConditionalFields(): void {
+  const allFields = this.getAllFields();
+  const conditionalFields = allFields.filter(field => field.conditional);
+
+  conditionalFields.forEach(field => {
+    const dependentControl = this.form.get(field.conditional!.dependsOn);
+    if (dependentControl) {
+      dependentControl.valueChanges.subscribe(value => {
+        const fieldControl = this.form.get(field.name);
+        if (fieldControl) {
+          if (value !== field.conditional!.showWhen) {
+            // Clear and disable field when hidden
+            fieldControl.setValue(field.type === 'checkbox' ? false : null);
+            fieldControl.clearValidators();
+          } else {
+            // Re-apply validators when shown
+            const validators = this.getValidators(field);
+            fieldControl.setValidators(validators);
+          }
+          fieldControl.updateValueAndValidity();
+        }
+      });
+    }
+  });
+}
 
   private getValidators(field: FormField): any[] {
     const validators = [];
@@ -274,7 +305,7 @@ export class ReusableFormComponent implements OnInit, OnChanges {
   }
 
   ////////////////
-    trackBySection(index: number, section: FormSection): string {
+  trackBySection(index: number, section: FormSection): string {
     return section.title;
   }
 
@@ -310,5 +341,19 @@ export class ReusableFormComponent implements OnInit, OnChanges {
     ctrl.markAsPristine();
     ctrl.markAsUntouched();
     ctrl.updateValueAndValidity();
+  }
+
+  // Conditional fields logic
+  shouldShowField(field: FormField): boolean {
+    if (!field.conditional) {
+      return true; // Always show if no conditional logic
+    }
+
+    const dependentControl = this.form.get(field.conditional.dependsOn);
+    if (!dependentControl) {
+      return false; // Hide if dependent field doesn't exist
+    }
+
+    return dependentControl.value === field.conditional.showWhen;
   }
 }
