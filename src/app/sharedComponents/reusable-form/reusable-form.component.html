@@ -2,158 +2,41 @@
   <h2 *ngIf="formTitle" class="form-title">{{ formTitle }}</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dynamic-form">
-    <ng-container *ngFor="let field of fields; trackBy: trackByFieldName">
 
-      <!-- Input Fields (text, email, password, number, tel) -->
-      <mat-form-field
-        *ngIf="isInputField(field.type)"
-        appearance="fill"
-        class="full-width">
-        <mat-label>{{ field.label }}</mat-label>
-        <input
-          matInput
-          [type]="field.type"
-          [formControlName]="field.name"
-          [placeholder]="field.placeholder || ''"
-          [required]="!!field.required">
+    <!-- NEW: Grouped mode with sections -->
+    <ng-container *ngIf="sections?.length; else flatMode">
+      <mat-accordion [multi]="multi">
+        <mat-expansion-panel
+          *ngFor="let section of sections; trackBy: trackBySection"
+          [expanded]="section.expanded || false">
 
-          <!-- Clear button -->
-        <button
-          *ngIf="field.clearable"
-          mat-icon-button
-          matSuffix
-          type="button"
-          aria-label="Clear"
-          (click)="clearField(field, $event)">
-          <mat-icon>close</mat-icon>
-        </button>
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ section.title }}</mat-panel-title>
+            <mat-panel-description *ngIf="section.description">
+              {{ section.description }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
 
-        <mat-error *ngIf="hasFieldError(field.name)">
-          {{ getFieldError(field.name) }}
-        </mat-error>
-      </mat-form-field>
+          <ng-container *ngFor="let field of section.fields; trackBy: trackByFieldName">
+            <ng-container
+              [ngTemplateOutlet]="fieldTemplate"
+              [ngTemplateOutletContext]="{ $implicit: field }">
+            </ng-container>
+          </ng-container>
 
-      <!-- Date Picker -->
-      <mat-form-field
-        *ngIf="field.type === 'date'"
-        appearance="fill"
-        class="full-width">
-        <mat-label>{{ field.label }}</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker"
-          [formControlName]="field.name"
-          [placeholder]="field.placeholder || ''"
-          [required]="!!field.required">
-
-           <!-- Clear button for date -->
-        <button
-          *ngIf="field.clearable"
-          mat-icon-button
-          matSuffix
-          type="button"
-          aria-label="Clear date"
-          (click)="clearField(field, $event)">
-          <mat-icon>close</mat-icon>
-        </button>
-
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="hasFieldError(field.name)">
-          {{ getFieldError(field.name) }}
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Select Dropdown -->
-      <mat-form-field
-        *ngIf="field.type === 'select'"
-        appearance="fill"
-        class="full-width">
-        <mat-label>{{ field.label }}</mat-label>
-        <mat-select
-          [formControlName]="field.name"
-          [multiple]="!!field.multiple"
-          [required]="!!field.required">
-          <mat-option
-            *ngFor="let option of field.options"
-            [value]="option.value">
-            {{ option.label }}
-          </mat-option>
-        </mat-select>
-
-         <!-- Clear button for select -->
-        <button
-          *ngIf="field.clearable"
-          mat-icon-button
-          matSuffix
-          type="button"
-          aria-label="Clear selection"
-          (click)="clearField(field, $event)">
-          <mat-icon>close</mat-icon>
-        </button>
-
-        <mat-error *ngIf="hasFieldError(field.name)">
-          {{ getFieldError(field.name) }}
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Textarea -->
-      <mat-form-field
-        *ngIf="field.type === 'textarea'"
-        appearance="fill"
-        class="full-width">
-        <mat-label>{{ field.label }}</mat-label>
-        <textarea
-          matInput
-          [formControlName]="field.name"
-          [placeholder]="field.placeholder || ''"
-          [rows]="field.rows || 3"
-          [required]="!!field.required">
-        </textarea>
-
-         <!-- Clear button for textarea -->
-        <button
-          *ngIf="field.clearable"
-          mat-icon-button
-          matSuffix
-          type="button"
-          aria-label="Clear text"
-          (click)="clearField(field, $event)">
-          <mat-icon>close</mat-icon>
-        </button>
-        
-        <mat-error *ngIf="hasFieldError(field.name)">
-          {{ getFieldError(field.name) }}
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Checkbox -->
-      <div *ngIf="field.type === 'checkbox'" class="checkbox-field">
-        <mat-checkbox [formControlName]="field.name">
-          {{ field.label }}
-        </mat-checkbox>
-        <div *ngIf="hasFieldError(field.name)" class="mat-error">
-          {{ getFieldError(field.name) }}
-        </div>
-      </div>
-
-      <!-- Radio Group -->
-      <div *ngIf="field.type === 'radio'" class="radio-field">
-        <label class="field-label">{{ field.label }}</label>
-        <mat-radio-group [formControlName]="field.name" class="radio-group">
-          <mat-radio-button
-            *ngFor="let option of field.options"
-            [value]="option.value"
-            class="radio-button">
-            {{ option.label }}
-          </mat-radio-button>
-        </mat-radio-group>
-        <div *ngIf="hasFieldError(field.name)" class="mat-error">
-          {{ getFieldError(field.name) }}
-        </div>
-      </div>
-
+        </mat-expansion-panel>
+      </mat-accordion>
     </ng-container>
+
+    <!-- UPDATED: Flat mode (backward compatible) -->
+    <ng-template #flatMode>
+      <ng-container *ngFor="let field of fields; trackBy: trackByFieldName">
+        <ng-container
+          [ngTemplateOutlet]="fieldTemplate"
+          [ngTemplateOutletContext]="{ $implicit: field }">
+        </ng-container>
+      </ng-container>
+    </ng-template>
 
     <div class="form-actions">
       <button
@@ -166,3 +49,163 @@
     </div>
   </form>
 </div>
+
+<!-- NEW: Shared field template (moved all your existing field code here) -->
+<ng-template #fieldTemplate let-field>
+
+  <div [formGroup]="form">
+    <!-- Input Fields (text, email, password, number, tel) -->
+    <mat-form-field
+      *ngIf="isInputField(field.type)"
+      appearance="fill"
+      class="full-width">
+      <mat-label>{{ field.label }}</mat-label>
+      <input
+        matInput
+        [type]="field.type"
+        [formControlName]="field.name"
+        [placeholder]="field.placeholder || ''"
+        [required]="!!field.required">
+
+        <!-- Clear button -->
+      <button
+        *ngIf="field.clearable"
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="Clear"
+        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+        (click)="clearField(field, $event)">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <mat-error *ngIf="hasFieldError(field.name)">
+        {{ getFieldError(field.name) }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Date Picker -->
+    <mat-form-field
+      *ngIf="field.type === 'date'"
+      appearance="fill"
+      class="full-width">
+      <mat-label>{{ field.label }}</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        [formControlName]="field.name"
+        [placeholder]="field.placeholder || 'DD/MM/YYYY'"
+        [required]="!!field.required">
+
+         <!-- Clear button for date -->
+      <button
+        *ngIf="field.clearable"
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="Clear date"
+        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+        (click)="clearField(field, $event)">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-error *ngIf="hasFieldError(field.name)">
+        {{ getFieldError(field.name) }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Select Dropdown -->
+    <mat-form-field
+      *ngIf="field.type === 'select'"
+      appearance="fill"
+      class="full-width">
+      <mat-label>{{ field.label }}</mat-label>
+      <mat-select
+        [formControlName]="field.name"
+        [multiple]="!!field.multiple"
+        [required]="!!field.required">
+        <mat-option
+          *ngFor="let option of field.options"
+          [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+
+       <!-- Clear button for select -->
+      <button
+        *ngIf="field.clearable"
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="Clear selection"
+        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+        (click)="clearField(field, $event)">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <mat-error *ngIf="hasFieldError(field.name)">
+        {{ getFieldError(field.name) }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Textarea -->
+    <mat-form-field
+      *ngIf="field.type === 'textarea'"
+      appearance="fill"
+      class="full-width">
+      <mat-label>{{ field.label }}</mat-label>
+      <textarea
+        matInput
+        [formControlName]="field.name"
+        [placeholder]="field.placeholder || ''"
+        [rows]="field.rows || 3"
+        [required]="!!field.required">
+      </textarea>
+
+       <!-- Clear button for textarea -->
+      <button
+        *ngIf="field.clearable"
+        mat-icon-button
+        matSuffix
+        type="button"
+        aria-label="Clear text"
+        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+        (click)="clearField(field, $event)">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <mat-error *ngIf="hasFieldError(field.name)">
+        {{ getFieldError(field.name) }}
+      </mat-error>
+    </mat-form-field>
+
+    <!-- Checkbox -->
+    <div *ngIf="field.type === 'checkbox'" class="checkbox-field">
+      <mat-checkbox [formControlName]="field.name">
+        {{ field.label }}
+      </mat-checkbox>
+      <div *ngIf="hasFieldError(field.name)" class="mat-error">
+        {{ getFieldError(field.name) }}
+      </div>
+    </div>
+
+    <!-- Radio Group -->
+    <div *ngIf="field.type === 'radio'" class="radio-field">
+      <label class="field-label">{{ field.label }}</label>
+      <mat-radio-group [formControlName]="field.name" class="radio-group">
+        <mat-radio-button
+          *ngFor="let option of field.options"
+          [value]="option.value"
+          class="radio-button">
+          {{ option.label }}
+        </mat-radio-button>
+      </mat-radio-group>
+      <div *ngIf="hasFieldError(field.name)" class="mat-error">
+        {{ getFieldError(field.name) }}
+      </div>
+    </div>
+  </div>
+
+</ng-template>

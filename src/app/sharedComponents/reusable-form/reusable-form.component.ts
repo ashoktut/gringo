@@ -4,6 +4,9 @@ import {
   Output,
   EventEmitter,
   Injectable,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
 } from '@angular/core';
 import {
   FormGroup,
@@ -28,6 +31,7 @@ import {
   NativeDateAdapter,
 } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
+import { MatExpansionModule } from '@angular/material/expansion';
 
 // Custom Date Adapter for DD/MM/YYYY format
 @Injectable()
@@ -97,6 +101,13 @@ export interface FormField {
   clearable?: boolean; // show a clear button
 }
 
+export interface FormSection {
+  title: string;
+  description?: string;
+  fields: FormField[];
+  expanded?: boolean; // whether panel is initially expanded
+}
+
 @Component({
   selector: 'app-reusable-form',
   standalone: true,
@@ -112,6 +123,7 @@ export interface FormField {
     MatButtonModule,
     MatNativeDateModule,
     MatIconModule,
+    MatExpansionModule,
   ],
   providers: [
     { provide: DateAdapter, useClass: CustomDateAdapter },
@@ -121,8 +133,10 @@ export interface FormField {
   templateUrl: './reusable-form.component.html',
   styleUrl: './reusable-form.component.css',
 })
-export class ReusableFormComponent {
+export class ReusableFormComponent implements OnInit, OnChanges {
   @Input() fields: FormField[] = [];
+  @Input() sections?: FormSection[]; // optional grouped mode
+  @Input() multi: boolean = true; // allow multiple panels open
   @Input() submitButtonText: string = 'Submit';
   @Input() formTitle?: string;
   @Output() formSubmit = new EventEmitter<any>();
@@ -139,12 +153,41 @@ export class ReusableFormComponent {
     });
   }
 
-  private buildForm(): void {
-    const group: { [key: string]: FormControl } = {};
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['fields'] || changes['sections']) {
+      this.buildForm();
+    }
+  }
 
-    this.fields.forEach((field) => {
+    private getAllFields(): FormField[] {
+    if (this.sections?.length) {
+      return this.sections.flatMap(s => s.fields);
+    }
+    return this.fields;
+  }
+
+  // private buildForm(): void {
+  //   const group: { [key: string]: FormControl } = {};
+
+  //   this.getAllFields().forEach((field) => {
+  //     const validators = this.getValidators(field);
+  //     const initialValue = field.type === 'checkbox' ? false : '';
+  //     group[field.name] = new FormControl(initialValue, validators);
+  //   });
+
+  //   this.form = this.fb.group(group);
+  // }
+
+    private buildForm(): void {
+    const group: { [key: string]: FormControl } = {};
+    const allFields = this.getAllFields();
+
+    allFields.forEach((field) => {
       const validators = this.getValidators(field);
-      const initialValue = field.type === 'checkbox' ? false : '';
+      const initialValue =
+        field.type === 'checkbox' ? false :
+        field.type === 'select' && field.multiple ? [] :
+        null;
       group[field.name] = new FormControl(initialValue, validators);
     });
 
@@ -195,7 +238,9 @@ export class ReusableFormComponent {
   getFieldError(fieldName: string): string {
     const control = this.form.get(fieldName);
     if (control?.errors && control.touched) {
-      const field = this.fields.find((f) => f.name === fieldName);
+      ///////////
+      const allFields = this.getAllFields();
+      const field = allFields.find((f) => f.name === fieldName);
 
       if (control.errors['required']) {
         return `${field?.label} is required.`;
@@ -223,11 +268,16 @@ export class ReusableFormComponent {
     return field.name;
   }
 
+  ////////////////
+    trackBySection(index: number, section: FormSection): string {
+    return section.title;
+  }
+
   isInputField(type: string): boolean {
     return ['text', 'email', 'password', 'number', 'tel'].includes(type);
   }
 
-  clearField(field: FormField, event?: MouseEvent): void {
+  clearField(field: FormField, event?: Event): void {
     event?.preventDefault();
     event?.stopPropagation();
     const ctrl = this.form.get(field.name);
@@ -250,6 +300,8 @@ export class ReusableFormComponent {
       default:
         ctrl.setValue('');
     }
+
+    (document.activeElement as HTMLElement)?.blur?.();
     ctrl.markAsPristine();
     ctrl.markAsUntouched();
     ctrl.updateValueAndValidity();
