@@ -227,7 +227,7 @@ export class ReusableFormComponent {
     return ['text', 'email', 'password', 'number', 'tel'].includes(type);
   }
 
-    clearField(field: FormField, event?: MouseEvent): void {
+  clearField(field: FormField, event?: MouseEvent): void {
     event?.preventDefault();
     event?.stopPropagation();
     const ctrl = this.form.get(field.name);
