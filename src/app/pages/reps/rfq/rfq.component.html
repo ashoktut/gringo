@@ -14,7 +14,8 @@
   </div>
 
   <app-reusable-form
-    [fields]="formFields"
+    [sections]="rfqSections"
+    [multi]="true"
     [formTitle]="'RFQ Form'"
     [submitButtonText]="'Submit RFQ'"
     (formSubmit)="onFormSubmit($event)"
