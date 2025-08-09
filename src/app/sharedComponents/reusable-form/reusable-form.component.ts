@@ -200,35 +200,35 @@ export class ReusableFormComponent implements OnInit, OnChanges {
 
     this.form = this.fb.group(group);
 
-      // Add value change listeners for conditional fields
-  this.setupConditionalFields();
+    // Add value change listeners for conditional fields
+    this.setupConditionalFields();
   }
 
   private setupConditionalFields(): void {
-  const allFields = this.getAllFields();
-  const conditionalFields = allFields.filter(field => field.conditional);
+    const allFields = this.getAllFields();
+    const conditionalFields = allFields.filter((field) => field.conditional);
 
-  conditionalFields.forEach(field => {
-    const dependentControl = this.form.get(field.conditional!.dependsOn);
-    if (dependentControl) {
-      dependentControl.valueChanges.subscribe(value => {
-        const fieldControl = this.form.get(field.name);
-        if (fieldControl) {
-          if (value !== field.conditional!.showWhen) {
-            // Clear and disable field when hidden
-            fieldControl.setValue(field.type === 'checkbox' ? false : null);
-            fieldControl.clearValidators();
-          } else {
-            // Re-apply validators when shown
-            const validators = this.getValidators(field);
-            fieldControl.setValidators(validators);
+    conditionalFields.forEach((field) => {
+      const dependentControl = this.form.get(field.conditional!.dependsOn);
+      if (dependentControl) {
+        dependentControl.valueChanges.subscribe((value) => {
+          const fieldControl = this.form.get(field.name);
+          if (fieldControl) {
+            if (value !== field.conditional!.showWhen) {
+              // Clear and disable field when hidden
+              fieldControl.setValue(field.type === 'checkbox' ? false : null);
+              fieldControl.clearValidators();
+            } else {
+              // Re-apply validators when shown
+              const validators = this.getValidators(field);
+              fieldControl.setValidators(validators);
+            }
+            fieldControl.updateValueAndValidity();
           }
-          fieldControl.updateValueAndValidity();
-        }
-      });
-    }
-  });
-}
+        });
+      }
+    });
+  }
 
   private getValidators(field: FormField): any[] {
     const validators = [];
@@ -246,6 +246,9 @@ export class ReusableFormComponent implements OnInit, OnChanges {
         break;
       case 'tel':
         validators.push(Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/));
+        break;
+      case 'number':
+        validators.push(Validators.pattern(/^\d+$/)); // Only allow digits
         break;
     }
 
