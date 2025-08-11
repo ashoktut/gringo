@@ -1,5 +1,29 @@
+/* MapLibre GL JS CSS - Required for proper map styling */
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
 /* You can add global styles to this file, and also import other style files */
 
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+
+/* Custom map styling enhancements */
+.maplibregl-popup-content {
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.maplibregl-popup-tip {
+  border-top-color: white;
+}
+
+.maplibregl-marker {
+  cursor: pointer;
+}
+
+/* Custom styles for map controls */
+.maplibregl-ctrl-group {
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}

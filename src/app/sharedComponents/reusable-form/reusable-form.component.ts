@@ -32,6 +32,7 @@ import {
 } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
+import { MapLibrePickerComponent } from '../map-libre-picker/map-libre-picker.component';
 
 // Custom Date Adapter for DD/MM/YYYY format
 @Injectable()
@@ -91,7 +92,8 @@ export interface FormField {
     | 'textarea'
     | 'checkbox'
     | 'radio'
-    | 'tel';
+    | 'tel'
+    | 'map';
   required?: boolean;
   placeholder?: string;
   options?: { value: any; label: string }[];
@@ -103,6 +105,17 @@ export interface FormField {
   conditional?: {
     dependsOn: string; // field name it depends on
     showWhen: any; // value that triggers showing this field
+  };
+  // ADD MAP CONFIGURATION OBJECT - defines map behavior and appearance
+  mapConfig?: {
+    defaultCenter?: [number, number]; // [lng, lat] - Note: MapLibre uses [lng, lat] format
+    zoom?: number; // Initial zoom level (1-20)
+    height?: string; // CSS height value like '400px'
+    enableGeocoding?: boolean; // Show address search box
+    enableLocationPicker?: boolean; // Allow clicking to select location
+    enableTracking?: boolean; // Enable real-time GPS tracking
+    enableRouting?: boolean; // Enable route calculation
+    style?: string; // Map style URL from OpenFreeMap
   };
 }
 
@@ -129,6 +142,7 @@ export interface FormSection {
     MatNativeDateModule,
     MatIconModule,
     MatExpansionModule,
+    MapLibrePickerComponent,
   ],
   providers: [
     { provide: DateAdapter, useClass: CustomDateAdapter },
@@ -250,6 +264,35 @@ export class ReusableFormComponent implements OnInit, OnChanges {
       case 'number':
         validators.push(Validators.pattern(/^\d+$/)); // Only allow digits
         break;
+      // ✅ Map field validation - VERIFY THIS EXISTS
+      case 'map':
+        if (field.required) {
+          validators.push((control: any) => {
+            const value = control.value;
+            // Check if location has both lat and lng coordinates
+            if (!value || !value.lat || !value.lng) {
+              return { required: true };
+            }
+            // Additional validation: ensure coordinates are valid numbers
+            if (
+              typeof value.lat !== 'number' ||
+              typeof value.lng !== 'number'
+            ) {
+              return { invalidCoordinates: true };
+            }
+            // Check coordinate ranges (basic validation)
+            if (
+              value.lat < -90 ||
+              value.lat > 90 ||
+              value.lng < -180 ||
+              value.lng > 180
+            ) {
+              return { invalidCoordinates: true };
+            }
+            return null;
+          });
+        }
+        break;
     }
 
     if (field.validators) {
@@ -282,7 +325,15 @@ export class ReusableFormComponent implements OnInit, OnChanges {
       const field = allFields.find((f) => f.name === fieldName);
 
       if (control.errors['required']) {
+        // Special message for map fields
+        if (field?.type === 'map') {
+          return `Please select a location on the map.`;
+        }
         return `${field?.label} is required.`;
+      }
+      // ✅ ADD THIS: New validation for invalid coordinates
+      if (control.errors['invalidCoordinates']) {
+        return `Please select a valid location on the map.`;
       }
       if (control.errors['email']) {
         return 'Please enter a valid email address.';
@@ -336,6 +387,10 @@ export class ReusableFormComponent implements OnInit, OnChanges {
       case 'date':
         ctrl.setValue(null);
         break;
+      // ✅ ADD THIS: Map field clearing
+      case 'map':
+        ctrl.setValue(null);
+        break;
       default:
         ctrl.setValue('');
     }
@@ -358,5 +413,9 @@ export class ReusableFormComponent implements OnInit, OnChanges {
     }
 
     return dependentControl.value === field.conditional.showWhen;
+  }
+
+  isMapField(type: string): boolean {
+    return type === 'map';
   }
 }

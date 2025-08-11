@@ -549,11 +549,12 @@ export class RfqComponent {
           label: 'Truss Notes',
           type: 'textarea',
           rows: 4,
-          placeholder: 'Tip: ⌚ Avoid Re-Quotes, Consult & confirm with client, provide short accurate info to designer for quicker turnaround time',
+          placeholder:
+            'Tip: ⌚ Avoid Re-Quotes, Consult & confirm with client, provide short accurate info to designer for quicker turnaround time',
           validators: [Validators.maxLength(500)],
         },
 
-                // optional p&g1 question field
+        // optional p&g1 question field
         {
           name: 'optionalP&G1',
           label: 'Optional P&G1',
@@ -627,6 +628,22 @@ export class RfqComponent {
           type: 'text',
           required: false,
           clearable: true,
+        },
+
+        // Maps field:
+        {
+          name: 'projectLocation',
+          label: 'Project Location (Click to Select)',
+          type: 'map',
+          required: true,
+          mapConfig: {
+            defaultCenter: [28.0473, -26.2041], // Johannesburg
+            zoom: 10,
+            height: '450px',
+            enableGeocoding: true,
+            enableLocationPicker: true,
+            style: 'liberty',
+          },
         },
       ],
     },

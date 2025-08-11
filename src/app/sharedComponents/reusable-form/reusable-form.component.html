@@ -206,6 +206,28 @@
         {{ getFieldError(field.name) }}
       </div>
     </div>
+
+    <!-- MapLibre Map Field -->
+    <div *ngIf="field.type === 'map'" class="map-field">
+      <!-- Field label -->
+      <label class="field-label">{{ field.label }}</label>
+
+      <!-- Map picker component with all configuration options -->
+      <app-map-libre-picker
+        [formControlName]="field.name"
+        [defaultCenter]="field.mapConfig?.defaultCenter || [28.0473, -26.2041]"
+        [zoom]="field.mapConfig?.zoom || 10"
+        [height]="field.mapConfig?.height || '400px'"
+        [enableGeocoding]="field.mapConfig?.enableGeocoding !== false"
+        [enableLocationPicker]="field.mapConfig?.enableLocationPicker !== false"
+        [style]="field.mapConfig?.style || 'liberty'">
+      </app-map-libre-picker>
+
+      <!-- Show validation errors if any -->
+      <div *ngIf="hasFieldError(field.name)" class="mat-error">
+        {{ getFieldError(field.name) }}
+      </div>
+    </div>
   </div>
 
 </ng-template>

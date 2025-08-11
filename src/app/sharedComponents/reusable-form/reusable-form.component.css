@@ -52,3 +52,89 @@
   font-size: 12px;
   margin-top: 4px;
 }
+
+/* MapLibre Map Field */
+
+/* Map field styling */
+.map-field {
+  width: 100%;
+  margin: 16px 0;
+  padding: 8px 0;
+}
+
+.map-field .field-label {
+  display: block;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+/* Error styling for map fields */
+.map-field .mat-error {
+  font-size: 12px;
+  color: #f44336;
+  margin-top: 8px;
+  display: block;
+  line-height: 1.4;
+}
+
+/* Map field container enhancement */
+.map-field app-map-libre-picker {
+  display: block;
+  width: 100%;
+}
+
+/* Ensure map field integrates well with form sections */
+.form-section .map-field {
+  margin: 12px 0 20px 0;
+}
+
+/* Map field validation state styling */
+.map-field.ng-invalid .field-label {
+  color: #f44336;
+}
+
+.map-field.ng-valid .field-label {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Loading state for map field */
+.map-field .map-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: #f5f5f5;
+  border-radius: 4px;
+  color: #666;
+}
+
+/* Responsive design for map fields */
+@media (max-width: 768px) {
+  .map-field {
+    margin: 12px 0;
+  }
+
+  .map-field .field-label {
+    font-size: 13px;
+  }
+}
+
+/* Integration with Material Design form field styling */
+.map-field + .mat-form-field,
+.mat-form-field + .map-field {
+  margin-top: 16px;
+}
+
+/* Ensure proper spacing in expansion panels */
+mat-expansion-panel .map-field {
+  margin: 8px 0 16px 0;
+}
+
+/* Focus state for accessibility */
+.map-field:focus-within .field-label {
+  color: #1976d2;
+  font-weight: 600;
+}
