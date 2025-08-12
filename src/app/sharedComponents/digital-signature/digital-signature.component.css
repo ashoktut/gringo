@@ -1,0 +1,236 @@
+/* Main card styling */
+.signature-card {
+  margin: 16px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.signature-card.has-signature {
+  border: 2px solid #4caf50;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.signature-card.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Header styling */
+.signature-header {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.signature-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 18px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.title-icon {
+  font-size: 24px;
+  color: #2196f3;
+}
+
+.signature-card.has-signature .title-icon {
+  color: #4caf50;
+}
+
+.signature-subtitle {
+  margin: 8px 0 0 36px;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Content area styling */
+.signature-content {
+  padding: 0;
+  position: relative;
+}
+
+.canvas-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  border: 2px dashed #ddd;
+  margin: 16px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.signature-card.has-signature .canvas-container {
+  background: #f8fff8;
+  border: 2px solid #4caf50;
+  border-style: solid;
+}
+
+/* Canvas styling */
+.signature-canvas {
+  display: block;
+  background: white;
+  cursor: crosshair;
+  border-radius: 6px;
+  touch-action: none;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.signature-canvas:hover:not(.disabled) {
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
+.signature-canvas:focus:not(.disabled) {
+  box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.3);
+}
+
+.signature-canvas.disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Canvas instructions overlay */
+.canvas-instructions {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #999;
+  font-size: 14px;
+  pointer-events: none;
+  text-align: center;
+}
+
+.canvas-instructions mat-icon {
+  font-size: 32px;
+  color: #2196f3;
+  opacity: 0.7;
+}
+
+/* Actions styling */
+.signature-actions {
+  padding: 12px 24px;
+  background: #fafafa;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Status indicator */
+.signature-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: #f5f5f5;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.signature-status.signed {
+  background: #e8f5e8;
+  color: #2e7d2e;
+}
+
+.signature-status mat-icon {
+  font-size: 18px;
+}
+
+.signature-status.signed mat-icon {
+  color: #4caf50;
+}
+
+/* Error message styling */
+.signature-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: #ffebee;
+  color: #c62828;
+  border-top: 1px solid #ffcdd2;
+  font-size: 14px;
+}
+
+.signature-error mat-icon {
+  font-size: 20px;
+  color: #d32f2f;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .signature-card {
+    margin: 12px 0;
+  }
+
+  .signature-header {
+    padding: 12px 16px;
+  }
+
+  .signature-title {
+    font-size: 16px;
+  }
+
+  .canvas-container {
+    margin: 12px;
+  }
+
+  .signature-actions {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .signature-status {
+    order: -1;
+    width: 100%;
+    justify-content: center;
+    margin-left: 0;
+    margin-bottom: 8px;
+  }
+
+  .canvas-instructions {
+    font-size: 13px;
+  }
+
+  .canvas-instructions mat-icon {
+    font-size: 28px;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .signature-card {
+    border: 2px solid;
+  }
+
+  .canvas-container {
+    border-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .signature-card,
+  .signature-canvas,
+  .signature-status {
+    transition: none;
+  }
+}

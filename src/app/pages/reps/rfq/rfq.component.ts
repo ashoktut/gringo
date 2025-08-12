@@ -48,7 +48,7 @@ export class RfqComponent {
     {
       // Rep details section
       title: 'Rep Details',
-      description: 'Rep details & send email to',
+      description: 'Rep info & email recipients',
       fields: [
         // Rep Name field
         {
@@ -158,7 +158,7 @@ export class RfqComponent {
     // project details section
     {
       title: 'Project Details',
-      description: 'Project details & Client info',
+      //description: 'Project details & Client info',
       fields: [
         // stand num field
         {
@@ -258,7 +258,7 @@ export class RfqComponent {
     // Truss Details Section
     {
       title: 'Truss Details',
-      description: 'Truss specifications & requirements',
+      //description: 'Truss specifications & requirements',
       fields: [
         {
           name: 'structureType',
@@ -583,26 +583,6 @@ export class RfqComponent {
         },
         //////////
 
-        //client phone field
-        {
-          name: 'clientPhone',
-          label: 'Client Phone Number',
-          type: 'tel',
-          required: true,
-          placeholder: '+27721549865',
-          clearable: true,
-        },
-
-        // client email field
-        {
-          name: 'clientEmail',
-          label: 'Client Email Address',
-          type: 'email',
-          required: true,
-          placeholder: 'Enter client email address',
-          clearable: true,
-        },
-
         // building type field
         {
           name: 'buildingType',
@@ -644,6 +624,56 @@ export class RfqComponent {
             enableLocationPicker: true,
             style: 'liberty',
           },
+        },
+      ],
+    },
+
+    {
+      // Cover section
+      title: 'Cover Type',
+      expanded: false,
+      fields: [
+        // Is quote cover needed
+        {
+          name: 'isQuoteCoverRequired',
+          label: 'Quote Cover Needed?',
+          type: 'select',
+          multiple: false,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - type of exposed truss design required
+        {
+          name: 'exposedTrussType',
+          label: 'Select Cover Type',
+          type: 'select',
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'tiles', label: 'Tiles' },
+            { value: 'sheeting', label: 'Sheeting' },
+            { value: 'slate', label: 'Slate, but not by LCP' },
+          ],
+          conditional: {
+            dependsOn: 'isQuoteCoverRequired',
+            showWhen: 'yes',
+          },
+        },
+
+        // Cover Notes field
+        {
+          name: 'coverNotes',
+          label: 'Cover Notes',
+          type: 'textarea',
+          rows: 4,
+          placeholder:
+            'Tip: 😁 Happy client = Retaining client',
+          validators: [Validators.maxLength(500)],
         },
       ],
     },
@@ -737,6 +767,74 @@ export class RfqComponent {
           label: 'I accept the terms and conditions',
           type: 'checkbox',
           required: true,
+        },
+
+        // basic signature field
+        {
+          name: 'customerName',
+          label: 'Customer Name',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'customerSignature',
+          label: 'Customer Signature',
+          type: 'signature',
+          required: true,
+          placeholder: 'Please sign here to confirm your request',
+        },
+
+        // Advanced signature with configurations
+        {
+          name: 'projectDetails',
+          label: 'Project Details',
+          type: 'textarea',
+          required: true,
+          rows: 4,
+        },
+        {
+          name: 'contractSignature',
+          label: 'Contract Agreement Signature',
+          type: 'signature',
+          required: true,
+          placeholder: 'Sign here to legally bind this contract',
+          signatureConfig: {
+            canvasWidth: 700,
+            canvasHeight: 250,
+            strokeColor: '#1976d2',
+            strokeWidth: 3,
+            backgroundColor: '#fafafa',
+          },
+        },
+      ],
+    },
+    // Conditional signature field
+    {
+      title: 'Agreement Terms',
+      description: 'Please review and accept the terms',
+      fields: [
+        {
+          name: 'termsAccepted',
+          label: 'I accept the terms and conditions',
+          type: 'checkbox',
+          required: true,
+        },
+        {
+          name: 'legalSignature',
+          label: 'Legal Authorization Signature',
+          type: 'signature',
+          required: true,
+          placeholder: 'Your signature confirms legal acceptance',
+          conditional: {
+            dependsOn: 'termsAccepted',
+            showWhen: true,
+          },
+          signatureConfig: {
+            canvasWidth: 600,
+            canvasHeight: 180,
+            strokeColor: '#d32f2f',
+            strokeWidth: 2,
+          },
         },
       ],
     },

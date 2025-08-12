@@ -1,0 +1,89 @@
+<!-- Signature Container Card -->
+<mat-card class="signature-card" [class.has-signature]="hasSignature" [class.disabled]="isDisabled">
+
+  <!-- Header with Title and Status -->
+  <mat-card-header class="signature-header">
+    <mat-card-title class="signature-title">
+      <mat-icon class="title-icon">{{ hasSignature ? 'check_circle' : 'draw' }}</mat-icon>
+      {{ label }}
+    </mat-card-title>
+    <mat-card-subtitle class="signature-subtitle">
+      {{ hasSignature ? 'Signature captured successfully' : (placeholder || 'Draw your signature below') }}
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <!-- Canvas Container -->
+  <mat-card-content class="signature-content">
+    <div class="canvas-container" [style.height.px]="canvasHeight + 20">
+
+      <!-- Canvas for Drawing -->
+      <canvas
+        #signatureCanvas
+        [width]="canvasWidth"
+        [height]="canvasHeight"
+        class="signature-canvas"
+        [class.has-signature]="hasSignature"
+        [class.disabled]="isDisabled"
+        (mousedown)="startDrawing($event)"
+        (mousemove)="draw($event)"
+        (mouseup)="stopDrawing()"
+        (mouseleave)="stopDrawing()"
+        (touchstart)="startDrawing($event)"
+        (touchmove)="draw($event)"
+        (touchend)="stopDrawing()"
+        (touchcancel)="stopDrawing()"
+        tabindex="0"
+        role="img"
+        [attr.aria-label]="hasSignature ? 'Signature captured' : 'Signature canvas - draw your signature here'">
+      </canvas>
+
+      <!-- Canvas Overlay Instructions -->
+      <div *ngIf="!hasSignature && !isDisabled" class="canvas-instructions">
+        <mat-icon>touch_app</mat-icon>
+        <span>{{ isMobile ? 'Touch and drag to sign' : 'Click and drag to sign' }}</span>
+      </div>
+
+    </div>
+  </mat-card-content>
+
+  <!-- Action Buttons -->
+  <mat-card-actions class="signature-actions" align="end">
+
+    <!-- Clear Button -->
+    <button
+      mat-raised-button
+      color="warn"
+      (click)="clearSignature()"
+      [disabled]="!hasSignature || isDisabled"
+      matTooltip="Clear signature and start over"
+      type="button">
+      <mat-icon>clear</mat-icon>
+      Clear
+    </button>
+
+    <!-- Undo Button (optional - for last stroke) -->
+    <button
+      mat-outlined-button
+      (click)="undoLastStroke()"
+      [disabled]="!canUndo || isDisabled"
+      matTooltip="Undo last stroke"
+      type="button">
+      <mat-icon>undo</mat-icon>
+      Undo
+    </button>
+
+    <!-- Status Indicator -->
+    <div class="signature-status" [class.signed]="hasSignature">
+      <mat-icon>{{ hasSignature ? 'verified' : 'pending' }}</mat-icon>
+      <span>{{ hasSignature ? 'Complete' : 'Pending' }}</span>
+    </div>
+
+  </mat-card-actions>
+
+  <!-- Error Message Display -->
+  <div *ngIf="showError" class="signature-error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+</mat-card>

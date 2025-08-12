@@ -33,6 +33,7 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MapLibrePickerComponent } from '../map-libre-picker/map-libre-picker.component';
+import { DigitalSignatureComponent } from '../digital-signature/digital-signature.component';
 
 // Custom Date Adapter for DD/MM/YYYY format
 @Injectable()
@@ -93,7 +94,8 @@ export interface FormField {
     | 'checkbox'
     | 'radio'
     | 'tel'
-    | 'map';
+    | 'map'
+    | 'signature';
   required?: boolean;
   placeholder?: string;
   options?: { value: any; label: string }[];
@@ -116,6 +118,14 @@ export interface FormField {
     enableTracking?: boolean; // Enable real-time GPS tracking
     enableRouting?: boolean; // Enable route calculation
     style?: string; // Map style URL from OpenFreeMap
+  };
+  // ✅ ADD SIGNATURE CONFIGURATION
+  signatureConfig?: {
+    canvasWidth?: number;
+    canvasHeight?: number;
+    strokeColor?: string;
+    strokeWidth?: number;
+    backgroundColor?: string;
   };
 }
 
@@ -143,6 +153,7 @@ export interface FormSection {
     MatIconModule,
     MatExpansionModule,
     MapLibrePickerComponent,
+    DigitalSignatureComponent,
   ],
   providers: [
     { provide: DateAdapter, useClass: CustomDateAdapter },
@@ -293,6 +304,18 @@ export class ReusableFormComponent implements OnInit, OnChanges {
           });
         }
         break;
+      // ✅ ADD SIGNATURE VALIDATION
+      case 'signature':
+        if (field.required) {
+          validators.push((control: any) => {
+            const value = control.value;
+            if (!value || typeof value !== 'string' || value.length === 0) {
+              return { signatureRequired: true };
+            }
+            return null;
+          });
+        }
+        break;
     }
 
     if (field.validators) {
@@ -324,14 +347,15 @@ export class ReusableFormComponent implements OnInit, OnChanges {
       const allFields = this.getAllFields();
       const field = allFields.find((f) => f.name === fieldName);
 
-      if (control.errors['required']) {
-        // Special message for map fields
+      if (control.errors['required'] || control.errors['signatureRequired']) {
         if (field?.type === 'map') {
           return `Please select a location on the map.`;
         }
+        if (field?.type === 'signature') {
+          return `Please provide your signature.`;
+        }
         return `${field?.label} is required.`;
       }
-      // ✅ ADD THIS: New validation for invalid coordinates
       if (control.errors['invalidCoordinates']) {
         return `Please select a valid location on the map.`;
       }
@@ -373,6 +397,7 @@ export class ReusableFormComponent implements OnInit, OnChanges {
     const ctrl = this.form.get(field.name);
     if (!ctrl) return;
 
+    // Fields reset or cleared
     switch (field.type) {
       case 'checkbox':
         ctrl.setValue(false);
@@ -387,8 +412,10 @@ export class ReusableFormComponent implements OnInit, OnChanges {
       case 'date':
         ctrl.setValue(null);
         break;
-      // ✅ ADD THIS: Map field clearing
       case 'map':
+        ctrl.setValue(null);
+        break;
+      case 'signature':
         ctrl.setValue(null);
         break;
       default:
@@ -414,8 +441,13 @@ export class ReusableFormComponent implements OnInit, OnChanges {
 
     return dependentControl.value === field.conditional.showWhen;
   }
-
+  // Add helper method for map fields:
   isMapField(type: string): boolean {
     return type === 'map';
+  }
+
+  // Add helper method for signature fields:
+  isSignatureField(type: string): boolean {
+    return type === 'signature';
   }
 }
