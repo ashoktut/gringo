@@ -137,8 +137,12 @@ export class MapLibrePickerComponent implements OnInit, AfterViewInit, OnDestroy
 
       // Try to get a human-readable address for the clicked location
       try {
-        const address = await this.mapLibreService.reverseGeocode(lng, lat);
-        this.updateLocation(lng, lat, address || undefined);
+        if ('reverseGeocode' in this.mapLibreService && typeof (this.mapLibreService as any).reverseGeocode === 'function') {
+          const address = await (this.mapLibreService as any).reverseGeocode(lng, lat);
+          this.updateLocation(lng, lat, address || undefined);
+        } else {
+          this.updateLocation(lng, lat);
+        }
       } catch (error) {
         // If reverse geocoding fails, just use coordinates
         this.updateLocation(lng, lat);
@@ -156,11 +160,13 @@ export class MapLibrePickerComponent implements OnInit, AfterViewInit, OnDestroy
     // Use the geocoding service to find the address
     const result = await this.mapLibreService.geocodeAddress(this.searchAddress);
 
-    if (result) {
+    if (result && result.length > 0) {
+      // Get the first result from the array
+      const firstResult = result[0];
       // If found, center map on the result and select it
-      this.map.setCenter([result.lng, result.lat]);
+      this.map.setCenter([firstResult.lng, firstResult.lat]);
       this.map.setZoom(15); // Zoom in to street level
-      this.updateLocation(result.lng, result.lat, result.displayName);
+      this.updateLocation(firstResult.lng, firstResult.lat, firstResult.display_name);
     } else {
       // Show error message if address not found
       alert('Location not found. Please try a different search term.');
@@ -215,13 +221,17 @@ export class MapLibrePickerComponent implements OnInit, AfterViewInit, OnDestroy
       draggable: true // Allow user to drag marker to adjust location
     }).setLngLat([lng, lat]).addTo(this.map);
 
-    // Handle marker drag events to update location when user drags marker
+    // Set up drag handler for the marker
     this.marker.on('dragend', async () => {
       const lngLat = this.marker!.getLngLat();
       try {
-        // Get address for new marker position
-        const address = await this.mapLibreService.reverseGeocode(lngLat.lng, lngLat.lat);
-        this.updateLocation(lngLat.lng, lngLat.lat, address || undefined);
+        // Get address for new marker position (if reverseGeocode method exists)
+        if (typeof (this.mapLibreService as any).reverseGeocode === 'function') {
+          const address = await (this.mapLibreService as any).reverseGeocode(lngLat.lng, lngLat.lat);
+          this.updateLocation(lngLat.lng, lngLat.lat, address || undefined);
+        } else {
+          this.updateLocation(lngLat.lng, lngLat.lat);
+        }
       } catch (error) {
         // If reverse geocoding fails, just update coordinates
         this.updateLocation(lngLat.lng, lngLat.lat);

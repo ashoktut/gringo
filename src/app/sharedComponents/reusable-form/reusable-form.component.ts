@@ -176,12 +176,22 @@ export class ReusableFormComponent implements OnInit, OnChanges {
 
   constructor(private fb: FormBuilder) {}
 
-  ngOnInit() {
-    this.buildForm();
-    this.form.valueChanges.subscribe((value) => {
-      this.formValueChange.emit(value);
-    });
-  }
+// ✅ ADD: In ngOnInit method
+ngOnInit() {
+  this.buildForm();
+
+  // Monitor form value changes
+  this.form.valueChanges.subscribe((value) => {
+    this.formValueChange.emit(value);
+    console.log('Form value changed:', value); // ✅ DEBUG LOG
+    console.log('Form valid after change:', this.isFormValid()); // ✅ DEBUG LOG
+  });
+
+  // ✅ ADD: Monitor form status changes
+  this.form.statusChanges.subscribe((status) => {
+    console.log('Form status changed:', status); // ✅ DEBUG LOG
+  });
+}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['fields'] || changes['sections']) {
@@ -227,6 +237,11 @@ export class ReusableFormComponent implements OnInit, OnChanges {
 
     // Add value change listeners for conditional fields
     this.setupConditionalFields();
+
+    // ✅ ADD: Force initial validation update
+    setTimeout(() => {
+      this.form.updateValueAndValidity();
+    }, 0);
   }
 
   private setupConditionalFields(): void {
@@ -243,6 +258,7 @@ export class ReusableFormComponent implements OnInit, OnChanges {
               // Clear and disable field when hidden
               fieldControl.setValue(field.type === 'checkbox' ? false : null);
               fieldControl.clearValidators();
+              fieldControl.setErrors(null); // ✅ ADD: Clear any existing errors
             } else {
               // Re-apply validators when shown
               const validators = this.getValidators(field);
@@ -258,8 +274,32 @@ export class ReusableFormComponent implements OnInit, OnChanges {
   private getValidators(field: FormField): any[] {
     const validators = [];
 
+    // Only add required validator if field is not conditional or should be shown
     if (field.required) {
-      validators.push(Validators.required);
+      if (field.conditional) {
+        // For conditional fields, add custom validator that checks if field should be shown
+        validators.push((control: any) => {
+          const dependentControl = this.form?.get(field.conditional!.dependsOn);
+          const shouldShow =
+            dependentControl?.value === field.conditional!.showWhen;
+
+          if (!shouldShow) {
+            return null; // Don't validate if field is hidden
+          }
+
+          // Apply required validation only when field is visible
+          if (
+            !control.value ||
+            (Array.isArray(control.value) && control.value.length === 0) ||
+            (typeof control.value === 'string' && control.value.trim() === '')
+          ) {
+            return { required: true };
+          }
+          return null;
+        });
+      } else {
+        validators.push(Validators.required);
+      }
     }
 
     switch (field.type) {
@@ -273,25 +313,32 @@ export class ReusableFormComponent implements OnInit, OnChanges {
         validators.push(Validators.pattern(/^[\+]?[1-9][\d]{0,15}$/));
         break;
       case 'number':
-        validators.push(Validators.pattern(/^\d+$/)); // Only allow digits
+        validators.push(Validators.pattern(/^\d+(\.\d+)?$/)); // ✅ UPDATED: Allow decimals
         break;
       // ✅ Map field validation - VERIFY THIS EXISTS
       case 'map':
         if (field.required) {
           validators.push((control: any) => {
+            // Check if this is a conditional field
+            if (field.conditional) {
+              const dependentControl = this.form?.get(
+                field.conditional.dependsOn
+              );
+              const shouldShow =
+                dependentControl?.value === field.conditional.showWhen;
+              if (!shouldShow) return null; // Don't validate if hidden
+            }
+
             const value = control.value;
-            // Check if location has both lat and lng coordinates
             if (!value || !value.lat || !value.lng) {
               return { required: true };
             }
-            // Additional validation: ensure coordinates are valid numbers
             if (
               typeof value.lat !== 'number' ||
               typeof value.lng !== 'number'
             ) {
               return { invalidCoordinates: true };
             }
-            // Check coordinate ranges (basic validation)
             if (
               value.lat < -90 ||
               value.lat > 90 ||
@@ -308,8 +355,19 @@ export class ReusableFormComponent implements OnInit, OnChanges {
       case 'signature':
         if (field.required) {
           validators.push((control: any) => {
+            // Check if this is a conditional field
+            if (field.conditional) {
+              const dependentControl = this.form?.get(
+                field.conditional.dependsOn
+              );
+              const shouldShow =
+                dependentControl?.value === field.conditional.showWhen;
+              if (!shouldShow) return null; // Don't validate if hidden
+            }
+
             const value = control.value;
-            if (!value || typeof value !== 'string' || value.length === 0) {
+           // ✅ UPDATED: Better validation for signature
+      if (!value || (typeof value === 'string' && value.trim().length === 0)) {
               return { signatureRequired: true };
             }
             return null;
@@ -325,12 +383,67 @@ export class ReusableFormComponent implements OnInit, OnChanges {
     return validators;
   }
 
+  // ✅ ADD: Method to check form validity excluding hidden conditional fields
+  isFormValid(): boolean {
+    if (!this.form) return false;
+
+    const allFields = this.getAllFields();
+
+    // Check each field individually
+    for (const field of allFields) {
+      const control = this.form.get(field.name);
+      if (!control) continue;
+
+      // Skip validation for hidden conditional fields
+      if (field.conditional && !this.shouldShowField(field)) {
+        continue;
+      }
+
+      // Check if visible field is valid
+      if (control.invalid) {
+        console.log(`Field ${field.name} is invalid:`, control.errors); // ✅ DEBUG LOG
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+
+
+  // ✅ UPDATE: Better submit method
   onSubmit(): void {
-    if (this.form.valid) {
+    console.log('Form submission attempted'); // ✅ DEBUG LOG
+    console.log('Form valid:', this.form.valid); // ✅ DEBUG LOG
+    console.log('Custom form valid:', this.isFormValid()); // ✅ DEBUG LOG
+
+    // Use custom validation that respects conditional fields
+    if (this.isFormValid()) {
+      console.log('Form data:', this.form.value); // ✅ DEBUG LOG
       this.formSubmit.emit(this.form.value);
     } else {
+      console.log('Form is invalid, marking fields as touched'); // ✅ DEBUG LOG
       this.markFormGroupTouched();
+      this.logFormErrors(); // ✅ DEBUG LOG
     }
+  }
+
+
+
+  // ✅ ADD: Debug method to log form errors
+  private logFormErrors(): void {
+    const allFields = this.getAllFields();
+
+    allFields.forEach((field) => {
+      const control = this.form.get(field.name);
+      if (control?.errors) {
+        console.log(`Field ${field.name} errors:`, control.errors);
+        console.log(
+          `Field ${field.name} should show:`,
+          this.shouldShowField(field)
+        );
+      }
+    });
   }
 
   private markFormGroupTouched(): void {
@@ -340,37 +453,43 @@ export class ReusableFormComponent implements OnInit, OnChanges {
     });
   }
 
-  getFieldError(fieldName: string): string {
-    const control = this.form.get(fieldName);
-    if (control?.errors && control.touched) {
-      ///////////
-      const allFields = this.getAllFields();
-      const field = allFields.find((f) => f.name === fieldName);
+// ✅ UPDATE: Better error handling
+getFieldError(fieldName: string): string {
+  const control = this.form.get(fieldName);
+  if (control?.errors && control.touched) {
+    const allFields = this.getAllFields();
+    const field = allFields.find((f) => f.name === fieldName);
 
-      if (control.errors['required'] || control.errors['signatureRequired']) {
-        if (field?.type === 'map') {
-          return `Please select a location on the map.`;
-        }
-        if (field?.type === 'signature') {
-          return `Please provide your signature.`;
-        }
-        return `${field?.label} is required.`;
+    if (control.errors['required'] || control.errors['signatureRequired']) {
+      if (field?.type === 'map') {
+        return `Please select a location on the map.`;
       }
-      if (control.errors['invalidCoordinates']) {
-        return `Please select a valid location on the map.`;
+      if (field?.type === 'signature') {
+        return `Please provide your signature.`;
       }
-      if (control.errors['email']) {
-        return 'Please enter a valid email address.';
-      }
-      if (control.errors['minlength']) {
-        return `Minimum ${control.errors['minlength'].requiredLength} characters required.`;
-      }
-      if (control.errors['pattern']) {
-        return `Please enter a valid ${field?.label?.toLowerCase()}.`;
-      }
+      return `${field?.label} is required.`;
     }
-    return '';
+    if (control.errors['invalidCoordinates']) {
+      return `Please select a valid location on the map.`;
+    }
+    if (control.errors['email']) {
+      return 'Please enter a valid email address.';
+    }
+    if (control.errors['minlength']) {
+      return `Minimum ${control.errors['minlength'].requiredLength} characters required.`;
+    }
+    if (control.errors['pattern']) {
+      if (field?.type === 'tel') {
+        return 'Please enter a valid phone number.';
+      }
+      if (field?.type === 'number') {
+        return 'Please enter a valid number.';
+      }
+      return `Please enter a valid ${field?.label?.toLowerCase()}.`;
+    }
   }
+  return '';
+}
 
   hasFieldError(fieldName: string): boolean {
     const control = this.form.get(fieldName);

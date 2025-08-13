@@ -677,6 +677,7 @@ export class RfqComponent {
         },
       ],
     },
+
     {
       title: 'Additional Details', // NEW SECTION
       description: 'Personal and account information',

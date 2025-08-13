@@ -4,8 +4,6 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-digital-signature',
@@ -15,8 +13,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
     MatButtonModule,
     MatIconModule,
     MatCardModule,
-    MatToolbarModule,
-    MatTooltipModule,
   ],
     providers: [
     {
@@ -33,280 +29,247 @@ export class DigitalSignatureComponent implements OnInit, AfterViewInit, OnDestr
 
   // Input properties for customization
   @Input() label: string = 'Digital Signature';
-  @Input() placeholder: string = '';
-  @Input() canvasWidth: number = 600;
+  @Input() placeholder: string = 'Please sign in the box above';
+  @Input() canvasWidth: number = 500;
   @Input() canvasHeight: number = 200;
   @Input() strokeColor: string = '#000000';
   @Input() strokeWidth: number = 2;
-  @Input() backgroundColor: string = '#FFFFFF';
+  @Input() backgroundColor: string = '#ffffff';
 
   // Component state
   private canvas!: HTMLCanvasElement;
-  private context!: CanvasRenderingContext2D;
-  private isDrawing: boolean = false;
-  private lastX: number = 0;
-  private lastY: number = 0;
-  private strokes: ImageData[] = []; // For undo functionality
+  private context!: CanvasRenderingContext2D | null;
+  private isDrawing = false;
+  private lastX = 0;
+  private lastY = 0;
+  private isEmpty = true;
+  private isViewInitialized = false; // ✅ ADD: Track view initialization
+  private pendingValue: string | null = null; // ✅ ADD: Store pending values
 
-  hasSignature: boolean = false;
-  showError: boolean = false;
-  errorMessage: string = '';
-  signatureData: string | null = null;
-  canUndo: boolean = false;
-  isMobile: boolean = false;
-  isDisabled: boolean = false;
-
-  // Form control integration
-  private onChange = (value: string | null) => {};
+  // Form control properties
+  isDisabled = false;
+  private onChange = (signature: string | null) => {};
   private onTouched = () => {};
 
   ngOnInit() {
-    // Detect mobile device
-    this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-    // Adjust canvas size for mobile
-    if (this.isMobile && this.canvasWidth > 400) {
-      this.canvasWidth = Math.min(this.canvasWidth, 400);
-      this.canvasHeight = Math.min(this.canvasHeight, 150);
-    }
+    // Component initialization logic that doesn't require the view
   }
 
   ngAfterViewInit() {
+    // ✅ UPDATED: Initialize canvas after view is ready
     this.initializeCanvas();
+    this.isViewInitialized = true;
+
+    // ✅ ADD: Process any pending value
+    if (this.pendingValue !== null) {
+      this.loadSignature(this.pendingValue);
+      this.pendingValue = null;
+    }
   }
 
   ngOnDestroy() {
-    // Cleanup event listeners
-    this.canvas?.removeEventListener('contextmenu', this.preventContextMenu);
+    this.removeEventListeners();
   }
 
-  /**
-   * Initialize the canvas for signature drawing
-   */
   private initializeCanvas() {
+    // ✅ ADD: Safety check
+    if (!this.canvasRef?.nativeElement) {
+      console.warn('Canvas element not available');
+      return;
+    }
+
     this.canvas = this.canvasRef.nativeElement;
-    this.context = this.canvas.getContext('2d')!;
+    this.context = this.canvas.getContext('2d');
 
-    // Set canvas background
-    this.clearCanvas();
+    // ✅ ADD: Safety check for context
+    if (!this.context) {
+      console.error('Could not get 2D rendering context');
+      return;
+    }
 
-    // Configure drawing settings
+    // Set canvas dimensions
+    this.canvas.width = this.canvasWidth;
+    this.canvas.height = this.canvasHeight;
+
+    // Configure canvas style
+    this.canvas.style.border = '1px solid #ccc';
+    this.canvas.style.borderRadius = '4px';
+    this.canvas.style.cursor = 'crosshair';
+
+    // Configure drawing context
     this.context.strokeStyle = this.strokeColor;
     this.context.lineWidth = this.strokeWidth;
     this.context.lineCap = 'round';
     this.context.lineJoin = 'round';
 
-    // Prevent context menu on right click
-    this.canvas.addEventListener('contextmenu', this.preventContextMenu);
+    // Clear canvas with background color
+    this.clearCanvas();
 
-    // Save initial state for undo
-    this.saveState();
+    // Add event listeners
+    this.addEventListeners();
   }
 
-  private preventContextMenu = (e: Event) => e.preventDefault();
+  private addEventListeners() {
+    if (!this.canvas) return;
 
-  /**
-   * Clear canvas and reset to background color
-   */
+    // Mouse events
+    this.canvas.addEventListener('mousedown', this.startDrawing.bind(this));
+    this.canvas.addEventListener('mousemove', this.draw.bind(this));
+    this.canvas.addEventListener('mouseup', this.stopDrawing.bind(this));
+    this.canvas.addEventListener('mouseout', this.stopDrawing.bind(this));
+
+    // Touch events for mobile
+    this.canvas.addEventListener('touchstart', this.handleTouchStart.bind(this));
+    this.canvas.addEventListener('touchmove', this.handleTouchMove.bind(this));
+    this.canvas.addEventListener('touchend', this.stopDrawing.bind(this));
+  }
+
+  private removeEventListeners() {
+    if (!this.canvas) return;
+
+    this.canvas.removeEventListener('mousedown', this.startDrawing.bind(this));
+    this.canvas.removeEventListener('mousemove', this.draw.bind(this));
+    this.canvas.removeEventListener('mouseup', this.stopDrawing.bind(this));
+    this.canvas.removeEventListener('mouseout', this.stopDrawing.bind(this));
+    this.canvas.removeEventListener('touchstart', this.handleTouchStart.bind(this));
+    this.canvas.removeEventListener('touchmove', this.handleTouchMove.bind(this));
+    this.canvas.removeEventListener('touchend', this.stopDrawing.bind(this));
+  }
+
+  private startDrawing(event: MouseEvent) {
+    if (this.isDisabled) return;
+
+    this.isDrawing = true;
+    this.onTouched();
+
+    const rect = this.canvas.getBoundingClientRect();
+    this.lastX = event.clientX - rect.left;
+    this.lastY = event.clientY - rect.top;
+  }
+
+  private draw(event: MouseEvent) {
+    if (!this.isDrawing || this.isDisabled || !this.context) return;
+
+    const rect = this.canvas.getBoundingClientRect();
+    const currentX = event.clientX - rect.left;
+    const currentY = event.clientY - rect.top;
+
+    this.context.beginPath();
+    this.context.moveTo(this.lastX, this.lastY);
+    this.context.lineTo(currentX, currentY);
+    this.context.stroke();
+
+    this.lastX = currentX;
+    this.lastY = currentY;
+    this.isEmpty = false;
+
+    // Emit change
+    this.onChange(this.getSignatureDataURL());
+  }
+
+  private stopDrawing() {
+    this.isDrawing = false;
+  }
+
+  private handleTouchStart(event: TouchEvent) {
+    event.preventDefault();
+    if (this.isDisabled) return;
+
+    const touch = event.touches[0];
+    const rect = this.canvas.getBoundingClientRect();
+
+    this.isDrawing = true;
+    this.onTouched();
+    this.lastX = touch.clientX - rect.left;
+    this.lastY = touch.clientY - rect.top;
+  }
+
+  private handleTouchMove(event: TouchEvent) {
+    event.preventDefault();
+    if (!this.isDrawing || this.isDisabled || !this.context) return;
+
+    const touch = event.touches[0];
+    const rect = this.canvas.getBoundingClientRect();
+    const currentX = touch.clientX - rect.left;
+    const currentY = touch.clientY - rect.top;
+
+    this.context.beginPath();
+    this.context.moveTo(this.lastX, this.lastY);
+    this.context.lineTo(currentX, currentY);
+    this.context.stroke();
+
+    this.lastX = currentX;
+    this.lastY = currentY;
+    this.isEmpty = false;
+
+    // Emit change
+    this.onChange(this.getSignatureDataURL());
+  }
+
+  clearSignature() {
+    // ✅ UPDATED: Add safety checks
+    if (!this.isViewInitialized || !this.context) {
+      return;
+    }
+
+    this.clearCanvas();
+    this.isEmpty = true;
+    this.onChange(null);
+  }
+
   private clearCanvas() {
+    // ✅ UPDATED: Add safety checks
+    if (!this.context || !this.canvas) {
+      return;
+    }
+
+    // Clear the canvas
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Fill with background color
     this.context.fillStyle = this.backgroundColor;
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  /**
-   * Save current canvas state for undo functionality
-   */
-  private saveState() {
-    this.strokes.push(this.context.getImageData(0, 0, this.canvas.width, this.canvas.height));
-    this.canUndo = this.strokes.length > 1;
+  private getSignatureDataURL(): string {
+    // ✅ ADD: Safety check
+    if (!this.canvas) {
+      return '';
+    }
+    return this.canvas.toDataURL();
   }
 
-  /**
-   * Get coordinates relative to canvas
-   */
-  private getCoordinates(event: MouseEvent | TouchEvent): { x: number, y: number } {
-    const rect = this.canvas.getBoundingClientRect();
-    const scaleX = this.canvas.width / rect.width;
-    const scaleY = this.canvas.height / rect.height;
-
-    let clientX: number, clientY: number;
-
-    if (event instanceof MouseEvent) {
-      clientX = event.clientX;
-      clientY = event.clientY;
-    } else {
-      clientX = event.touches[0].clientX;
-      clientY = event.touches[0].clientY;
+  private loadSignature(dataUrl: string) {
+    // ✅ UPDATED: Add safety checks
+    if (!this.context || !this.canvas || !dataUrl) {
+      return;
     }
 
-    return {
-      x: (clientX - rect.left) * scaleX,
-      y: (clientY - rect.top) * scaleY
+    const img = new Image();
+    img.onload = () => {
+      if (!this.context) return; // ✅ ADD: Additional safety check in callback
+      this.clearCanvas();
+      this.context.drawImage(img, 0, 0);
+      this.isEmpty = false;
     };
+    img.src = dataUrl;
   }
 
-  /**
-   * Start drawing when user presses mouse or touches screen
-   */
-  startDrawing(event: MouseEvent | TouchEvent) {
-    if (this.isDisabled) return;
-
-    event.preventDefault();
-    this.isDrawing = true;
-    this.onTouched(); // Mark as touched for form validation
-
-    const coords = this.getCoordinates(event);
-    this.lastX = coords.x;
-    this.lastY = coords.y;
-
-    // Start new path
-    this.context.beginPath();
-    this.context.moveTo(this.lastX, this.lastY);
-  }
-
-  /**
-   * Draw line as user moves mouse or finger
-   */
-  draw(event: MouseEvent | TouchEvent) {
-    if (!this.isDrawing || this.isDisabled) return;
-
-    event.preventDefault();
-
-    const coords = this.getCoordinates(event);
-
-    // Draw smooth line
-    this.context.lineTo(coords.x, coords.y);
-    this.context.stroke();
-
-    this.lastX = coords.x;
-    this.lastY = coords.y;
-  }
-
-  /**
-   * Stop drawing when user releases mouse or lifts finger
-   */
-  stopDrawing() {
-    if (!this.isDrawing || this.isDisabled) return;
-
-    this.isDrawing = false;
-    this.context.closePath();
-
-    // Save state for undo and update signature status
-    this.saveState();
-    this.updateSignatureStatus();
-  }
-
-  /**
-   * Clear the signature canvas
-   */
-  clearSignature() {
-    if (this.isDisabled) return;
-
-    this.clearCanvas();
-    this.strokes = [];
-    this.saveState();
-
-    // Reset state
-    this.hasSignature = false;
-    this.signatureData = null;
-    this.showError = false;
-    this.canUndo = false;
-
-    // Notify form system
-    this.onChange(null);
-  }
-
-  /**
-   * Undo last stroke
-   */
-  undoLastStroke() {
-    if (this.strokes.length > 1 && !this.isDisabled) {
-      this.strokes.pop(); // Remove current state
-      const previousState = this.strokes[this.strokes.length - 1];
-      this.context.putImageData(previousState, 0, 0);
-
-      this.canUndo = this.strokes.length > 1;
-      this.updateSignatureStatus();
-    }
-  }
-
-  /**
-   * Update signature status and convert to base64
-   */
-  private updateSignatureStatus() {
-    // Check if canvas has any drawing (not just background)
-    const imageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
-    const pixelData = imageData.data;
-
-    // Check if any pixel is not the background color
-    let hasDrawing = false;
-    const bgR = 255, bgG = 255, bgB = 255; // White background
-
-    for (let i = 0; i < pixelData.length; i += 4) {
-      const r = pixelData[i];
-      const g = pixelData[i + 1];
-      const b = pixelData[i + 2];
-      const a = pixelData[i + 3];
-
-      // If pixel is not white background and has opacity
-      if (!(r === bgR && g === bgG && b === bgB) && a > 0) {
-        hasDrawing = true;
-        break;
-      }
-    }
-
-    this.hasSignature = hasDrawing;
-
-    if (this.hasSignature) {
-      // Convert canvas to base64 data URL
-      this.signatureData = this.canvas.toDataURL('image/png', 0.8);
-      this.showError = false;
-
-      // Notify form system
-      this.onChange(this.signatureData);
-    } else {
-      this.signatureData = null;
-      this.onChange(null);
-    }
-  }
-
-  /**
-   * Get signature as base64 string
-   */
-  getSignatureData(): string | null {
-    return this.signatureData;
-  }
-
-  /**
-   * Set error state (called from parent form)
-   */
-  setError(message: string) {
-    this.showError = true;
-    this.errorMessage = message;
-  }
-
-  /**
-   * Clear error state
-   */
-  clearError() {
-    this.showError = false;
-    this.errorMessage = '';
+  hasSignature(): boolean {
+    return !this.isEmpty;
   }
 
   // ========== ControlValueAccessor Implementation ==========
 
   writeValue(value: string | null): void {
-    if (value && typeof value === 'string') {
-      // Load existing signature from base64
-      const img = new Image();
-      img.onload = () => {
-        this.clearCanvas();
-        this.context.drawImage(img, 0, 0, this.canvas.width, this.canvas.height);
-        this.hasSignature = true;
-        this.signatureData = value;
-        this.saveState();
-      };
-      img.src = value;
+    // ✅ UPDATED: Handle case when view is not initialized
+    if (!this.isViewInitialized) {
+      this.pendingValue = value;
+      return;
+    }
+
+    if (value) {
+      this.loadSignature(value);
     } else {
       this.clearSignature();
     }
@@ -322,5 +285,11 @@ export class DigitalSignatureComponent implements OnInit, AfterViewInit, OnDestr
 
   setDisabledState(isDisabled: boolean): void {
     this.isDisabled = isDisabled;
+
+    // ✅ ADD: Update canvas style based on disabled state
+    if (this.canvas) {
+      this.canvas.style.cursor = isDisabled ? 'not-allowed' : 'crosshair';
+      this.canvas.style.opacity = isDisabled ? '0.6' : '1';
+    }
   }
 }

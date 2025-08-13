@@ -45,10 +45,22 @@
         mat-raised-button
         color="primary"
         type="submit"
-        [disabled]="form.invalid"
+        [disabled]="!isFormValid()"
+        class="submit-button"
       >
         {{ submitButtonText }}
       </button>
+
+      <!-- ✅ ADD: Debug info (remove in production) -->
+      <div
+        class="debug-info"
+        style="margin-top: 10px; font-size: 12px; color: #666"
+      >
+        Form Valid (Angular): {{ form.valid }}<br />
+        Form Valid (Custom): {{ isFormValid() }}<br />
+        Form Touched: {{ form.touched }}<br />
+        Form Dirty: {{ form.dirty }}
+      </div>
     </div>
   </form>
 </div>
