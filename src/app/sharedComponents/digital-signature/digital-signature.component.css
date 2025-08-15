@@ -1,0 +1,70 @@
+.signature-card {
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.signature-card.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.signature-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  color: #333;
+}
+
+.signature-content {
+  padding: 16px;
+}
+
+.canvas-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.signature-canvas {
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.signature-canvas:hover:not(.disabled) {
+  border-color: #2196f3;
+}
+
+.signature-canvas.disabled {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.signature-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4caf50;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.signature-check {
+  font-size: 18px;
+}
+
+.clear-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .signature-canvas {
+    max-width: 100%;
+    height: auto;
+  }
+}

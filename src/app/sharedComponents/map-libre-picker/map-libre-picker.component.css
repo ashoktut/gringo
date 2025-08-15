@@ -1,0 +1,123 @@
+/* Main container styling */
+.maplibre-picker-container {
+  width: 100%;
+  margin: 8px 0;
+}
+
+/* Flexbox layout for controls row */
+.controls-row {
+  display: flex;
+  gap: 16px; /* Space between search and style fields */
+  margin-bottom: 8px;
+  flex-wrap: wrap; /* Wrap to next line on small screens */
+}
+
+/* Search field takes 2/3 of the width */
+.search-field {
+  flex: 2;
+  min-width: 200px; /* Minimum width for mobile */
+}
+
+/* Style field takes 1/3 of the width */
+.style-field {
+  flex: 1;
+  min-width: 150px; /* Minimum width for mobile */
+}
+
+/* Map container styling with border and shadow */
+.map-container {
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  margin: 8px 0;
+  overflow: hidden; /* Prevents map from spilling outside border */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+/* Selected location display card styling */
+.location-display {
+  background: linear-gradient(
+    135deg,
+    #e3f2fd 0%,
+    #f3e5f5 100%
+  ); /* Gradient background */
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+  border-left: 4px solid #2196f3; /* Blue accent border */
+  display: flex;
+  justify-content: space-between; /* Space between info and button */
+  align-items: center;
+  flex-wrap: wrap; /* Wrap on small screens */
+  gap: 12px;
+}
+
+/* Location information text styling */
+.location-info h4 {
+  margin: 0 0 8px 0;
+  color: #1976d2; /* Blue heading color */
+  font-size: 16px;
+}
+
+.location-info p {
+  margin: 4px 0;
+  font-size: 14px;
+  color: #333; /* Dark grey text */
+}
+
+/* Instructions styling when no location is selected */
+.instructions {
+  background: #f5f5f5; /* Light grey background */
+  padding: 12px;
+  border-radius: 4px;
+  text-align: center;
+  color: #666; /* Medium grey text */
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Space between icon and text */
+}
+
+.instructions mat-icon {
+  font-size: 18px;
+  color: #2196f3; /* Blue icon color */
+}
+
+/* Responsive design for mobile devices */
+@media (max-width: 600px) {
+  .controls-row {
+    flex-direction: column; /* Stack controls vertically on mobile */
+  }
+
+  .location-display {
+    flex-direction: column; /* Stack info and button vertically on mobile */
+    align-items: flex-start;
+  }
+}
+
+/* Additional styling for better visual appearance */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Map loading state */
+.map-container:empty::before {
+  content: "Loading map...";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 14px;
+}
+
+/* Hover effects for better interactivity */
+.instructions:hover {
+  background: #eeeeee;
+  transition: background-color 0.2s ease;
+}
+
+.location-display:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: box-shadow 0.2s ease;
+}

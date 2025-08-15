@@ -20,10 +20,12 @@ export class RfqComponent {
 
   rfqSections: FormSection[] = [
     {
+      // Quote timeline section
       title: 'Quote Timeline',
       description: 'Set a realistic timeline ',
       expanded: true,
       fields: [
+        // date submitted field
         {
           name: 'dateSubmitted',
           label: 'Date Submitted',
@@ -32,6 +34,7 @@ export class RfqComponent {
           clearable: true,
           validators: [Validators.required],
         },
+        // Date due field
         {
           name: 'dateDue',
           label: 'Date Due',
@@ -43,9 +46,11 @@ export class RfqComponent {
       ],
     },
     {
+      // Rep details section
       title: 'Rep Details',
-      description: 'Rep details & send email to',
+      description: 'Rep info & email recipients',
       fields: [
+        // Rep Name field
         {
           name: 'repName',
           label: 'Rep Name',
@@ -60,6 +65,8 @@ export class RfqComponent {
             { value: 'other', label: 'Other' },
           ],
         },
+
+        // CC Mail To field
         {
           name: 'ccMail',
           label: 'CC Mail To',
@@ -73,15 +80,19 @@ export class RfqComponent {
             { value: 'jeff@roofing.com', label: 'Jeff Nain' },
             { value: 'roux@roofing.com', label: 'Roux Mahlerbe' },
             { value: 'ruan@roofing.com', label: 'Ruan Schroder' },
+            { value: 'lyndsay@roofing.com', label: 'Lyndsay Cotton' },
             { value: 'stacy@roofing.com', label: 'Stacy Burgess' },
           ],
         },
       ],
     },
+
+    // Roof timeline section
     {
       title: 'Roof Timeline',
       description: 'ABK and P&G info',
       fields: [
+        // roof timeline field
         {
           name: 'roofTimeline',
           label: 'Roof Timeline',
@@ -98,6 +109,8 @@ export class RfqComponent {
             { value: 'above 6 months', label: '> 6 months' },
           ],
         },
+
+        // abk field
         {
           name: 'abk',
           label: 'ABK',
@@ -112,6 +125,8 @@ export class RfqComponent {
             { value: '5000', label: 'EE' },
           ],
         },
+
+        // pg2 field
         {
           name: 'pg2',
           label: 'P&G 2',
@@ -139,10 +154,13 @@ export class RfqComponent {
         },
       ],
     },
+
+    // project details section
     {
       title: 'Project Details',
-      description: 'Project details & Client info',
+      //description: 'Project details & Client info',
       fields: [
+        // stand num field
         {
           name: 'standNum',
           label: 'Stand / Site Address',
@@ -150,6 +168,8 @@ export class RfqComponent {
           required: true,
           clearable: true,
         },
+
+        // client type field
         {
           name: 'clientType',
           label: 'Client Type',
@@ -162,7 +182,8 @@ export class RfqComponent {
             { value: 'company', label: 'Company' },
           ],
         },
-        // ADD CONDITIONAL FIELD FOR COMPANY
+
+        // ADD CONDITIONAL FIELD FOR COMPANY - company name field
         {
           name: 'companyName',
           label: 'Company Name',
@@ -175,6 +196,8 @@ export class RfqComponent {
             showWhen: 'company',
           },
         },
+
+        // client name field
         {
           name: 'clientName',
           label: 'Client Full Name',
@@ -183,7 +206,7 @@ export class RfqComponent {
           clearable: true,
         },
 
-        //////////
+        // client phone field
         {
           name: 'clientPhone',
           label: 'Client Phone Number',
@@ -192,6 +215,8 @@ export class RfqComponent {
           placeholder: '+27721549865',
           clearable: true,
         },
+
+        // client email field
         {
           name: 'clientEmail',
           label: 'Client Email Address',
@@ -200,6 +225,8 @@ export class RfqComponent {
           placeholder: 'Enter client email address',
           clearable: true,
         },
+
+        // building type field
         {
           name: 'buildingType',
           label: 'Building Type',
@@ -216,6 +243,8 @@ export class RfqComponent {
             { value: 'other', label: 'Other Building Type' },
           ],
         },
+
+        // municipality field
         {
           name: 'municipality',
           label: 'Municipality',
@@ -226,10 +255,10 @@ export class RfqComponent {
       ],
     },
 
-    // Truss Details
+    // Truss Details Section
     {
       title: 'Truss Details',
-      description: 'Truss specifications & requirements',
+      //description: 'Truss specifications & requirements',
       fields: [
         {
           name: 'structureType',
@@ -245,7 +274,7 @@ export class RfqComponent {
           ],
         },
 
-        // Max truss spacing
+        // Max truss spacing field
         {
           name: 'maxTrussSpacing',
           label: 'Max Truss Spacing',
@@ -254,7 +283,7 @@ export class RfqComponent {
           clearable: true,
         },
 
-        // Main Pitch
+        // Main Pitch field
         {
           name: 'mainPitch',
           label: 'Main Pitch',
@@ -265,7 +294,7 @@ export class RfqComponent {
           validators: [Validators.min(1), Validators.max(100000)],
         },
 
-        // Pitch 2
+        // Pitch 2 field
         {
           name: 'pitch2',
           label: 'Pitch 2',
@@ -276,7 +305,7 @@ export class RfqComponent {
           validators: [Validators.min(1), Validators.max(100000)],
         },
 
-        // Roofing Services Required
+        // Roofing Services field
         {
           name: 'serviceType',
           label: 'Roofing Service Required',
@@ -292,44 +321,269 @@ export class RfqComponent {
           ],
         },
 
-        // ADD CONDITIONAL FIELD FOR COMPANY
+        // drawings field
         {
-          name: 'companyName',
-          label: 'Company Name',
-          type: 'text',
+          name: 'drawings',
+          label: 'Drawings',
+          type: 'number',
           required: true,
           clearable: true,
-          placeholder: 'Enter company name',
-          conditional: {
-            dependsOn: 'clientType',
-            showWhen: 'company',
-          },
+          placeholder: 'Enter number of drawings',
         },
+
+        // Ceiling type field
         {
-          name: 'clientName',
-          label: 'Client Full Name',
-          type: 'text',
+          name: 'ceilingType',
+          label: 'Ceiling Type',
+          type: 'select',
           required: true,
+          options: [
+            {
+              value: 'Standard Fixed Ceiling',
+              label: 'Standard Fixed Ceiling',
+            },
+            { value: 'Suspended Ceiling', label: 'Suspended Ceiling' },
+          ],
+        },
+
+        // Wall cobbling field
+        {
+          name: 'wallCobbling',
+          label: 'Wall Cobbling',
+          type: 'text',
+          required: false,
           clearable: true,
         },
 
+        // Eaves overhang field
+        {
+          name: 'eavesOverhang',
+          label: 'Eaves Overhang',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'horizontal dimension in mm from wall',
+        },
+
+        // Gable overhang field
+        {
+          name: 'gableOverhang',
+          label: 'Gable Overhang',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'state the overhang from wall',
+        },
+
+        // Apex overhang field
+        {
+          name: 'apexOverhang',
+          label: 'Apex Overhang',
+          type: 'text',
+          required: false,
+          clearable: true,
+          placeholder: 'state the overhang from wall',
+        },
+
+        // Ulay spec field
+        {
+          name: 'ulaySpec',
+          label: 'Ulay Spec',
+          type: 'select',
+          multiple: true,
+          required: true,
+          options: [
+            { value: 'undertile', label: 'Undertile membrane' },
+            { value: 'singleSisilation', label: 'Single sided sisilation' },
+            { value: 'doubleSisilation', label: 'Double sided sisilation' },
+            { value: 'bubblefoil', label: 'Bubblefoil or similar' },
+            { value: 'thickInsulation', label: 'Thick insulation' },
+            { value: 'isoboard', label: 'Isoboard or similar' },
+            { value: 'aluBubble', label: 'ALU bubble' },
+            { value: 'durafoil', label: 'Durafoil' },
+            { value: 'otherIns', label: 'Other ins' },
+          ],
+          placeholder: 'Select Items',
+          clearable: true,
+        },
+
+        // Is Solar Needed question field
+        {
+          name: 'isSolarLoading',
+          label: 'Solar Loading Required ?',
+          type: 'select',
+          multiple: false,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - where do you need the solar installed on the structure, above bathroom
+        {
+          name: 'solarLoadingArea',
+          label: 'Which area requires solar loading?',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'eg. Above bedroom',
+          conditional: {
+            dependsOn: 'isSolarLoading',
+            showWhen: 'yes',
+          },
+        },
+
+        // Is Geyser Needed question field
+        {
+          name: 'isGeyserLoading',
+          label: 'Geyser Loading Required ?',
+          type: 'select',
+          multiple: false,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - where do you need the geyser installed on the structure
+        {
+          name: 'geyserLoadingArea',
+          label: 'Which area requires solar loading?',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'eg. Bedroom, mention accurate area from plans',
+          conditional: {
+            dependsOn: 'isGeyserLoading',
+            showWhen: 'yes',
+          },
+        },
+
+        // Is Exposed Trusses Needed question field
+        {
+          name: 'isExposedTrussRequired',
+          label: 'Exposed trusses Required in design ?',
+          type: 'select',
+          multiple: false,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - type of exposed truss design required
+        {
+          name: 'exposedTrussType',
+          label: 'Exposed Truss Design Type Required',
+          type: 'select',
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'partially', label: 'Partially Exposed' },
+            { value: 'completely', label: 'Completely Exposed' },
+          ],
+          conditional: {
+            dependsOn: 'isExposedTrussRequired',
+            showWhen: 'yes',
+          },
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - type of exposed truss manual
+        {
+          name: 'exposedTrussType_2',
+          label: 'Exposed Truss Design Type Required',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'eg. Bedroom, mention accurate area from plans',
+          conditional: {
+            dependsOn: 'isExposedTrussRequired',
+            showWhen: 'yes',
+          },
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - which areas of the structure needs exposed truss
+        {
+          name: 'exposedTrussType_3',
+          label: 'Areas That Require Exposed trusses',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'eg. Bedroom, mention accurate area from plans',
+          conditional: {
+            dependsOn: 'isExposedTrussRequired',
+            showWhen: 'yes',
+          },
+        },
+
+        // Truss Sundry field
+        {
+          name: 'trussSundry',
+          label: 'Truss Sundry',
+          type: 'select',
+          multiple: true,
+          required: true,
+          clearable: true,
+          placeholder: 'Tip: ⌚ For faster quote turnaround, mark on drawings',
+          options: [
+            { value: 'vergeTiles', label: 'Verge Tiles' },
+            { value: 'monoRidges', label: 'Mono Ridges' },
+            { value: 'bargeBoards', label: 'Barge Boards' },
+            { value: 'facias', label: 'Facias' },
+            { value: 'shutterboard', label: 'Shutterboard' },
+            { value: 'gableTrims', label: 'Gable Trims' },
+            { value: 'apexTrims', label: 'Apex Trims' },
+            { value: 'none', label: 'None, eg: hip roof' },
+          ],
+        },
+
+        // Truss Notes field
+        {
+          name: 'trussNotes',
+          label: 'Truss Notes',
+          type: 'textarea',
+          rows: 4,
+          placeholder:
+            'Tip: ⌚ Avoid Re-Quotes, Consult & confirm with client, provide short accurate info to designer for quicker turnaround time',
+          validators: [Validators.maxLength(500)],
+        },
+
+        // optional p&g1 question field
+        {
+          name: 'optionalP&G1',
+          label: 'Optional P&G1',
+          type: 'select',
+          multiple: false,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - where do you need the geyser installed on the structure
+        {
+          name: 'p&g1Description',
+          label: 'P&G1 Description',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'List all the items required in a short description',
+          conditional: {
+            dependsOn: 'optionalP&G1',
+            showWhen: 'yes',
+          },
+        },
         //////////
-        {
-          name: 'clientPhone',
-          label: 'Client Phone Number',
-          type: 'tel',
-          required: true,
-          placeholder: '+27721549865',
-          clearable: true,
-        },
-        {
-          name: 'clientEmail',
-          label: 'Client Email Address',
-          type: 'email',
-          required: true,
-          placeholder: 'Enter client email address',
-          clearable: true,
-        },
+
+        // building type field
         {
           name: 'buildingType',
           label: 'Building Type',
@@ -346,6 +600,8 @@ export class RfqComponent {
             { value: 'other', label: 'Other Building Type' },
           ],
         },
+
+        // municipality field
         {
           name: 'municipality',
           label: 'Municipality',
@@ -353,8 +609,75 @@ export class RfqComponent {
           required: false,
           clearable: true,
         },
+
+        // Maps field:
+        {
+          name: 'projectLocation',
+          label: 'Project Location (Click to Select)',
+          type: 'map',
+          required: true,
+          mapConfig: {
+            defaultCenter: [28.0473, -26.2041], // Johannesburg
+            zoom: 10,
+            height: '450px',
+            enableGeocoding: true,
+            enableLocationPicker: true,
+            style: 'liberty',
+          },
+        },
       ],
     },
+
+    {
+      // Cover section
+      title: 'Cover Type',
+      expanded: false,
+      fields: [
+        // Is quote cover needed
+        {
+          name: 'isQuoteCoverRequired',
+          label: 'Quote Cover Needed?',
+          type: 'select',
+          multiple: false,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - type of exposed truss design required
+        {
+          name: 'exposedTrussType',
+          label: 'Select Cover Type',
+          type: 'select',
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'tiles', label: 'Tiles' },
+            { value: 'sheeting', label: 'Sheeting' },
+            { value: 'slate', label: 'Slate, but not by LCP' },
+          ],
+          conditional: {
+            dependsOn: 'isQuoteCoverRequired',
+            showWhen: 'yes',
+          },
+        },
+
+        // Cover Notes field
+        {
+          name: 'coverNotes',
+          label: 'Cover Notes',
+          type: 'textarea',
+          rows: 4,
+          placeholder:
+            'Tip: 😁 Happy client = Retaining client',
+          validators: [Validators.maxLength(500)],
+        },
+      ],
+    },
+
     {
       title: 'Additional Details', // NEW SECTION
       description: 'Personal and account information',
@@ -445,6 +768,74 @@ export class RfqComponent {
           label: 'I accept the terms and conditions',
           type: 'checkbox',
           required: true,
+        },
+
+        // basic signature field
+        {
+          name: 'customerName',
+          label: 'Customer Name',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'customerSignature',
+          label: 'Customer Signature',
+          type: 'signature',
+          required: true,
+          placeholder: 'Please sign here to confirm your request',
+        },
+
+        // Advanced signature with configurations
+        {
+          name: 'projectDetails',
+          label: 'Project Details',
+          type: 'textarea',
+          required: true,
+          rows: 4,
+        },
+        {
+          name: 'contractSignature',
+          label: 'Contract Agreement Signature',
+          type: 'signature',
+          required: true,
+          placeholder: 'Sign here to legally bind this contract',
+          signatureConfig: {
+            canvasWidth: 700,
+            canvasHeight: 250,
+            strokeColor: '#1976d2',
+            strokeWidth: 3,
+            backgroundColor: '#fafafa',
+          },
+        },
+      ],
+    },
+    // Conditional signature field
+    {
+      title: 'Agreement Terms',
+      description: 'Please review and accept the terms',
+      fields: [
+        {
+          name: 'termsAccepted',
+          label: 'I accept the terms and conditions',
+          type: 'checkbox',
+          required: true,
+        },
+        {
+          name: 'legalSignature',
+          label: 'Legal Authorization Signature',
+          type: 'signature',
+          required: true,
+          placeholder: 'Your signature confirms legal acceptance',
+          conditional: {
+            dependsOn: 'termsAccepted',
+            showWhen: true,
+          },
+          signatureConfig: {
+            canvasWidth: 600,
+            canvasHeight: 180,
+            strokeColor: '#d32f2f',
+            strokeWidth: 2,
+          },
         },
       ],
     },

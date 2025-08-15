@@ -2,14 +2,13 @@
   <h2 *ngIf="formTitle" class="form-title">{{ formTitle }}</h2>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dynamic-form">
-
     <!-- NEW: Grouped mode with sections -->
     <ng-container *ngIf="sections?.length; else flatMode">
       <mat-accordion [multi]="multi">
         <mat-expansion-panel
           *ngFor="let section of sections; trackBy: trackBySection"
-          [expanded]="section.expanded || false">
-
+          [expanded]="section.expanded || false"
+        >
           <mat-expansion-panel-header>
             <mat-panel-title>{{ section.title }}</mat-panel-title>
             <mat-panel-description *ngIf="section.description">
@@ -17,13 +16,15 @@
             </mat-panel-description>
           </mat-expansion-panel-header>
 
-          <ng-container *ngFor="let field of section.fields; trackBy: trackByFieldName">
+          <ng-container
+            *ngFor="let field of section.fields; trackBy: trackByFieldName"
+          >
             <ng-container
               [ngTemplateOutlet]="fieldTemplate"
-              [ngTemplateOutletContext]="{ $implicit: field }">
+              [ngTemplateOutletContext]="{ $implicit: field }"
+            >
             </ng-container>
           </ng-container>
-
         </mat-expansion-panel>
       </mat-accordion>
     </ng-container>
@@ -33,7 +34,8 @@
       <ng-container *ngFor="let field of fields; trackBy: trackByFieldName">
         <ng-container
           [ngTemplateOutlet]="fieldTemplate"
-          [ngTemplateOutletContext]="{ $implicit: field }">
+          [ngTemplateOutletContext]="{ $implicit: field }"
+        >
         </ng-container>
       </ng-container>
     </ng-template>
@@ -43,31 +45,45 @@
         mat-raised-button
         color="primary"
         type="submit"
-        [disabled]="form.invalid">
+        [disabled]="!isFormValid()"
+        class="submit-button"
+      >
         {{ submitButtonText }}
       </button>
+
+      <!-- ✅ ADD: Debug info (remove in production) -->
+      <div
+        class="debug-info"
+        style="margin-top: 10px; font-size: 12px; color: #666"
+      >
+        Form Valid (Angular): {{ form.valid }}<br />
+        Form Valid (Custom): {{ isFormValid() }}<br />
+        Form Touched: {{ form.touched }}<br />
+        Form Dirty: {{ form.dirty }}
+      </div>
     </div>
   </form>
 </div>
 
 <!-- NEW: Shared field template (moved all your existing field code here) -->
 <ng-template #fieldTemplate let-field>
-
   <div [formGroup]="form" *ngIf="shouldShowField(field)">
     <!-- Input Fields (text, email, password, number, tel) -->
     <mat-form-field
       *ngIf="isInputField(field.type)"
       appearance="fill"
-      class="full-width">
+      class="full-width"
+    >
       <mat-label>{{ field.label }}</mat-label>
       <input
         matInput
         [type]="field.type"
         [formControlName]="field.name"
         [placeholder]="field.placeholder || ''"
-        [required]="!!field.required">
+        [required]="!!field.required"
+      />
 
-        <!-- Clear button -->
+      <!-- Clear button -->
       <button
         *ngIf="field.clearable"
         mat-icon-button
@@ -75,7 +91,8 @@
         type="button"
         aria-label="Clear"
         (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)">
+        (click)="clearField(field, $event)"
+      >
         <mat-icon>close</mat-icon>
       </button>
 
@@ -88,16 +105,18 @@
     <mat-form-field
       *ngIf="field.type === 'date'"
       appearance="fill"
-      class="full-width">
+      class="full-width"
+    >
       <mat-label>{{ field.label }}</mat-label>
       <input
         matInput
         [matDatepicker]="picker"
         [formControlName]="field.name"
         [placeholder]="field.placeholder || 'DD/MM/YYYY'"
-        [required]="!!field.required">
+        [required]="!!field.required"
+      />
 
-         <!-- Clear button for date -->
+      <!-- Clear button for date -->
       <button
         *ngIf="field.clearable"
         mat-icon-button
@@ -105,11 +124,15 @@
         type="button"
         aria-label="Clear date"
         (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)">
+        (click)="clearField(field, $event)"
+      >
         <mat-icon>close</mat-icon>
       </button>
 
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker-toggle
+        matIconSuffix
+        [for]="picker"
+      ></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
       <mat-error *ngIf="hasFieldError(field.name)">
         {{ getFieldError(field.name) }}
@@ -120,20 +143,20 @@
     <mat-form-field
       *ngIf="field.type === 'select'"
       appearance="fill"
-      class="full-width">
+      class="full-width"
+    >
       <mat-label>{{ field.label }}</mat-label>
       <mat-select
         [formControlName]="field.name"
         [multiple]="!!field.multiple"
-        [required]="!!field.required">
-        <mat-option
-          *ngFor="let option of field.options"
-          [value]="option.value">
+        [required]="!!field.required"
+      >
+        <mat-option *ngFor="let option of field.options" [value]="option.value">
           {{ option.label }}
         </mat-option>
       </mat-select>
 
-       <!-- Clear button for select -->
+      <!-- Clear button for select -->
       <button
         *ngIf="field.clearable"
         mat-icon-button
@@ -141,7 +164,8 @@
         type="button"
         aria-label="Clear selection"
         (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)">
+        (click)="clearField(field, $event)"
+      >
         <mat-icon>close</mat-icon>
       </button>
 
@@ -154,17 +178,19 @@
     <mat-form-field
       *ngIf="field.type === 'textarea'"
       appearance="fill"
-      class="full-width">
+      class="full-width"
+    >
       <mat-label>{{ field.label }}</mat-label>
       <textarea
         matInput
         [formControlName]="field.name"
         [placeholder]="field.placeholder || ''"
         [rows]="field.rows || 3"
-        [required]="!!field.required">
+        [required]="!!field.required"
+      >
       </textarea>
 
-       <!-- Clear button for textarea -->
+      <!-- Clear button for textarea -->
       <button
         *ngIf="field.clearable"
         mat-icon-button
@@ -172,7 +198,8 @@
         type="button"
         aria-label="Clear text"
         (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)">
+        (click)="clearField(field, $event)"
+      >
         <mat-icon>close</mat-icon>
       </button>
 
@@ -198,7 +225,8 @@
         <mat-radio-button
           *ngFor="let option of field.options"
           [value]="option.value"
-          class="radio-button">
+          class="radio-button"
+        >
           {{ option.label }}
         </mat-radio-button>
       </mat-radio-group>
@@ -206,6 +234,49 @@
         {{ getFieldError(field.name) }}
       </div>
     </div>
-  </div>
 
+    <!-- MapLibre Map Field -->
+    <div *ngIf="field.type === 'map'" class="map-field">
+      <!-- Field label -->
+      <label class="field-label">{{ field.label }}</label>
+
+      <!-- Map picker component with all configuration options -->
+      <app-map-libre-picker
+        [formControlName]="field.name"
+        [defaultCenter]="field.mapConfig?.defaultCenter || [28.0473, -26.2041]"
+        [zoom]="field.mapConfig?.zoom || 10"
+        [height]="field.mapConfig?.height || '400px'"
+        [enableGeocoding]="field.mapConfig?.enableGeocoding !== false"
+        [enableLocationPicker]="field.mapConfig?.enableLocationPicker !== false"
+        [style]="field.mapConfig?.style || 'liberty'"
+      >
+      </app-map-libre-picker>
+
+      <!-- Show validation errors if any -->
+      <div *ngIf="hasFieldError(field.name)" class="mat-error">
+        {{ getFieldError(field.name) }}
+      </div>
+    </div>
+
+    <!-- 🖊️ Digital Signature Field -->
+    <div *ngIf="field.type === 'signature'" class="signature-field">
+      <!-- Digital signature component with all configuration options -->
+      <app-digital-signature
+        [formControlName]="field.name"
+        [label]="field.label"
+        [placeholder]="field.placeholder"
+        [canvasWidth]="field.signatureConfig?.canvasWidth || 600"
+        [canvasHeight]="field.signatureConfig?.canvasHeight || 200"
+        [strokeColor]="field.signatureConfig?.strokeColor || '#000000'"
+        [strokeWidth]="field.signatureConfig?.strokeWidth || 2"
+        [backgroundColor]="field.signatureConfig?.backgroundColor || '#FFFFFF'"
+      >
+      </app-digital-signature>
+
+      <!-- Show validation errors if any -->
+      <div *ngIf="hasFieldError(field.name)" class="mat-error">
+        {{ getFieldError(field.name) }}
+      </div>
+    </div>
+  </div>
 </ng-template>
