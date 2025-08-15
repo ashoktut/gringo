@@ -50,6 +50,18 @@ export class RfqComponent {
       title: 'Rep Details',
       description: 'Rep info & email recipients',
       fields: [
+        // Information label
+        {
+          name: 'repInfoLabel',
+          label: '',
+          type: 'label',
+          text: 'Please select the representative handling this RFQ and specify email recipients for notifications.',
+          labelConfig: {
+            style: 'info',
+            alignment: 'left'
+          }
+        },
+
         // Rep Name field
         {
           name: 'repName',
@@ -160,6 +172,18 @@ export class RfqComponent {
       title: 'Project Details',
       //description: 'Project details & Client info',
       fields: [
+        // Important notice label
+        {
+          name: 'projectNoticeLabel',
+          label: '',
+          type: 'label',
+          text: '⚠️ Important: Ensure all project details are accurate as they will be used for quotes and scheduling.',
+          labelConfig: {
+            style: 'warning',
+            alignment: 'left'
+          }
+        },
+
         // stand num field
         {
           name: 'standNum',
@@ -671,174 +695,496 @@ export class RfqComponent {
           label: 'Cover Notes',
           type: 'textarea',
           rows: 4,
-          placeholder:
-            'Tip: 😁 Happy client = Retaining client',
+          placeholder: 'Tip: 😁 Happy client = Retaining client',
           validators: [Validators.maxLength(500)],
         },
       ],
     },
 
     {
-      title: 'Additional Details', // NEW SECTION
-      description: 'Personal and account information',
+      // Drawings section
+      title: 'Drawings & Images',
+      expanded: false,
       fields: [
+        // Section title label
         {
-          name: 'password',
-          label: 'Password',
-          type: 'password',
-          required: true,
-          placeholder: 'Enter a strong password',
+          name: 'drawingsSectionTitle',
+          label: '',
+          type: 'label',
+          text: 'Upload Drawings & Site Photos',
+          labelConfig: {
+            style: 'title',
+            alignment: 'center',
+            bold: true
+          }
         },
+
+        // Caption label
         {
-          name: 'age',
-          label: 'Age',
-          type: 'number',
-          required: true,
-          placeholder: 'Enter your age',
-          validators: [Validators.min(18), Validators.max(100)],
+          name: 'drawingsCaption',
+          label: '',
+          type: 'label',
+          text: 'Add dates for drawings and upload photos/scans. Picture fields will appear when drawing dates are selected.',
+          labelConfig: {
+            style: 'caption',
+            alignment: 'center'
+          }
         },
+
+        // Is quote cover needed
         {
-          name: 'phone',
-          label: 'Phone Number',
-          type: 'tel',
-          required: true,
-          placeholder: '+1234567890',
-        },
-        {
-          name: 'dateOfBirth',
-          label: 'Date of Birth',
+          name: 'drawings1',
+          label: 'Drawing 1 date',
           type: 'date',
-          required: true,
+          multiple: false,
+          required: false,
+          clearable: true,
         },
+
+        // Dwg 1 text field
         {
-          name: 'country',
-          label: 'Country',
-          type: 'select',
-          required: true,
-          options: [
-            { value: 'za', label: 'South Africa' },
-            { value: 'us', label: 'United States' },
-            { value: 'uk', label: 'United Kingdom' },
-            { value: 'ca', label: 'Canada' },
-            { value: 'au', label: 'Australia' },
-          ],
-        },
-        {
-          name: 'skills',
-          label: 'Skills',
-          type: 'select',
-          multiple: true,
-          required: true,
-          options: [
-            { value: 'angular', label: 'Angular' },
-            { value: 'react', label: 'React' },
-            { value: 'vue', label: 'Vue.js' },
-            { value: 'nodejs', label: 'Node.js' },
-            { value: 'python', label: 'Python' },
-            { value: 'java', label: 'Java' },
-          ],
-        },
-        {
-          name: 'bio',
-          label: 'Biography',
-          type: 'textarea',
-          rows: 4,
-          placeholder: 'Tell us about yourself...',
+          name: 'dwg1No',
+          label: 'Drawing 1 Name',
+          type: 'text',
+          placeholder: 'Tip: Enter drawing name',
           validators: [Validators.maxLength(500)],
         },
+
+        // ADD CONDITIONAL FIELD - shows when drawings1 has a date value
         {
-          name: 'gender',
-          label: 'Gender',
-          type: 'radio',
+          name: 'drawings2',
+          label: 'Drawing 2 Date',
+          type: 'date',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'drawings1',
+            showWhen: 'hasValue', // This will show when drawings1 has any date value
+          },
+        },
+
+        // Dwg 2 text field
+        {
+          name: 'dwg2No',
+          label: 'Drawing 2 Name',
+          type: 'text',
+          required: false,
+          clearable: true,
+          placeholder: 'Tip: Enter drawing name',
+          validators: [Validators.maxLength(500)],
+          conditional: {
+            dependsOn: 'drawings1',
+            showWhen: 'hasValue', // This will show when drawings1 has any date value
+          },
+        },
+
+        // ADD CONDITIONAL FIELD - shows when drawings2 has a date value
+        {
+          name: 'drawings3',
+          label: 'Drawing 3 Date',
+          type: 'date',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'drawings2',
+            showWhen: 'hasValue', // This will show when drawings2 has any date value
+          },
+        },
+
+        // Dwg 3 text field
+        {
+          name: 'dwg3No',
+          label: 'Drawing 3 Name',
+          type: 'text',
+          required: false,
+          clearable: true,
+          placeholder: 'Tip: Enter drawing name',
+          validators: [Validators.maxLength(500)],
+          conditional: {
+            dependsOn: 'drawings2',
+            showWhen: 'hasValue', // This will show when drawings2 has any date value
+          },
+        },
+
+        // ADD CONDITIONAL FIELD - shows when drawings3 has a date value
+        {
+          name: 'drawings4',
+          label: 'Drawing 4 Date',
+          type: 'date',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'drawings3',
+            showWhen: 'hasValue', // This will show when drawings3 has any date value
+          },
+        },
+
+        // Dwg 4 text field
+        {
+          name: 'dwg4No',
+          label: 'Drawing 4 Name',
+          type: 'text',
+          required: false,
+          clearable: true,
+          placeholder: 'Tip: Enter drawing name',
+          validators: [Validators.maxLength(500)],
+          conditional: {
+            dependsOn: 'drawings3',
+            showWhen: 'hasValue', // This will show when drawings3 has any date value
+          },
+        },
+
+        // ADD CONDITIONAL FIELD - shows when drawings4 has a date value
+        {
+          name: 'drawings5',
+          label: 'Drawing 5 Date',
+          type: 'date',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'drawings4',
+            showWhen: 'hasValue', // This will show when drawings4 has any date value
+          },
+        },
+
+        // Dwg 5 text field
+        {
+          name: 'dwg5No',
+          label: 'Drawing 5 Name',
+          type: 'text',
+          required: false,
+          clearable: true,
+          placeholder: 'Tip: Enter drawing name',
+          validators: [Validators.maxLength(500)],
+          conditional: {
+            dependsOn: 'drawings4',
+            showWhen: 'hasValue', // This will show when drawings4 has any date value
+          },
+        },
+
+        // Picture Upload Fields
+        {
+          name: 'drawingPhoto1',
+          label: 'Drawing 1 Photo/Scan',
+          type: 'picture',
+          required: false,
+          placeholder: 'Upload drawing photo or scan',
+          pictureConfig: {
+            maxFileSize: 10 * 1024 * 1024, // 10MB for high-res drawings
+            acceptedTypes: [
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'application/pdf',
+            ],
+          },
+          conditional: {
+            dependsOn: 'drawings1',
+            showWhen: 'hasValue',
+          },
+        },
+
+        {
+          name: 'drawingPhoto2',
+          label: 'Drawing 2 Photo/Scan',
+          type: 'picture',
+          required: false,
+          placeholder: 'Upload drawing photo or scan',
+          pictureConfig: {
+            maxFileSize: 10 * 1024 * 1024, // 10MB for high-res drawings
+            acceptedTypes: [
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'application/pdf',
+            ],
+          },
+          conditional: {
+            dependsOn: 'drawings2',
+            showWhen: 'hasValue',
+          },
+        },
+
+        {
+          name: 'drawingPhoto3',
+          label: 'Drawing 3 Photo/Scan',
+          type: 'picture',
+          required: false,
+          placeholder: 'Upload drawing photo or scan',
+          pictureConfig: {
+            maxFileSize: 10 * 1024 * 1024, // 10MB for high-res drawings
+            acceptedTypes: [
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'application/pdf',
+            ],
+          },
+          conditional: {
+            dependsOn: 'drawings3',
+            showWhen: 'hasValue',
+          },
+        },
+
+        {
+          name: 'drawingPhoto4',
+          label: 'Drawing 4 Photo/Scan',
+          type: 'picture',
+          required: false,
+          placeholder: 'Upload drawing photo or scan',
+          pictureConfig: {
+            maxFileSize: 10 * 1024 * 1024, // 10MB for high-res drawings
+            acceptedTypes: [
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'application/pdf',
+            ],
+          },
+          conditional: {
+            dependsOn: 'drawings4',
+            showWhen: 'hasValue',
+          },
+        },
+
+        {
+          name: 'drawingPhoto5',
+          label: 'Drawing 5 Photo/Scan',
+          type: 'picture',
+          required: false,
+          placeholder: 'Upload drawing photo or scan',
+          pictureConfig: {
+            maxFileSize: 10 * 1024 * 1024, // 10MB for high-res drawings
+            acceptedTypes: [
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'application/pdf',
+            ],
+          },
+          conditional: {
+            dependsOn: 'drawings5',
+            showWhen: 'hasValue',
+          },
+        },
+
+        // {
+        //   name: 'sitePhoto',
+        //   label: 'Site Photo',
+        //   type: 'picture',
+        //   required: false,
+        //   placeholder: 'Take or upload site photo',
+        //   pictureConfig: {
+        //     maxFileSize: 5 * 1024 * 1024, // 5MB for photos
+        //     acceptedTypes: ['image/jpeg', 'image/png', 'image/webp']
+        //   }
+        // },
+      ],
+    },
+
+
+
+
+
+    {
+      // Extra Information section
+      title: 'Extra Information',
+      expanded: false,
+      fields: [
+        // Is gate access payment needed
+        {
+          name: 'gateAccess',
+          label: 'Gate Access Payment Needed?',
+          type: 'select',
+          multiple: false,
           required: true,
+          clearable: true,
           options: [
-            { value: 'male', label: 'Male' },
-            { value: 'female', label: 'Female' },
-            { value: 'other', label: 'Other' },
-            { value: 'prefer-not-to-say', label: 'Prefer not to say' },
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
           ],
         },
-        {
-          name: 'newsletter',
-          label: 'Subscribe to newsletter',
-          type: 'checkbox',
-        },
-        {
-          name: 'acceptTerms',
-          label: 'I accept the terms and conditions',
-          type: 'checkbox',
-          required: true,
-        },
 
-        // basic signature field
+        // General notes
         {
-          name: 'customerName',
-          label: 'Customer Name',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'customerSignature',
-          label: 'Customer Signature',
-          type: 'signature',
-          required: true,
-          placeholder: 'Please sign here to confirm your request',
-        },
-
-        // Advanced signature with configurations
-        {
-          name: 'projectDetails',
-          label: 'Project Details',
+          name: 'generalNotes',
+          label: 'General Notes',
           type: 'textarea',
-          required: true,
           rows: 4,
+          placeholder: 'Tip: 😁 Happy client = Retaining client',
+          validators: [Validators.maxLength(500)],
         },
-        {
-          name: 'contractSignature',
-          label: 'Contract Agreement Signature',
-          type: 'signature',
-          required: true,
-          placeholder: 'Sign here to legally bind this contract',
-          signatureConfig: {
-            canvasWidth: 700,
-            canvasHeight: 250,
-            strokeColor: '#1976d2',
-            strokeWidth: 3,
-            backgroundColor: '#fafafa',
-          },
-        },
+
+
       ],
     },
-    // Conditional signature field
-    {
-      title: 'Agreement Terms',
-      description: 'Please review and accept the terms',
-      fields: [
-        {
-          name: 'termsAccepted',
-          label: 'I accept the terms and conditions',
-          type: 'checkbox',
-          required: true,
-        },
-        {
-          name: 'legalSignature',
-          label: 'Legal Authorization Signature',
-          type: 'signature',
-          required: true,
-          placeholder: 'Your signature confirms legal acceptance',
-          conditional: {
-            dependsOn: 'termsAccepted',
-            showWhen: true,
-          },
-          signatureConfig: {
-            canvasWidth: 600,
-            canvasHeight: 180,
-            strokeColor: '#d32f2f',
-            strokeWidth: 2,
-          },
-        },
-      ],
-    },
+
+
+
+
+
+
+    // {
+    //   title: 'Additional Details', // NEW SECTION
+    //   description: 'Personal and account information',
+    //   fields: [
+    //     {
+    //       name: 'password',
+    //       label: 'Password',
+    //       type: 'password',
+    //       required: true,
+    //       placeholder: 'Enter a strong password',
+    //     },
+    //     {
+    //       name: 'age',
+    //       label: 'Age',
+    //       type: 'number',
+    //       required: true,
+    //       placeholder: 'Enter your age',
+    //       validators: [Validators.min(18), Validators.max(100)],
+    //     },
+    //     {
+    //       name: 'phone',
+    //       label: 'Phone Number',
+    //       type: 'tel',
+    //       required: true,
+    //       placeholder: '+1234567890',
+    //     },
+    //     {
+    //       name: 'dateOfBirth',
+    //       label: 'Date of Birth',
+    //       type: 'date',
+    //       required: true,
+    //     },
+    //     {
+    //       name: 'country',
+    //       label: 'Country',
+    //       type: 'select',
+    //       required: true,
+    //       options: [
+    //         { value: 'za', label: 'South Africa' },
+    //         { value: 'us', label: 'United States' },
+    //         { value: 'uk', label: 'United Kingdom' },
+    //         { value: 'ca', label: 'Canada' },
+    //         { value: 'au', label: 'Australia' },
+    //       ],
+    //     },
+    //     {
+    //       name: 'skills',
+    //       label: 'Skills',
+    //       type: 'select',
+    //       multiple: true,
+    //       required: true,
+    //       options: [
+    //         { value: 'angular', label: 'Angular' },
+    //         { value: 'react', label: 'React' },
+    //         { value: 'vue', label: 'Vue.js' },
+    //         { value: 'nodejs', label: 'Node.js' },
+    //         { value: 'python', label: 'Python' },
+    //         { value: 'java', label: 'Java' },
+    //       ],
+    //     },
+    //     {
+    //       name: 'bio',
+    //       label: 'Biography',
+    //       type: 'textarea',
+    //       rows: 4,
+    //       placeholder: 'Tell us about yourself...',
+    //       validators: [Validators.maxLength(500)],
+    //     },
+    //     {
+    //       name: 'gender',
+    //       label: 'Gender',
+    //       type: 'radio',
+    //       required: true,
+    //       options: [
+    //         { value: 'male', label: 'Male' },
+    //         { value: 'female', label: 'Female' },
+    //         { value: 'other', label: 'Other' },
+    //         { value: 'prefer-not-to-say', label: 'Prefer not to say' },
+    //       ],
+    //     },
+    //     {
+    //       name: 'newsletter',
+    //       label: 'Subscribe to newsletter',
+    //       type: 'checkbox',
+    //     },
+    //     {
+    //       name: 'acceptTerms',
+    //       label: 'I accept the terms and conditions',
+    //       type: 'checkbox',
+    //       required: true,
+    //     },
+
+    //     // basic signature field
+    //     {
+    //       name: 'customerName',
+    //       label: 'Customer Name',
+    //       type: 'text',
+    //       required: true,
+    //     },
+    //     {
+    //       name: 'customerSignature',
+    //       label: 'Customer Signature',
+    //       type: 'signature',
+    //       required: true,
+    //       placeholder: 'Please sign here to confirm your request',
+    //     },
+
+    //     // Advanced signature with configurations
+    //     {
+    //       name: 'projectDetails',
+    //       label: 'Project Details',
+    //       type: 'textarea',
+    //       required: true,
+    //       rows: 4,
+    //     },
+    //     {
+    //       name: 'contractSignature',
+    //       label: 'Contract Agreement Signature',
+    //       type: 'signature',
+    //       required: true,
+    //       placeholder: 'Sign here to legally bind this contract',
+    //       signatureConfig: {
+    //         canvasWidth: 700,
+    //         canvasHeight: 250,
+    //         strokeColor: '#1976d2',
+    //         strokeWidth: 3,
+    //         backgroundColor: '#fafafa',
+    //       },
+    //     },
+    //   ],
+    // },
+    // // Conditional signature field
+    // {
+    //   title: 'Agreement Terms',
+    //   description: 'Please review and accept the terms',
+    //   fields: [
+    //     {
+    //       name: 'termsAccepted',
+    //       label: 'I accept the terms and conditions',
+    //       type: 'checkbox',
+    //       required: true,
+    //     },
+    //     {
+    //       name: 'legalSignature',
+    //       label: 'Legal Authorization Signature',
+    //       type: 'signature',
+    //       required: true,
+    //       placeholder: 'Your signature confirms legal acceptance',
+    //       conditional: {
+    //         dependsOn: 'termsAccepted',
+    //         showWhen: true,
+    //       },
+    //       signatureConfig: {
+    //         canvasWidth: 600,
+    //         canvasHeight: 180,
+    //         strokeColor: '#d32f2f',
+    //         strokeWidth: 2,
+    //       },
+    //     },
+    //   ],
+    // },
   ];
 
   // onFormSubmit($event: any) {

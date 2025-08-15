@@ -161,6 +161,36 @@ mat-expansion-panel .map-field {
   margin: 12px 0 20px 0;
 }
 
+/* Picture field styling */
+.picture-field {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.picture-field .field-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* Error styling for picture fields */
+.picture-field .mat-error {
+  font-size: 12px;
+  color: #f44336;
+  margin-top: 8px;
+  display: block;
+  line-height: 1.4;
+  padding-left: 16px;
+}
+
+/* Integration with form sections */
+.form-section .picture-field {
+  margin: 12px 0 20px 0;
+}
+
 /* Submit button styling */
 .submit-button {
   min-width: 120px;
@@ -206,6 +236,113 @@ mat-expansion-panel .map-field {
 /* Responsive design for signature fields */
 @media (max-width: 768px) {
   .signature-field {
+    margin: 12px 0;
+  }
+}
+
+/* Label field styling */
+.label-field {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.label-content {
+  display: block;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+/* Label style variants */
+.label-default .label-content {
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.label-title .label-content {
+  font-size: 24px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+  margin-bottom: 8px;
+}
+
+.label-subtitle .label-content {
+  font-size: 18px;
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.74);
+  margin-bottom: 6px;
+}
+
+.label-caption .label-content {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+}
+
+.label-info .label-content {
+  font-size: 14px;
+  color: #2196f3;
+  background-color: rgba(33, 150, 243, 0.1);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 4px solid #2196f3;
+}
+
+.label-warning .label-content {
+  font-size: 14px;
+  color: #ff9800;
+  background-color: rgba(255, 152, 0, 0.1);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 4px solid #ff9800;
+}
+
+.label-error .label-content {
+  font-size: 14px;
+  color: #f44336;
+  background-color: rgba(244, 67, 54, 0.1);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 4px solid #f44336;
+}
+
+/* Label alignment */
+.label-align-left .label-content {
+  text-align: left;
+}
+
+.label-align-center .label-content {
+  text-align: center;
+}
+
+.label-align-right .label-content {
+  text-align: right;
+}
+
+/* Label text formatting */
+.label-bold .label-content {
+  font-weight: bold;
+}
+
+.label-italic .label-content {
+  font-style: italic;
+}
+
+/* Integration with form sections */
+.form-section .label-field {
+  margin: 8px 0 16px 0;
+}
+
+/* Responsive design for label fields */
+@media (max-width: 600px) {
+  .label-title .label-content {
+    font-size: 20px;
+  }
+  
+  .label-subtitle .label-content {
+    font-size: 16px;
+  }
+  
+  .label-field {
     margin: 12px 0;
   }
 }

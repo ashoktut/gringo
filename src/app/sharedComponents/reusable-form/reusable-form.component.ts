@@ -34,6 +34,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MapLibrePickerComponent } from '../map-libre-picker/map-libre-picker.component';
 import { DigitalSignatureComponent } from '../digital-signature/digital-signature.component';
+import { PictureUploadComponent } from '../picture-upload/picture-upload.component';
 
 // Custom Date Adapter for DD/MM/YYYY format
 @Injectable()
@@ -95,7 +96,9 @@ export interface FormField {
     | 'radio'
     | 'tel'
     | 'map'
-    | 'signature';
+    | 'signature'
+    | 'picture'
+    | 'label';
   required?: boolean;
   placeholder?: string;
   options?: { value: any; label: string }[];
@@ -127,6 +130,21 @@ export interface FormField {
     strokeWidth?: number;
     backgroundColor?: string;
   };
+  // 📷 ADD PICTURE CONFIGURATION
+  pictureConfig?: {
+    maxFileSize?: number; // Max file size in bytes (default: 5MB)
+    acceptedTypes?: string[]; // Accepted MIME types (default: common image types)
+  };
+  // 🏷️ ADD LABEL CONFIGURATION
+  labelConfig?: {
+    style?: 'default' | 'title' | 'subtitle' | 'caption' | 'info' | 'warning' | 'error'; // Visual style
+    alignment?: 'left' | 'center' | 'right'; // Text alignment
+    color?: string; // Custom color
+    fontSize?: string; // Custom font size
+    bold?: boolean; // Bold text
+    italic?: boolean; // Italic text
+  };
+  text?: string; // For label type - the text content to display
 }
 
 export interface FormSection {
@@ -154,6 +172,7 @@ export interface FormSection {
     MatExpansionModule,
     MapLibrePickerComponent,
     DigitalSignatureComponent,
+    PictureUploadComponent,
   ],
   providers: [
     { provide: DateAdapter, useClass: CustomDateAdapter },
@@ -223,6 +242,11 @@ ngOnInit() {
     const allFields = this.getAllFields();
 
     allFields.forEach((field) => {
+      // Skip creating form controls for label fields (they're display-only)
+      if (field.type === 'label') {
+        return;
+      }
+      
       const validators = this.getValidators(field);
       const initialValue =
         field.type === 'checkbox'
@@ -254,7 +278,17 @@ ngOnInit() {
         dependentControl.valueChanges.subscribe((value) => {
           const fieldControl = this.form.get(field.name);
           if (fieldControl) {
-            if (value !== field.conditional!.showWhen) {
+            let shouldShow = false;
+
+            // Check for special 'hasValue' condition
+            if (field.conditional!.showWhen === 'hasValue') {
+              shouldShow = value !== null && value !== undefined && value !== '';
+            } else {
+              // Default: exact value matching
+              shouldShow = value === field.conditional!.showWhen;
+            }
+
+            if (!shouldShow) {
               // Clear and disable field when hidden
               fieldControl.setValue(field.type === 'checkbox' ? false : null);
               fieldControl.clearValidators();
@@ -280,8 +314,16 @@ ngOnInit() {
         // For conditional fields, add custom validator that checks if field should be shown
         validators.push((control: any) => {
           const dependentControl = this.form?.get(field.conditional!.dependsOn);
-          const shouldShow =
-            dependentControl?.value === field.conditional!.showWhen;
+          let shouldShow = false;
+
+          // Check for special 'hasValue' condition
+          if (field.conditional!.showWhen === 'hasValue') {
+            const value = dependentControl?.value;
+            shouldShow = value !== null && value !== undefined && value !== '';
+          } else {
+            // Default: exact value matching
+            shouldShow = dependentControl?.value === field.conditional!.showWhen;
+          }
 
           if (!shouldShow) {
             return null; // Don't validate if field is hidden
@@ -324,8 +366,17 @@ ngOnInit() {
               const dependentControl = this.form?.get(
                 field.conditional.dependsOn
               );
-              const shouldShow =
-                dependentControl?.value === field.conditional.showWhen;
+              let shouldShow = false;
+
+              // Check for special 'hasValue' condition
+              if (field.conditional.showWhen === 'hasValue') {
+                const value = dependentControl?.value;
+                shouldShow = value !== null && value !== undefined && value !== '';
+              } else {
+                // Default: exact value matching
+                shouldShow = dependentControl?.value === field.conditional.showWhen;
+              }
+
               if (!shouldShow) return null; // Don't validate if hidden
             }
 
@@ -360,8 +411,17 @@ ngOnInit() {
               const dependentControl = this.form?.get(
                 field.conditional.dependsOn
               );
-              const shouldShow =
-                dependentControl?.value === field.conditional.showWhen;
+              let shouldShow = false;
+
+              // Check for special 'hasValue' condition
+              if (field.conditional.showWhen === 'hasValue') {
+                const value = dependentControl?.value;
+                shouldShow = value !== null && value !== undefined && value !== '';
+              } else {
+                // Default: exact value matching
+                shouldShow = dependentControl?.value === field.conditional.showWhen;
+              }
+
               if (!shouldShow) return null; // Don't validate if hidden
             }
 
@@ -369,6 +429,38 @@ ngOnInit() {
            // ✅ UPDATED: Better validation for signature
       if (!value || (typeof value === 'string' && value.trim().length === 0)) {
               return { signatureRequired: true };
+            }
+            return null;
+          });
+        }
+        break;
+      // 📷 ADD PICTURE VALIDATION
+      case 'picture':
+        if (field.required) {
+          validators.push((control: any) => {
+            // Check if this is a conditional field
+            if (field.conditional) {
+              const dependentControl = this.form?.get(
+                field.conditional.dependsOn
+              );
+              let shouldShow = false;
+
+              // Check for special 'hasValue' condition
+              if (field.conditional.showWhen === 'hasValue') {
+                const value = dependentControl?.value;
+                shouldShow = value !== null && value !== undefined && value !== '';
+              } else {
+                // Default: exact value matching
+                shouldShow = dependentControl?.value === field.conditional.showWhen;
+              }
+
+              if (!shouldShow) return null; // Don't validate if hidden
+            }
+
+            const value = control.value;
+            // Check if picture data exists and has required properties
+            if (!value || !value.file || !value.dataUrl) {
+              return { pictureRequired: true };
             }
             return null;
           });
@@ -558,6 +650,13 @@ getFieldError(fieldName: string): string {
       return false; // Hide if dependent field doesn't exist
     }
 
+    // Check for special 'hasValue' condition (for date fields, etc.)
+    if (field.conditional.showWhen === 'hasValue') {
+      const value = dependentControl.value;
+      return value !== null && value !== undefined && value !== '';
+    }
+
+    // Default: exact value matching
     return dependentControl.value === field.conditional.showWhen;
   }
   // Add helper method for map fields:
@@ -568,5 +667,62 @@ getFieldError(fieldName: string): string {
   // Add helper method for signature fields:
   isSignatureField(type: string): boolean {
     return type === 'signature';
+  }
+
+  // Add helper method for picture fields:
+  isPictureField(type: string): boolean {
+    return type === 'picture';
+  }
+
+  // Add helper method for label fields:
+  isLabelField(type: string): boolean {
+    return type === 'label';
+  }
+
+  // Get CSS classes for label field
+  getLabelClasses(field: FormField): string[] {
+    const classes = [];
+    const style = field.labelConfig?.style || 'default';
+    
+    classes.push(`label-${style}`);
+    
+    if (field.labelConfig?.alignment) {
+      classes.push(`label-align-${field.labelConfig.alignment}`);
+    }
+    
+    if (field.labelConfig?.bold) {
+      classes.push('label-bold');
+    }
+    
+    if (field.labelConfig?.italic) {
+      classes.push('label-italic');
+    }
+    
+    return classes;
+  }
+
+  // Get inline styles for label field
+  getLabelStyles(field: FormField): { [key: string]: string } {
+    const styles: { [key: string]: string } = {};
+    
+    if (field.labelConfig?.color) {
+      styles['color'] = field.labelConfig.color;
+    }
+    
+    if (field.labelConfig?.fontSize) {
+      styles['font-size'] = field.labelConfig.fontSize;
+    }
+    
+    return styles;
+  }
+
+  // Handle picture upload errors
+  onPictureError(error: string, fieldName: string): void {
+    console.error(`Picture upload error for field ${fieldName}:`, error);
+    // Optionally set form error
+    const control = this.form.get(fieldName);
+    if (control) {
+      control.setErrors({ pictureError: error });
+    }
   }
 }
