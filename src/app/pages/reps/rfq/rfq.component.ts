@@ -22,9 +22,21 @@ export class RfqComponent {
     {
       // Quote timeline section
       title: 'Quote Timeline',
-      description: 'Set a realistic timeline ',
+      description: '',
       expanded: true,
       fields: [
+
+                // Information label
+        {
+          name: 'quoteInfoLabel',
+          label: '',
+          type: 'label',
+          text: 'Set a realistic turnaround time for the quote to be sent to client',
+          labelConfig: {
+            style: 'info',
+            alignment: 'left'
+          }
+        },
         // date submitted field
         {
           name: 'dateSubmitted',
@@ -55,7 +67,7 @@ export class RfqComponent {
           name: 'repInfoLabel',
           label: '',
           type: 'label',
-          text: 'Please select the representative handling this RFQ and specify email recipients for notifications.',
+          text: 'Select the rep handling this RFQ and specify email recipients to cc quote to',
           labelConfig: {
             style: 'info',
             alignment: 'left'
@@ -519,18 +531,18 @@ export class RfqComponent {
         },
 
         // ADD CONDITIONAL FIELD FOR YES - type of exposed truss manual
-        {
-          name: 'exposedTrussType_2',
-          label: 'Exposed Truss Design Type Required',
-          type: 'text',
-          required: true,
-          clearable: true,
-          placeholder: 'eg. Bedroom, mention accurate area from plans',
-          conditional: {
-            dependsOn: 'isExposedTrussRequired',
-            showWhen: 'yes',
-          },
-        },
+        // {
+        //   name: 'exposedTrussType_2',
+        //   label: 'Exposed Truss Design Type Required',
+        //   type: 'text',
+        //   required: true,
+        //   clearable: true,
+        //   placeholder: 'eg. Bedroom, mention accurate area from plans',
+        //   conditional: {
+        //     dependsOn: 'isExposedTrussRequired',
+        //     showWhen: 'yes',
+        //   },
+        // },
 
         // ADD CONDITIONAL FIELD FOR YES - which areas of the structure needs exposed truss
         {
@@ -1014,6 +1026,43 @@ export class RfqComponent {
           placeholder: 'Tip: 😁 Happy client = Retaining client',
           validators: [Validators.maxLength(500)],
         },
+
+                        // Conditions label
+        {
+          name: 'conditionsLabel',
+          label: '',
+          type: 'label',
+          text: 'Notes and comments for consideration when quoting: 1.Manufacture & delivery dates are dependent on workload at time of deposit payment. 2.Manufacture is dependent on availability of material not normally included in a standard roof design. 3.Laminated beams can take up to 3 or 4 weeks to procure. 4.Decorative and purpose made plated trusses will take an additional 3.weeks to the normal truss dates. 5.No manufacture will commence until the deposit is paid and signed terms & conditions are forwarded to the LCP Roofing head office. 6.Inaccurate information, changes to the design & building not according to plan will delay the manufacture and erection process. 7.Final design is ONLY done when the terms and conditions are signed and the deposit is paid. It could happen that certain design elements can change which affect the layout of the roof. The client will be requested to sign this off if such a change occurs. LCP Roofing will do everything possible to ensure the original quote is correct and accurate. 8.Overhangs are standard 50mm or 1 tile(350mm), 1.5 tile (500mm) or 2 tile (650mm) on SLOPE. Deviations from this will result in an unnecessary additional cost. 9.Roof sheeting can take up to 4 weeks to procure from site measure and colour confirmation; and up to 12 weeks in Nov & Dec. 10.Take special note to discuss Roof Wire or Hoop Iron holding down details and note the National Building Regulations in this regard. 11.LCP quotes to complete a roof and guarantees the quoted price if we supply the complete service. Should LCP Roofing not do the erection, any materials shortages will be charged for. No refunds are given for excess materials left over on site.',
+          labelConfig: {
+            style: 'info',
+            alignment: 'left',
+            italic: true,
+          }
+        },
+
+                // Repeat RFQ
+        {
+          name: 'repeatRFQ',
+          label: 'Repeat RFQ ?',
+          type: 'select',
+          multiple: false,
+          required: true,
+          clearable: true,
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // basic signature field
+         {
+           name: 'customerSignature',
+           label: 'Customer Signature',
+           type: 'signature',
+           required: true,
+           placeholder: 'Please sign here to confirm your request',
+         },
+
 
 
       ],

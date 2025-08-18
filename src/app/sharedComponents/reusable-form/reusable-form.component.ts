@@ -246,7 +246,7 @@ ngOnInit() {
       if (field.type === 'label') {
         return;
       }
-      
+
       const validators = this.getValidators(field);
       const initialValue =
         field.type === 'checkbox'
@@ -683,36 +683,36 @@ getFieldError(fieldName: string): string {
   getLabelClasses(field: FormField): string[] {
     const classes = [];
     const style = field.labelConfig?.style || 'default';
-    
+
     classes.push(`label-${style}`);
-    
+
     if (field.labelConfig?.alignment) {
       classes.push(`label-align-${field.labelConfig.alignment}`);
     }
-    
+
     if (field.labelConfig?.bold) {
       classes.push('label-bold');
     }
-    
+
     if (field.labelConfig?.italic) {
       classes.push('label-italic');
     }
-    
+
     return classes;
   }
 
   // Get inline styles for label field
   getLabelStyles(field: FormField): { [key: string]: string } {
     const styles: { [key: string]: string } = {};
-    
+
     if (field.labelConfig?.color) {
       styles['color'] = field.labelConfig.color;
     }
-    
+
     if (field.labelConfig?.fontSize) {
       styles['font-size'] = field.labelConfig.fontSize;
     }
-    
+
     return styles;
   }
 
