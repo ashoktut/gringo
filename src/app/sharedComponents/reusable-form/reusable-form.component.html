@@ -278,5 +278,29 @@
         {{ getFieldError(field.name) }}
       </div>
     </div>
+
+    <!-- 📸 Picture Upload Field -->
+    <div *ngIf="field.type === 'picture'" class="picture-field">
+      <label class="field-label">{{ field.label }}</label>
+      <app-picture-upload
+        [formControlName]="field.name"
+        [placeholder]="field.pictureConfig?.placeholder || field.placeholder || 'Add Picture'"
+        [maxFileSize]="field.pictureConfig?.maxFileSize || 5242880"
+        [acceptedTypes]="field.pictureConfig?.acceptedTypes || ['image/jpeg', 'image/png', 'image/webp', 'image/gif']"
+        [required]="field.required || false"
+      >
+      </app-picture-upload>
+
+      <div *ngIf="hasFieldError(field.name)" class="mat-error">
+        {{ getFieldError(field.name) }}
+      </div>
+    </div>
+
+    <!-- 🏷️ Label Field (Display-only text) -->
+    <div *ngIf="field.type === 'label'" class="label-field" [ngClass]="getLabelClasses(field)">
+      <div class="label-content" [ngStyle]="getLabelStyles(field)">
+        {{ field.text || field.label }}
+      </div>
+    </div>
   </div>
 </ng-template>

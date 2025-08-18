@@ -34,6 +34,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MapLibrePickerComponent } from '../map-libre-picker/map-libre-picker.component';
 import { DigitalSignatureComponent } from '../digital-signature/digital-signature.component';
+import { PictureUploadComponent } from '../picture-upload/picture-upload.component';
 
 // Custom Date Adapter for DD/MM/YYYY format
 @Injectable()
@@ -95,7 +96,9 @@ export interface FormField {
     | 'radio'
     | 'tel'
     | 'map'
-    | 'signature';
+    | 'signature'
+    | 'label'
+    | 'picture';
   required?: boolean;
   placeholder?: string;
   options?: { value: any; label: string }[];
@@ -127,6 +130,22 @@ export interface FormField {
     strokeWidth?: number;
     backgroundColor?: string;
   };
+  // 🏷️ ADD LABEL CONFIGURATION
+  labelConfig?: {
+    style?: 'default' | 'title' | 'subtitle' | 'caption' | 'info' | 'warning' | 'error'; // Visual style
+    alignment?: 'left' | 'center' | 'right'; // Text alignment
+    color?: string; // Custom color
+    fontSize?: string; // Custom font size
+    bold?: boolean; // Bold text
+    italic?: boolean; // Italic text
+  };
+  text?: string; // For label type - the text content to display
+  // 📸 ADD PICTURE CONFIGURATION
+  pictureConfig?: {
+    maxFileSize?: number; // Maximum file size in bytes (default: 5MB)
+    acceptedTypes?: string[]; // Allowed file types (default: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+    placeholder?: string; // Button text
+  };
 }
 
 export interface FormSection {
@@ -154,6 +173,7 @@ export interface FormSection {
     MatExpansionModule,
     MapLibrePickerComponent,
     DigitalSignatureComponent,
+    PictureUploadComponent,
   ],
   providers: [
     { provide: DateAdapter, useClass: CustomDateAdapter },
@@ -223,12 +243,19 @@ ngOnInit() {
     const allFields = this.getAllFields();
 
     allFields.forEach((field) => {
+      // Skip creating form controls for label fields (they're display-only)
+      if (field.type === 'label') {
+        return;
+      }
+
       const validators = this.getValidators(field);
       const initialValue =
         field.type === 'checkbox'
           ? false
           : field.type === 'select' && field.multiple
           ? []
+          : field.type === 'picture'
+          ? null
           : null;
       group[field.name] = new FormControl(initialValue, validators);
     });
@@ -568,5 +595,47 @@ getFieldError(fieldName: string): string {
   // Add helper method for signature fields:
   isSignatureField(type: string): boolean {
     return type === 'signature';
+  }
+
+  // Add helper method for label fields:
+  isLabelField(type: string): boolean {
+    return type === 'label';
+  }
+
+  // Get CSS classes for label field
+  getLabelClasses(field: FormField): string[] {
+    const classes = [];
+    const style = field.labelConfig?.style || 'default';
+
+    classes.push(`label-${style}`);
+
+    if (field.labelConfig?.alignment) {
+      classes.push(`label-align-${field.labelConfig.alignment}`);
+    }
+
+    if (field.labelConfig?.bold) {
+      classes.push('label-bold');
+    }
+
+    if (field.labelConfig?.italic) {
+      classes.push('label-italic');
+    }
+
+    return classes;
+  }
+
+  // Get inline styles for label field
+  getLabelStyles(field: FormField): { [key: string]: string } {
+    const styles: { [key: string]: string } = {};
+
+    if (field.labelConfig?.color) {
+      styles['color'] = field.labelConfig.color;
+    }
+
+    if (field.labelConfig?.fontSize) {
+      styles['font-size'] = field.labelConfig.fontSize;
+    }
+
+    return styles;
   }
 }

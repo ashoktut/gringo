@@ -25,6 +25,18 @@ export class RfqComponent {
       description: 'Set a realistic timeline ',
       expanded: true,
       fields: [
+        // Timeline guidance label
+        {
+          name: 'timelineGuideLabel',
+          label: '',
+          type: 'label',
+          text: 'ℹ️ Please allow adequate time for quote preparation. Rush requests may incur additional fees.',
+          labelConfig: {
+            style: 'info',
+            alignment: 'left'
+          }
+        },
+
         // date submitted field
         {
           name: 'dateSubmitted',
@@ -50,6 +62,18 @@ export class RfqComponent {
       title: 'Rep Details',
       description: 'Rep info & email recipients',
       fields: [
+        // Information label
+        {
+          name: 'repInfoLabel',
+          label: '',
+          type: 'label',
+          text: 'Please select the representative handling this RFQ and specify email recipients for notifications.',
+          labelConfig: {
+            style: 'info',
+            alignment: 'left'
+          }
+        },
+
         // Rep Name field
         {
           name: 'repName',
@@ -92,6 +116,18 @@ export class RfqComponent {
       title: 'Roof Timeline',
       description: 'ABK and P&G info',
       fields: [
+        // Timeline explanation label
+        {
+          name: 'roofTimelineExplainLabel',
+          label: '',
+          type: 'label',
+          text: 'Select your preferred timeline for roof construction. This helps us prioritize production scheduling.',
+          labelConfig: {
+            style: 'default',
+            alignment: 'left'
+          }
+        },
+
         // roof timeline field
         {
           name: 'roofTimeline',
@@ -160,6 +196,18 @@ export class RfqComponent {
       title: 'Project Details',
       //description: 'Project details & Client info',
       fields: [
+        // Important notice label
+        {
+          name: 'projectNoticeLabel',
+          label: '',
+          type: 'label',
+          text: '⚠️ Important: Ensure all project details are accurate as they will be used for quotes and scheduling.',
+          labelConfig: {
+            style: 'warning',
+            alignment: 'left'
+          }
+        },
+
         // stand num field
         {
           name: 'standNum',
@@ -260,6 +308,30 @@ export class RfqComponent {
       title: 'Truss Details',
       //description: 'Truss specifications & requirements',
       fields: [
+        // Truss specifications label
+        {
+          name: 'trussSpecsLabel',
+          label: '',
+          type: 'label',
+          text: '🏗️ Truss Specifications',
+          labelConfig: {
+            style: 'subtitle',
+            alignment: 'left',
+            bold: true
+          }
+        },
+
+        // Technical details notice
+        {
+          name: 'trussNoticeLabel',
+          label: '',
+          type: 'label',
+          text: 'Provide accurate measurements and load requirements for proper truss design calculations.',
+          labelConfig: {
+            style: 'caption',
+            alignment: 'left'
+          }
+        },
         {
           name: 'structureType',
           label: 'Structure Type',
@@ -329,6 +401,46 @@ export class RfqComponent {
           required: true,
           clearable: true,
           placeholder: 'Enter number of drawings',
+        },
+
+        // ADD PICTURE FIELDS FOR DOCUMENTATION
+        // Site photos
+        {
+          name: 'sitePhoto',
+          label: 'Site Photo',
+          type: 'picture',
+          required: false,
+          pictureConfig: {
+            placeholder: 'Add Site Photo',
+            maxFileSize: 10485760, // 10MB for high-quality photos
+            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp']
+          }
+        },
+
+        // Architectural drawings/plans
+        {
+          name: 'architecturalDrawing',
+          label: 'Architectural Drawing / Plan',
+          type: 'picture',
+          required: false,
+          pictureConfig: {
+            placeholder: 'Upload Drawing/Plan',
+            maxFileSize: 15728640, // 15MB for detailed drawings
+            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/tiff']
+          }
+        },
+
+        // Reference photo
+        {
+          name: 'referencePhoto',
+          label: 'Reference Photo (Optional)',
+          type: 'picture',
+          required: false,
+          pictureConfig: {
+            placeholder: 'Add Reference Photo',
+            maxFileSize: 5242880, // 5MB
+            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp']
+          }
         },
 
         // Ceiling type field
@@ -633,6 +745,18 @@ export class RfqComponent {
       title: 'Cover Type',
       expanded: false,
       fields: [
+        // Cover selection guidance
+        {
+          name: 'coverGuidanceLabel',
+          label: '',
+          type: 'label',
+          text: '⚠️ Important: Cover selection affects structural requirements and final pricing. Choose carefully based on your project needs.',
+          labelConfig: {
+            style: 'warning',
+            alignment: 'left'
+          }
+        },
+
         // Is quote cover needed
         {
           name: 'isQuoteCoverRequired',
@@ -682,6 +806,14 @@ export class RfqComponent {
       title: 'Additional Details', // NEW SECTION
       description: 'Personal and account information',
       fields: [
+        {
+          name: 'additional_details_info',
+          label: 'Provide additional information relevant to your RFQ. Optional fields that help us better understand your requirements.',
+          type: 'label',
+          labelConfig: {
+            style: 'caption'
+          }
+        },
         {
           name: 'password',
           label: 'Password',
@@ -814,6 +946,28 @@ export class RfqComponent {
       title: 'Agreement Terms',
       description: 'Please review and accept the terms',
       fields: [
+        // Important notice label
+        {
+          name: 'agreement_importance',
+          label: 'IMPORTANT: Please carefully review all terms before proceeding with your RFQ submission.',
+          type: 'label',
+          labelConfig: {
+            style: 'error'
+          }
+        },
+        // Legal notice label
+        {
+          name: 'legalNoticeLabel',
+          label: '',
+          type: 'label',
+          text: 'By submitting this RFQ, you agree to our Terms of Service and authorize us to process this request.',
+          labelConfig: {
+            style: 'caption',
+            alignment: 'center',
+            italic: true
+          }
+        },
+
         {
           name: 'termsAccepted',
           label: 'I accept the terms and conditions',
