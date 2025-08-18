@@ -7,6 +7,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ## Features
 
 ### 🎯 Core Features
+
 - **Display-only**: No form control created, purely for display
 - **Multiple Styles**: 6 predefined styles (default, title, subtitle, caption, info, warning, error)
 - **Flexible Alignment**: Left, center, right text alignment
@@ -15,6 +16,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 - **Form Integration**: Seamlessly integrates with existing form structure
 
 ### 🎨 Style Variants
+
 - **Default**: Standard text display
 - **Title**: Large, bold heading text
 - **Subtitle**: Medium heading text
@@ -26,6 +28,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ## Basic Usage
 
 ### Simple Text Label
+
 ```typescript
 {
   name: 'infoLabel',
@@ -36,6 +39,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Styled Label
+
 ```typescript
 {
   name: 'titleLabel',
@@ -51,6 +55,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Information Box
+
 ```typescript
 {
   name: 'instructionsLabel',
@@ -65,6 +70,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Warning Notice
+
 ```typescript
 {
   name: 'warningLabel',
@@ -104,6 +110,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ## Style Examples
 
 ### Default Style
+
 ```typescript
 {
   name: 'defaultLabel',
@@ -114,6 +121,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Title Style
+
 ```typescript
 {
   name: 'titleLabel',
@@ -127,6 +135,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Subtitle Style
+
 ```typescript
 {
   name: 'subtitleLabel',
@@ -140,6 +149,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Caption Style
+
 ```typescript
 {
   name: 'captionLabel',
@@ -153,7 +163,8 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 }
 ```
 
-### Information Box
+### Information Box -
+
 ```typescript
 {
   name: 'infoBox',
@@ -166,6 +177,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Warning Box
+
 ```typescript
 {
   name: 'warningBox',
@@ -178,6 +190,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Error Box
+
 ```typescript
 {
   name: 'errorBox',
@@ -192,6 +205,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ## Advanced Styling
 
 ### Custom Colors and Fonts
+
 ```typescript
 {
   name: 'customLabel',
@@ -208,6 +222,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 ```
 
 ### Combining Styles
+
 ```typescript
 {
   name: 'combinedLabel',
@@ -227,6 +242,7 @@ The **Label Field** is a new FormField type that allows you to display non-edita
 The component automatically applies CSS classes based on configuration:
 
 ### Style Classes
+
 - `.label-default` - Default text style
 - `.label-title` - Title style (large, bold)
 - `.label-subtitle` - Subtitle style (medium)
@@ -236,17 +252,20 @@ The component automatically applies CSS classes based on configuration:
 - `.label-error` - Error box style (red background)
 
 ### Alignment Classes
+
 - `.label-align-left` - Left-aligned text
 - `.label-align-center` - Center-aligned text
 - `.label-align-right` - Right-aligned text
 
 ### Text Formatting Classes
+
 - `.label-bold` - Bold text
 - `.label-italic` - Italic text
 
 ## Real-World Examples
 
 ### Form Section Header
+
 ```typescript
 {
   name: 'sectionHeader',
@@ -261,6 +280,7 @@ The component automatically applies CSS classes based on configuration:
 ```
 
 ### Instructions
+
 ```typescript
 {
   name: 'instructions',
@@ -274,6 +294,7 @@ The component automatically applies CSS classes based on configuration:
 ```
 
 ### Field Separator
+
 ```typescript
 {
   name: 'separator',
@@ -288,6 +309,7 @@ The component automatically applies CSS classes based on configuration:
 ```
 
 ### Legal Notice
+
 ```typescript
 {
   name: 'legalNotice',
@@ -301,6 +323,7 @@ The component automatically applies CSS classes based on configuration:
 ```
 
 ### Success Message
+
 ```typescript
 {
   name: 'successMessage',
@@ -363,6 +386,7 @@ Label fields are optimized for mobile devices:
 5. **Mobile-First**: Test on mobile devices for readability
 
 ### ✅ Good Examples
+
 ```typescript
 // Clear instructions
 {
@@ -387,6 +411,7 @@ Label fields are optimized for mobile devices:
 ```
 
 ### ❌ Avoid
+
 ```typescript
 // Don't use for decorative purposes
 {
@@ -425,16 +450,19 @@ Label fields are performance-optimized:
 ### Common Issues
 
 #### Label Not Showing
+
 - Check that `text` property is set
 - Verify conditional logic if used
 - Ensure proper FormField structure
 
 #### Styling Not Applied
+
 - Verify `labelConfig` object structure
 - Check CSS class names in browser dev tools
 - Ensure custom colors use valid CSS values
 
 #### Mobile Display Issues
+
 - Test responsive breakpoints
 - Check font sizes on mobile devices
 - Verify alignment works on small screens
