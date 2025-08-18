@@ -137,6 +137,7 @@ export interface FormField {
   pictureConfig?: {
     maxFileSize?: number; // Max file size in bytes (default: 5MB)
     acceptedTypes?: string[]; // Accepted MIME types (default: common image types)
+    placeholder?: string; // Button text placeholder
   };
 
   // 🏷️ ADD LABEL CONFIGURATION
@@ -149,13 +150,6 @@ export interface FormField {
     italic?: boolean; // Italic text
   };
   text?: string; // For label type - the text content to display
-
-  // 📸 ADD PICTURE CONFIGURATION
-  pictureConfig?: {
-    maxFileSize?: number; // Maximum file size in bytes (default: 5MB)
-    acceptedTypes?: string[]; // Allowed file types (default: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
-    placeholder?: string; // Button text
-  };
 }
 
 export interface FormSection {
