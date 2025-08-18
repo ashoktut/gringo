@@ -110,7 +110,7 @@
 }
 
 /* Loading Styles */
-
+.loading-image {
   max-width: 100%;
   height: auto;
   max-height: 400px;
@@ -170,6 +170,8 @@ mat-card-subtitle {
 /* Card Content */
 mat-card-content {
   padding: 8px 16px 16px 16px;
+}
+
 .mat-mdc-card-actions {
   padding: 16px;
   gap: 8px;
@@ -211,7 +213,11 @@ mat-card-content {
 @media (max-width: 768px) {
   .picture-upload-container {
     max-width: 100%;
-  gap: 12px;
+  }
+
+  .upload-area {
+    gap: 12px;
+  }
 }
 
 .mat-mdc-menu-item mat-icon {
