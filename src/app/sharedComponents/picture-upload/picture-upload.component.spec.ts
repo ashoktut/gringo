@@ -1,8 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { PictureUploadComponent } from './picture-upload.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PictureUploadComponent } from './picture-upload.component';
+
 
 describe('PictureUploadComponent', () => {
   let component: PictureUploadComponent;
@@ -15,8 +18,12 @@ describe('PictureUploadComponent', () => {
         MatSnackBarModule,
         BrowserAnimationsModule
       ]
+
+    }).compileComponents();
+
     })
     .compileComponents();
+
 
     fixture = TestBed.createComponent(PictureUploadComponent);
     component = fixture.componentInstance;
@@ -33,6 +40,9 @@ describe('PictureUploadComponent', () => {
     expect((component as any).checkCameraSupport).toHaveBeenCalled();
   });
 
+
+  it('should validate file type', () => {
+
   it('should format file size correctly', () => {
     expect(component.formatFileSize(0)).toBe('0 Bytes');
     expect(component.formatFileSize(1024)).toBe('1 KB');
@@ -40,6 +50,7 @@ describe('PictureUploadComponent', () => {
   });
 
   it('should validate file types', () => {
+
     const validFile = new File([''], 'test.jpg', { type: 'image/jpeg' });
     const invalidFile = new File([''], 'test.txt', { type: 'text/plain' });
 
@@ -48,23 +59,52 @@ describe('PictureUploadComponent', () => {
   });
 
   it('should validate file size', () => {
+
+    const smallFile = new File(['small'], 'small.jpg', { type: 'image/jpeg' });
+    const largeFile = new File([new ArrayBuffer(10 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
     const smallFile = new File(['a'.repeat(1000)], 'small.jpg', { type: 'image/jpeg' });
     const largeFile = new File(['a'.repeat(10 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
+
 
     expect((component as any).validateFile(smallFile)).toBeTruthy();
     expect((component as any).validateFile(largeFile)).toBeFalsy();
   });
+
+
+  it('should format file size correctly', () => {
+    expect(component.formatFileSize(0)).toBe('0 Bytes');
+    expect(component.formatFileSize(1024)).toBe('1 KB');
+    expect(component.formatFileSize(1024 * 1024)).toBe('1 MB');
+  });
+
+  it('should emit events when picture is selected', () => {
+    spyOn(component.pictureSelected, 'emit');
+
+    const file = new File(['test'], 'test.jpg', { type: 'image/jpeg' });
+    component['processFile'](file);
+
+    // Wait for async file reading
+    setTimeout(() => {
+      expect(component.pictureSelected.emit).toHaveBeenCalled();
+    }, 100);
+  });
+
+  it('should remove picture and emit event', () => {
+    spyOn(component.pictureRemoved, 'emit');
 
   it('should remove picture correctly', () => {
     spyOn(component.pictureRemoved, 'emit');
     spyOn(component as any, 'onChange');
     spyOn(component as any, 'onTouched');
 
+
     component.pictureData = {
       file: new File([''], 'test.jpg'),
       dataUrl: 'data:image/jpeg;base64,test',
       name: 'test.jpg',
+      size: 1024,
       size: 1000,
+
       type: 'image/jpeg'
     };
 
@@ -72,6 +112,7 @@ describe('PictureUploadComponent', () => {
 
     expect(component.pictureData).toBeNull();
     expect(component.pictureRemoved.emit).toHaveBeenCalled();
+
     expect((component as any).onChange).toHaveBeenCalledWith(null);
     expect((component as any).onTouched).toHaveBeenCalled();
   });
@@ -80,5 +121,6 @@ describe('PictureUploadComponent', () => {
     spyOn(component, 'stopCamera');
     component.ngOnDestroy();
     expect(component.stopCamera).toHaveBeenCalled();
+
   });
 });

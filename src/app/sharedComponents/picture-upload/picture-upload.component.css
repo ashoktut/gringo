@@ -1,8 +1,9 @@
 .picture-upload-container {
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   margin: 0 auto;
 }
+
 
 /* Upload Controls */
 .upload-controls {
@@ -14,13 +15,35 @@
 .upload-button {
   min-width: 200px;
   height: 48px;
+  font-size: 14px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.upload-button:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
   font-size: 16px;
+
 }
 
 .upload-button mat-icon {
   margin-right: 8px;
 }
 
+
+/* Camera Styles */
+.camera-container {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.camera-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
 /* Camera Container */
 .camera-container {
   width: 100%;
@@ -33,11 +56,30 @@
 
 .camera-video {
   width: 100%;
+  height: auto;
+  max-height: 400px;
   max-width: 100%;
   height: auto;
   border-radius: 8px;
   background-color: #000;
   object-fit: cover;
+}
+
+/* Picture Preview Styles */
+.picture-preview {
+  width: 100%;
+  margin: 16px 0;
+}
+
+.preview-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.preview-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Mobile optimizations for camera */
@@ -58,6 +100,17 @@
 
 .preview-image {
   width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: contain;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  display: block;
+  margin: 0 auto;
+}
+
+/* Loading Styles */
+
   max-width: 100%;
   height: auto;
   max-height: 400px;
@@ -78,11 +131,45 @@
 
 .loading-container p {
   margin-top: 16px;
+  color: #666;
   color: rgba(0, 0, 0, 0.6);
   font-size: 14px;
 }
 
 /* Card Actions */
+mat-card-actions {
+  padding: 16px;
+  gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+mat-card-actions button {
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Card Header */
+mat-card-header {
+  padding: 16px 16px 8px 16px;
+}
+
+mat-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  word-break: break-word;
+}
+
+mat-card-subtitle {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Card Content */
+mat-card-content {
+  padding: 8px 16px 16px 16px;
 .mat-mdc-card-actions {
   padding: 16px;
   gap: 8px;
@@ -96,6 +183,34 @@
 .mat-mdc-menu-item {
   display: flex;
   align-items: center;
+  min-height: 48px;
+  padding: 0 16px;
+}
+
+.mat-mdc-menu-item mat-icon {
+  margin-right: 12px;
+  color: #666;
+}
+
+.mat-mdc-menu-item span {
+  font-size: 14px;
+  color: #333;
+}
+
+/* Buttons */
+.mat-mdc-raised-button {
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.mat-mdc-button mat-icon {
+  margin-right: 8px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .picture-upload-container {
+    max-width: 100%;
   gap: 12px;
 }
 
@@ -112,6 +227,99 @@
   .upload-button {
     min-width: 160px;
     height: 44px;
+    font-size: 13px;
+  }
+
+  .camera-video {
+    max-height: 300px;
+  }
+
+  .preview-image {
+    max-height: 250px;
+  }
+
+  mat-card-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  mat-card-actions button {
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  mat-card-title {
+    font-size: 14px;
+  }
+
+  mat-card-subtitle {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .camera-video {
+    max-height: 250px;
+  }
+
+  .preview-image {
+    max-height: 200px;
+  }
+
+  .upload-button {
+    min-width: 140px;
+    height: 40px;
+    font-size: 12px;
+  }
+
+  .loading-container {
+    padding: 24px;
+  }
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .upload-button,
+  .preview-card {
+    transition: none;
+  }
+
+  .upload-button:hover {
+    transform: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .preview-card {
+    border: 2px solid #000;
+  }
+
+  .upload-button {
+    border: 2px solid #000;
+  }
+
+  .camera-card {
+    border: 2px solid #000;
+  }
+}
+
+/* Dark mode considerations */
+@media (prefers-color-scheme: dark) {
+  .preview-image {
+    background-color: #2d2d2d;
+  }
+
+  mat-card-title {
+    color: #fff;
+  }
+
+  mat-card-subtitle {
+    color: #bbb;
+  }
+
+  .loading-container p {
+    color: #bbb;
     font-size: 14px;
   }
 

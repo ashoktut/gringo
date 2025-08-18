@@ -97,8 +97,10 @@ export interface FormField {
     | 'tel'
     | 'map'
     | 'signature'
+    | 'label'
     | 'picture'
-    | 'label';
+
+
   required?: boolean;
   placeholder?: string;
   options?: { value: any; label: string }[];
@@ -130,11 +132,13 @@ export interface FormField {
     strokeWidth?: number;
     backgroundColor?: string;
   };
+
   // 📷 ADD PICTURE CONFIGURATION
   pictureConfig?: {
     maxFileSize?: number; // Max file size in bytes (default: 5MB)
     acceptedTypes?: string[]; // Accepted MIME types (default: common image types)
   };
+
   // 🏷️ ADD LABEL CONFIGURATION
   labelConfig?: {
     style?: 'default' | 'title' | 'subtitle' | 'caption' | 'info' | 'warning' | 'error'; // Visual style
@@ -145,6 +149,13 @@ export interface FormField {
     italic?: boolean; // Italic text
   };
   text?: string; // For label type - the text content to display
+
+  // 📸 ADD PICTURE CONFIGURATION
+  pictureConfig?: {
+    maxFileSize?: number; // Maximum file size in bytes (default: 5MB)
+    acceptedTypes?: string[]; // Allowed file types (default: ['image/jpeg', 'image/png', 'image/webp', 'image/gif'])
+    placeholder?: string; // Button text
+  };
 }
 
 export interface FormSection {
@@ -253,6 +264,8 @@ ngOnInit() {
           ? false
           : field.type === 'select' && field.multiple
           ? []
+          : field.type === 'picture'
+          ? null
           : null;
       group[field.name] = new FormControl(initialValue, validators);
     });
