@@ -98,7 +98,9 @@ export interface FormField {
     | 'map'
     | 'signature'
     | 'label'
-    | 'picture';
+    | 'picture'
+
+
   required?: boolean;
   placeholder?: string;
   options?: { value: any; label: string }[];
@@ -130,6 +132,13 @@ export interface FormField {
     strokeWidth?: number;
     backgroundColor?: string;
   };
+
+  // 📷 ADD PICTURE CONFIGURATION
+  pictureConfig?: {
+    maxFileSize?: number; // Max file size in bytes (default: 5MB)
+    acceptedTypes?: string[]; // Accepted MIME types (default: common image types)
+  };
+
   // 🏷️ ADD LABEL CONFIGURATION
   labelConfig?: {
     style?: 'default' | 'title' | 'subtitle' | 'caption' | 'info' | 'warning' | 'error'; // Visual style
@@ -140,6 +149,7 @@ export interface FormField {
     italic?: boolean; // Italic text
   };
   text?: string; // For label type - the text content to display
+
   // 📸 ADD PICTURE CONFIGURATION
   pictureConfig?: {
     maxFileSize?: number; // Maximum file size in bytes (default: 5MB)
@@ -281,7 +291,17 @@ ngOnInit() {
         dependentControl.valueChanges.subscribe((value) => {
           const fieldControl = this.form.get(field.name);
           if (fieldControl) {
-            if (value !== field.conditional!.showWhen) {
+            let shouldShow = false;
+
+            // Check for special 'hasValue' condition
+            if (field.conditional!.showWhen === 'hasValue') {
+              shouldShow = value !== null && value !== undefined && value !== '';
+            } else {
+              // Default: exact value matching
+              shouldShow = value === field.conditional!.showWhen;
+            }
+
+            if (!shouldShow) {
               // Clear and disable field when hidden
               fieldControl.setValue(field.type === 'checkbox' ? false : null);
               fieldControl.clearValidators();
@@ -307,8 +327,16 @@ ngOnInit() {
         // For conditional fields, add custom validator that checks if field should be shown
         validators.push((control: any) => {
           const dependentControl = this.form?.get(field.conditional!.dependsOn);
-          const shouldShow =
-            dependentControl?.value === field.conditional!.showWhen;
+          let shouldShow = false;
+
+          // Check for special 'hasValue' condition
+          if (field.conditional!.showWhen === 'hasValue') {
+            const value = dependentControl?.value;
+            shouldShow = value !== null && value !== undefined && value !== '';
+          } else {
+            // Default: exact value matching
+            shouldShow = dependentControl?.value === field.conditional!.showWhen;
+          }
 
           if (!shouldShow) {
             return null; // Don't validate if field is hidden
@@ -351,8 +379,17 @@ ngOnInit() {
               const dependentControl = this.form?.get(
                 field.conditional.dependsOn
               );
-              const shouldShow =
-                dependentControl?.value === field.conditional.showWhen;
+              let shouldShow = false;
+
+              // Check for special 'hasValue' condition
+              if (field.conditional.showWhen === 'hasValue') {
+                const value = dependentControl?.value;
+                shouldShow = value !== null && value !== undefined && value !== '';
+              } else {
+                // Default: exact value matching
+                shouldShow = dependentControl?.value === field.conditional.showWhen;
+              }
+
               if (!shouldShow) return null; // Don't validate if hidden
             }
 
@@ -387,8 +424,17 @@ ngOnInit() {
               const dependentControl = this.form?.get(
                 field.conditional.dependsOn
               );
-              const shouldShow =
-                dependentControl?.value === field.conditional.showWhen;
+              let shouldShow = false;
+
+              // Check for special 'hasValue' condition
+              if (field.conditional.showWhen === 'hasValue') {
+                const value = dependentControl?.value;
+                shouldShow = value !== null && value !== undefined && value !== '';
+              } else {
+                // Default: exact value matching
+                shouldShow = dependentControl?.value === field.conditional.showWhen;
+              }
+
               if (!shouldShow) return null; // Don't validate if hidden
             }
 
@@ -396,6 +442,38 @@ ngOnInit() {
            // ✅ UPDATED: Better validation for signature
       if (!value || (typeof value === 'string' && value.trim().length === 0)) {
               return { signatureRequired: true };
+            }
+            return null;
+          });
+        }
+        break;
+      // 📷 ADD PICTURE VALIDATION
+      case 'picture':
+        if (field.required) {
+          validators.push((control: any) => {
+            // Check if this is a conditional field
+            if (field.conditional) {
+              const dependentControl = this.form?.get(
+                field.conditional.dependsOn
+              );
+              let shouldShow = false;
+
+              // Check for special 'hasValue' condition
+              if (field.conditional.showWhen === 'hasValue') {
+                const value = dependentControl?.value;
+                shouldShow = value !== null && value !== undefined && value !== '';
+              } else {
+                // Default: exact value matching
+                shouldShow = dependentControl?.value === field.conditional.showWhen;
+              }
+
+              if (!shouldShow) return null; // Don't validate if hidden
+            }
+
+            const value = control.value;
+            // Check if picture data exists and has required properties
+            if (!value || !value.file || !value.dataUrl) {
+              return { pictureRequired: true };
             }
             return null;
           });
@@ -585,6 +663,13 @@ getFieldError(fieldName: string): string {
       return false; // Hide if dependent field doesn't exist
     }
 
+    // Check for special 'hasValue' condition (for date fields, etc.)
+    if (field.conditional.showWhen === 'hasValue') {
+      const value = dependentControl.value;
+      return value !== null && value !== undefined && value !== '';
+    }
+
+    // Default: exact value matching
     return dependentControl.value === field.conditional.showWhen;
   }
   // Add helper method for map fields:
@@ -595,6 +680,11 @@ getFieldError(fieldName: string): string {
   // Add helper method for signature fields:
   isSignatureField(type: string): boolean {
     return type === 'signature';
+  }
+
+  // Add helper method for picture fields:
+  isPictureField(type: string): boolean {
+    return type === 'picture';
   }
 
   // Add helper method for label fields:
@@ -637,5 +727,15 @@ getFieldError(fieldName: string): string {
     }
 
     return styles;
+  }
+
+  // Handle picture upload errors
+  onPictureError(error: string, fieldName: string): void {
+    console.error(`Picture upload error for field ${fieldName}:`, error);
+    // Optionally set form error
+    const control = this.form.get(fieldName);
+    if (control) {
+      control.setErrors({ pictureError: error });
+    }
   }
 }
