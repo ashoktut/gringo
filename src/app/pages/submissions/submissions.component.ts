@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormSubmissionService, FormSubmission } from '../../services/form-submission.service';
+import { SearchComponent, SearchConfig } from '../../sharedComponents/search/search.component';
 
 @Component({
   selector: 'app-submissions',
@@ -17,20 +18,35 @@ import { FormSubmissionService, FormSubmission } from '../../services/form-submi
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
-    MatTooltipModule
+    MatTooltipModule,
+    SearchComponent
   ],
   template: `
     <div class="submissions-container">
       <div class="header">
         <h1>RFQ Submissions</h1>
-        <button mat-raised-button color="primary" (click)="createNewRFQ()">
-          <mat-icon>add</mat-icon>
-          New RFQ
-        </button>
+        <div class="header-actions">
+          <app-search
+            [config]="searchConfig"
+            (searchChange)="onSearchChange($event)"
+            (searchClear)="onSearchClear()">
+          </app-search>
+          <button mat-raised-button color="primary" (click)="createNewRFQ()">
+            <mat-icon>add</mat-icon>
+            New RFQ
+          </button>
+        </div>
       </div>
 
-      <div class="submissions-grid" *ngIf="submissions.length > 0; else noSubmissions">
-        <mat-card *ngFor="let submission of submissions" class="submission-card">
+      <div class="search-results" *ngIf="isSearching && searchTerm">
+        <p class="search-info">
+          <mat-icon>search</mat-icon>
+          Found {{ filteredSubmissions.length }} result(s) for "{{ searchTerm }}"
+        </p>
+      </div>
+
+      <div class="submissions-grid" *ngIf="displayedSubmissions.length > 0; else noSubmissions">
+        <mat-card *ngFor="let submission of displayedSubmissions" class="submission-card">
           <mat-card-header>
             <mat-card-title>{{ submission.formTitle }}</mat-card-title>
             <mat-card-subtitle>
@@ -41,6 +57,7 @@ import { FormSubmissionService, FormSubmission } from '../../services/form-submi
           <mat-card-content>
             <div class="submission-details">
               <p><strong>Client:</strong> {{ submission.formData?.clientName || 'N/A' }}</p>
+              <p><strong>Address:</strong> {{ submission.formData?.standNum || 'N/A' }}</p>
               <p><strong>Status:</strong>
                 <mat-chip [color]="getStatusColor(submission.status)">
                   {{ submission.status }}
@@ -84,10 +101,11 @@ import { FormSubmissionService, FormSubmission } from '../../services/form-submi
       <ng-template #noSubmissions>
         <div class="no-submissions">
           <mat-icon>description</mat-icon>
-          <h3>No submissions found</h3>
-          <p>Start by creating your first RFQ submission.</p>
+          <h3>{{ isSearching ? 'No results found' : 'No submissions found' }}</h3>
+          <p *ngIf="!isSearching">Start by creating your first RFQ submission.</p>
+          <p *ngIf="isSearching">Try adjusting your search terms or clear the search to see all submissions.</p>
           <button mat-raised-button color="primary" (click)="createNewRFQ()">
-            Create First RFQ
+            Create {{ isSearching ? 'New' : 'First' }} RFQ
           </button>
         </div>
       </ng-template>
@@ -103,13 +121,42 @@ import { FormSubmissionService, FormSubmission } from '../../services/form-submi
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
       margin-bottom: 32px;
+      gap: 24px;
     }
 
     .header h1 {
       color: #1976d2;
       margin: 0;
+      flex-shrink: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+
+    .search-results {
+      margin-bottom: 24px;
+    }
+
+    .search-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #666;
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .search-info mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
     }
 
     .submissions-grid {
@@ -169,6 +216,11 @@ import { FormSubmissionService, FormSubmission } from '../../services/form-submi
         align-items: stretch;
       }
 
+      .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
       .submissions-grid {
         grid-template-columns: 1fr;
       }
@@ -181,6 +233,18 @@ import { FormSubmissionService, FormSubmission } from '../../services/form-submi
 })
 export class SubmissionsComponent implements OnInit {
   submissions: FormSubmission[] = [];
+  filteredSubmissions: FormSubmission[] = [];
+  displayedSubmissions: FormSubmission[] = [];
+  searchTerm: string = '';
+  isSearching: boolean = false;
+
+  // Search configuration
+  searchConfig: SearchConfig = {
+    placeholder: 'Search by ID, client name, status...',
+    debounceTime: 300,
+    minLength: 1,
+    showClearButton: true
+  };
 
   constructor(
     private formSubmissionService: FormSubmissionService,
@@ -197,11 +261,80 @@ export class SubmissionsComponent implements OnInit {
         this.submissions = submissions.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
+        this.updateDisplayedSubmissions();
       },
       error: (error) => {
         console.error('Error loading submissions:', error);
       }
     });
+  }
+
+  // Search functionality
+  onSearchChange(searchTerm: string) {
+    this.searchTerm = searchTerm;
+    this.isSearching = searchTerm.length > 0;
+    this.performSearch();
+  }
+
+  onSearchClear() {
+    this.searchTerm = '';
+    this.isSearching = false;
+    this.updateDisplayedSubmissions();
+  }
+
+  private performSearch() {
+    if (!this.searchTerm) {
+      this.filteredSubmissions = [];
+      this.updateDisplayedSubmissions();
+      return;
+    }
+
+    const searchLower = this.searchTerm.toLowerCase();
+
+    this.filteredSubmissions = this.submissions.filter(submission => {
+      // Search in submission ID
+      if (submission.submissionId.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in client name
+      if (submission.formData?.clientName?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in status
+      if (submission.status.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in form title
+      if (submission.formTitle.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in form type
+      if (submission.formType.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in rep name if available
+      if (submission.formData?.repName?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      // Search in stand number/address
+      if (submission.formData?.standNum?.toLowerCase().includes(searchLower)) {
+        return true;
+      }
+
+      return false;
+    });
+
+    this.updateDisplayedSubmissions();
+  }
+
+  private updateDisplayedSubmissions() {
+    this.displayedSubmissions = this.isSearching ? this.filteredSubmissions : this.submissions;
   }
 
   createNewRFQ() {
@@ -231,7 +364,7 @@ export class SubmissionsComponent implements OnInit {
     if (confirm('Are you sure you want to delete this submission?')) {
       this.formSubmissionService.deleteSubmission(submissionId).subscribe({
         next: () => {
-          this.loadSubmissions();
+          this.loadSubmissions(); // Reload and update search results
         },
         error: (error) => {
           console.error('Error deleting submission:', error);
