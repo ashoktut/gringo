@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormField,
   FormSection, // ADD THIS IMPORT
@@ -6,14 +6,39 @@ import {
 } from '../../../sharedComponents/reusable-form/reusable-form.component';
 import { CommonModule } from '@angular/common';
 import { Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormSubmissionService } from '../../../services/form-submission.service';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-rfq',
-  imports: [CommonModule, ReusableFormComponent],
+  imports: [CommonModule, ReusableFormComponent, MatIconModule],
   templateUrl: './rfq.component.html',
   styleUrl: './rfq.component.css',
 })
-export class RfqComponent {
+export class RfqComponent implements OnInit {
+
+  // Repeat functionality properties
+  isRepeatMode = false;
+  originalSubmissionId: string | null = null;
+  repeatedSubmissionData: any = null;
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private formSubmissionService: FormSubmissionService
+  ) {}
+
+  ngOnInit() {
+    // Check if this is a repeat RFQ from query parameters
+    this.route.queryParams.subscribe(params => {
+      if (params['repeat'] && params['submissionId']) {
+        this.isRepeatMode = true;
+        this.originalSubmissionId = params['submissionId'];
+        this.loadSubmissionForRepeat(params['submissionId']);
+      }
+    });
+  }
   // To make a field not rquired, set required: false
   // To make a field required, set required: true
   // To remove validation, remove the validators array or set it to an empty array
@@ -1302,15 +1327,69 @@ export class RfqComponent {
   onFormSubmit(event: any) {
     console.log('Form submitted successfully!', event);
 
-    // Here you would typically send the data to your backend
-    // Example:
-    // this.userService.createUser(formData).subscribe(
-    //   response => console.log('User created:', response),
-    //   error => console.error('Error creating user:', error)
-    // );
+    // Add metadata for repeated submissions
+    const submissionData = {
+      ...event,
+      isRepeatedSubmission: this.isRepeatMode,
+      originalSubmissionId: this.originalSubmissionId
+    };
 
-    // Show success message
-    alert('Form submitted successfully! Check console for form data.');
+    // Save submission using the service
+    this.formSubmissionService.createSubmission(
+      'RFQ',
+      'Request for Quote',
+      submissionData,
+      this.rfqSections
+    ).subscribe({
+      next: (response) => {
+        console.log('RFQ submitted successfully:', response);
+        alert(`RFQ ${this.isRepeatMode ? 'repeated' : 'submitted'} successfully! ID: ${response.submissionId}`);
+      },
+      error: (error) => {
+        console.error('Error submitting RFQ:', error);
+        alert('Error submitting RFQ. Please try again.');
+      }
+    });
+  }
+
+  // Load original submission data for repeating
+  private loadSubmissionForRepeat(submissionId: string) {
+    this.formSubmissionService.getSubmission(submissionId).subscribe({
+      next: (submission) => {
+        if (submission) {
+          this.repeatedSubmissionData = this.prepareDataForRepeat(submission.formData);
+          console.log('Loaded submission for repeat:', this.repeatedSubmissionData);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading submission for repeat:', error);
+      }
+    });
+  }
+
+  // Prepare the data for repeating (remove submission-specific fields)
+  private prepareDataForRepeat(originalData: any): any {
+    const dataToRepeat = { ...originalData };
+
+    // Remove fields that shouldn't be duplicated
+    delete dataToRepeat.dateSubmitted;
+    delete dataToRepeat.submissionId;
+    delete dataToRepeat.status;
+    delete dataToRepeat.createdAt;
+    delete dataToRepeat.updatedAt;
+    delete dataToRepeat.isRepeatedSubmission;
+    delete dataToRepeat.originalSubmissionId;
+
+    // Reset date due to today + 7 days as default
+    const nextWeek = new Date();
+    nextWeek.setDate(nextWeek.getDate() + 7);
+    dataToRepeat.dateDue = nextWeek.toISOString().split('T')[0];
+
+    // Set today as submitted date
+    const today = new Date();
+    dataToRepeat.dateSubmitted = today.toISOString().split('T')[0];
+
+    return dataToRepeat;
   }
 
   onFormValueChange(event: any) {

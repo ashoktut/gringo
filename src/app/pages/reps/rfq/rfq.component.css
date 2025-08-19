@@ -64,3 +64,27 @@
     font-size: 1rem;
   }
 }
+
+/* Repeat RFQ styling */
+.repeat-notice {
+  background: #e3f2fd;
+  border: 1px solid #2196f3;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #1976d2;
+}
+
+.repeat-notice mat-icon {
+  color: #2196f3;
+  font-size: 20px;
+}
+
+.repeat-notice p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 14px;
+}

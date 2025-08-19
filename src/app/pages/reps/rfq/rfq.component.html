@@ -8,18 +8,27 @@
 
 <div class="page-container">
   <div class="form-header">
-    <h1>Request For Quote (RFQ)</h1>
-    <p>
-      This form demonstrates all available input types using our reusable form
-      component.
+    <h1>
+      {{ isRepeatMode ? 'Repeat Request For Quote (RFQ)' : 'Request For Quote (RFQ)' }}
+    </h1>
+    <p *ngIf="!isRepeatMode">
+      This form demonstrates all available input types using our reusable form component.
     </p>
+    <div *ngIf="isRepeatMode" class="repeat-notice">
+      <mat-icon>refresh</mat-icon>
+      <p>
+        Creating new RFQ based on submission #{{ originalSubmissionId?.split('-')?.[1] || originalSubmissionId }}.
+        Review and update as needed.
+      </p>
+    </div>
   </div>
 
   <app-reusable-form
     [sections]="rfqSections"
     [multi]="true"
-    [formTitle]="'RFQ Form'"
-    [submitButtonText]="'Submit RFQ'"
+    [formTitle]="isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
+    [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
+    [initialData]="repeatedSubmissionData"
     (formSubmit)="onFormSubmit($event)"
     (formValueChange)="onFormValueChange($event)"
   >

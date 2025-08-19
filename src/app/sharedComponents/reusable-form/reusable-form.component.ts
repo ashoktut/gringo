@@ -193,6 +193,7 @@ export class ReusableFormComponent implements OnInit, OnChanges {
   @Input() multi: boolean = true; // allow multiple panels open
   @Input() submitButtonText: string = 'Submit';
   @Input() formTitle?: string;
+  @Input() initialData: any = null; // Add this for repeat functionality
   @Output() formSubmit = new EventEmitter<any>();
   @Output() formValueChange = new EventEmitter<any>();
 
@@ -203,6 +204,13 @@ export class ReusableFormComponent implements OnInit, OnChanges {
 // ✅ ADD: In ngOnInit method
 ngOnInit() {
   this.buildForm();
+
+  // Populate form with initial data if provided (for repeat functionality)
+  if (this.initialData) {
+    setTimeout(() => {
+      this.populateFormWithData(this.initialData);
+    }, 100);
+  }
 
   // Monitor form value changes
   this.form.valueChanges.subscribe((value) => {
@@ -731,5 +739,21 @@ getFieldError(fieldName: string): string {
     if (control) {
       control.setErrors({ pictureError: error });
     }
+  }
+
+  // Populate form with initial data (for repeat functionality)
+  private populateFormWithData(data: any): void {
+    if (!this.form || !data) return;
+
+    Object.keys(data).forEach(key => {
+      const control = this.form.get(key);
+      if (control && data[key] !== undefined && data[key] !== null) {
+        control.setValue(data[key]);
+        control.markAsTouched();
+      }
+    });
+
+    // Update form validation after populating
+    this.form.updateValueAndValidity();
   }
 }
