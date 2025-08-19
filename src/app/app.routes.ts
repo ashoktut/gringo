@@ -5,6 +5,7 @@ import { ForgotPasswordComponent } from './pages/user/forgot-password/forgot-pas
 import { HomeComponent } from './pages/home/home.component';
 import { RfqComponent } from './pages/reps/rfq/rfq.component';
 import { RqrComponent } from './pages/reps/rqr/rqr.component';
+import { SubmissionsComponent } from './pages/submissions/submissions.component';
 
 export const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -13,5 +14,6 @@ export const routes: Routes = [
   { path: 'home', component: HomeComponent },
   { path: 'rfq', component: RfqComponent },
   { path: 'rqr', component: RqrComponent },
-  { path: '', redirectTo: '/login', pathMatch: 'full' }
+  { path: 'submissions', component: SubmissionsComponent },
+  { path: '', redirectTo: '/submissions', pathMatch: 'full' }
 ];

@@ -25,11 +25,16 @@ export class HomeComponent {
   list = [
   {
     "formID": "1",
+    "formName": "View Submissions",
+    "routePath": "/submissions"
+  },
+  {
+    "formID": "2",
     "formName": "Request for Quote (RFQ)",
     "routePath": "/rfq"
   },
   {
-    "formID": "2",
+    "formID": "3",
     "formName": "Request for Re-Quote (RQR)",
     "routePath": "/rqr"
   }
