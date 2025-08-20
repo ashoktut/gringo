@@ -6,7 +6,13 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatDividerModule } from '@angular/material/divider';
 import { FormSubmissionService, FormSubmission } from '../../services/form-submission.service';
+import { Template, TemplateType, TemplateGenerationRequest } from '../../models/template.models';
+import { TemplateManagementService } from '../../services/template-management.service';
 import { SearchComponent, SearchConfig } from '../../sharedComponents/search/search.component';
 
 @Component({
@@ -19,6 +25,10 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
     MatIconModule,
     MatChipsModule,
     MatTooltipModule,
+    MatSnackBarModule,
+    MatMenuModule,
+    MatDialogModule,
+    MatDividerModule,
     SearchComponent
   ],
   template: `
@@ -80,6 +90,15 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
             </button>
 
             <button mat-button
+                    color="primary"
+                    matTooltip="Generate PDF"
+                    [matMenuTriggerFor]="pdfMenu"
+                    [disabled]="!hasTemplatesForForm(submission.formType)">
+              <mat-icon>picture_as_pdf</mat-icon>
+              PDF
+            </button>
+
+            <button mat-button
                     color="accent"
                     matTooltip="Repeat RFQ"
                     (click)="repeatSubmission(submission.submissionId)">
@@ -94,6 +113,22 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
               <mat-icon>delete</mat-icon>
               Delete
             </button>
+
+            <!-- PDF Template Menu -->
+            <mat-menu #pdfMenu="matMenu">
+              <ng-container *ngFor="let template of getTemplatesForSubmission(submission)">
+                <button mat-menu-item (click)="generatePdfFromTemplate(submission, template)">
+                  <mat-icon>{{ getTemplateIcon(template.type) }}</mat-icon>
+                  <span>{{ template.name }}</span>
+                  <mat-chip *ngIf="template.isUniversal" class="universal-chip">Universal</mat-chip>
+                </button>
+              </ng-container>
+              <mat-divider *ngIf="getTemplatesForSubmission(submission).length > 0"></mat-divider>
+              <button mat-menu-item (click)="navigateToTemplates(submission.formType)">
+                <mat-icon>add</mat-icon>
+                <span>Manage Templates</span>
+              </button>
+            </mat-menu>
           </mat-card-actions>
         </mat-card>
       </div>
@@ -205,6 +240,20 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
       color: #333;
     }
 
+    .universal-chip {
+      background-color: #fff3e0 !important;
+      color: #f57c00 !important;
+      font-size: 10px !important;
+      height: 18px !important;
+      margin-left: 8px !important;
+    }
+
+    mat-menu .mat-menu-item {
+      display: flex !important;
+      align-items: center !important;
+      gap: 8px !important;
+    }
+
     @media (max-width: 768px) {
       .submissions-container {
         padding: 16px;
@@ -248,7 +297,10 @@ export class SubmissionsComponent implements OnInit {
 
   constructor(
     private formSubmissionService: FormSubmissionService,
-    private router: Router
+    private templateService: TemplateManagementService,
+    private router: Router,
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -379,6 +431,76 @@ export class SubmissionsComponent implements OnInit {
       case 'submitted': return 'primary';
       case 'completed': return 'primary';
       default: return '';
+    }
+  }
+
+  // PDF Template Methods
+  hasTemplatesForForm(formType: string): boolean {
+    // For now, we'll return true and handle the actual check in the template
+    // In a real implementation, you might want to cache templates or use a synchronous check
+    return true;
+  }
+
+  getTemplatesForSubmission(submission: FormSubmission): Template[] {
+    // This should be updated to return an Observable or use async pipe in template
+    // For now, returning empty array - should be refactored to use observables
+    return [];
+  }
+
+  generatePdfFromTemplate(submission: FormSubmission, template: Template) {
+    const formType = submission.formType || 'rfq';
+
+    // Enhance form data with submission metadata
+    const enhancedFormData = {
+      ...submission.formData,
+      submissionId: submission.submissionId,
+      formTitle: submission.formTitle,
+      status: submission.status,
+      createdAt: submission.createdAt,
+      updatedAt: submission.updatedAt,
+      formType: formType
+    };
+
+    const request = {
+      templateId: template.id,
+      formData: enhancedFormData,
+      formType: formType
+    };
+
+    this.templateService.generatePdf(request).subscribe({
+      next: () => {
+        this.snackBar.open(
+          `PDF generated successfully using "${template.name}"!`,
+          'Close',
+          {
+            duration: 4000,
+            panelClass: ['success-snackbar']
+          }
+        );
+      },
+      error: (error) => {
+        this.snackBar.open(
+          'Error generating PDF: ' + error.message,
+          'Close',
+          {
+            duration: 5000,
+            panelClass: ['error-snackbar']
+          }
+        );
+      }
+    });
+  }
+
+  navigateToTemplates(formType: string) {
+    this.router.navigate(['/templates', formType || 'rfq']);
+  }
+
+  getTemplateIcon(type: string): string {
+    switch (type) {
+      case 'word': return 'description';
+      case 'google-docs': return 'article';
+      case 'odt': return 'text_snippet';
+      default: return 'insert_drive_file';
     }
   }
 }
