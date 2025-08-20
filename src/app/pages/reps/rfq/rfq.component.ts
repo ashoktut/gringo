@@ -17,7 +17,6 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './rfq.component.css',
 })
 export class RfqComponent implements OnInit {
-
   // Repeat functionality properties
   isRepeatMode = false;
   originalSubmissionId: string | null = null;
@@ -31,7 +30,7 @@ export class RfqComponent implements OnInit {
 
   ngOnInit() {
     // Check if this is a repeat RFQ from query parameters
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['repeat'] && params['submissionId']) {
         this.isRepeatMode = true;
         this.originalSubmissionId = params['submissionId'];
@@ -58,8 +57,8 @@ export class RfqComponent implements OnInit {
           text: 'ℹ️ Please allow adequate time for quote preparation. Rush requests may incur additional fees.',
           labelConfig: {
             style: 'info',
-            alignment: 'left'
-          }
+            alignment: 'left',
+          },
         },
 
         // date submitted field
@@ -95,8 +94,8 @@ export class RfqComponent implements OnInit {
           text: 'Please select the representative handling this RFQ and specify email recipients for notifications.',
           labelConfig: {
             style: 'info',
-            alignment: 'left'
-          }
+            alignment: 'left',
+          },
         },
 
         // Rep Name field
@@ -149,8 +148,8 @@ export class RfqComponent implements OnInit {
           text: 'Select your preferred timeline for roof construction. This helps us prioritize production scheduling.',
           labelConfig: {
             style: 'default',
-            alignment: 'left'
-          }
+            alignment: 'left',
+          },
         },
 
         // roof timeline field
@@ -229,8 +228,8 @@ export class RfqComponent implements OnInit {
           text: '⚠️ Important: Ensure all project details are accurate as they will be used for quotes and scheduling.',
           labelConfig: {
             style: 'warning',
-            alignment: 'left'
-          }
+            alignment: 'left',
+          },
         },
 
         // stand num field
@@ -342,8 +341,8 @@ export class RfqComponent implements OnInit {
           labelConfig: {
             style: 'subtitle',
             alignment: 'left',
-            bold: true
-          }
+            bold: true,
+          },
         },
 
         // Technical details notice
@@ -354,8 +353,8 @@ export class RfqComponent implements OnInit {
           text: 'Provide accurate measurements and load requirements for proper truss design calculations.',
           labelConfig: {
             style: 'caption',
-            alignment: 'left'
-          }
+            alignment: 'left',
+          },
         },
         {
           name: 'structureType',
@@ -411,10 +410,10 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'supply-truss', label: 'Supply Truss' },
-            { value: 'supply-cover', label: 'Supply Cover' },
-            { value: 'erect-truss', label: 'Erect Truss' },
-            { value: 'erect-cover', label: 'Erect Cover' },
+            { value: 'Supply Truss', label: 'Supply Truss' },
+            { value: 'Supply Cover', label: 'Supply Cover' },
+            { value: 'Erect Truss', label: 'Erect Truss' },
+            { value: 'Erect Cover', label: 'Erect Cover' },
           ],
         },
 
@@ -438,8 +437,8 @@ export class RfqComponent implements OnInit {
           pictureConfig: {
             placeholder: 'Add Site Photo',
             maxFileSize: 10485760, // 10MB for high-quality photos
-            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp']
-          }
+            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+          },
         },
 
         // Architectural drawings/plans
@@ -451,8 +450,13 @@ export class RfqComponent implements OnInit {
           pictureConfig: {
             placeholder: 'Upload Drawing/Plan',
             maxFileSize: 15728640, // 15MB for detailed drawings
-            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/tiff']
-          }
+            acceptedTypes: [
+              'image/jpeg',
+              'image/png',
+              'image/webp',
+              'image/tiff',
+            ],
+          },
         },
 
         // Reference photo
@@ -464,8 +468,8 @@ export class RfqComponent implements OnInit {
           pictureConfig: {
             placeholder: 'Add Reference Photo',
             maxFileSize: 5242880, // 5MB
-            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp']
-          }
+            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+          },
         },
 
         // Ceiling type field
@@ -530,18 +534,38 @@ export class RfqComponent implements OnInit {
           multiple: true,
           required: true,
           options: [
-            { value: 'undertile', label: 'Undertile membrane' },
-            { value: 'singleSisilation', label: 'Single sided sisilation' },
-            { value: 'doubleSisilation', label: 'Double sided sisilation' },
-            { value: 'bubblefoil', label: 'Bubblefoil or similar' },
-            { value: 'thickInsulation', label: 'Thick insulation' },
-            { value: 'isoboard', label: 'Isoboard or similar' },
-            { value: 'aluBubble', label: 'ALU bubble' },
-            { value: 'durafoil', label: 'Durafoil' },
-            { value: 'otherIns', label: 'Other ins' },
+            { value: 'Undertile', label: 'Undertile membrane' },
+            {
+              value: 'Single sided sisalation',
+              label: 'Single sided sisalation',
+            },
+            {
+              value: 'Double sided sisalation',
+              label: 'Double sided sisalation',
+            },
+            { value: 'Bubblefoil', label: 'Bubblefoil or similar' },
+            { value: 'Thick Insulation', label: 'Thick insulation' },
+            { value: 'Isoboard', label: 'Isoboard or similar' },
+            { value: 'AluBubble', label: 'ALU bubble' },
+            { value: 'Durafoil', label: 'Durafoil' },
+            { value: 'OtherIns', label: 'OtherIns' },
           ],
           placeholder: 'Select Items',
           clearable: true,
+        },
+
+        // ADD CONDITIONAL FIELD FOR YES - where do you need the solar installed on the structure, above bathroom
+        {
+          name: 'insSpec',
+          label: 'Ins Spec',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'Other and alternative specifications',
+          conditional: {
+            dependsOn: 'ulaySpec',
+            showWhen: 'OtherIns',
+          },
         },
 
         // Is Solar Needed question field
@@ -617,7 +641,7 @@ export class RfqComponent implements OnInit {
         // ADD CONDITIONAL FIELD FOR YES - type of exposed truss design required
         {
           name: 'exposedTrussType',
-          label: 'Exposed Truss Design Type Required',
+          label: 'Exposed Truss Design',
           type: 'select',
           required: true,
           clearable: true,
@@ -669,14 +693,14 @@ export class RfqComponent implements OnInit {
           clearable: true,
           placeholder: 'Tip: ⌚ For faster quote turnaround, mark on drawings',
           options: [
-            { value: 'vergeTiles', label: 'Verge Tiles' },
-            { value: 'monoRidges', label: 'Mono Ridges' },
-            { value: 'bargeBoards', label: 'Barge Boards' },
-            { value: 'facias', label: 'Facias' },
-            { value: 'shutterboard', label: 'Shutterboard' },
-            { value: 'gableTrims', label: 'Gable Trims' },
-            { value: 'apexTrims', label: 'Apex Trims' },
-            { value: 'none', label: 'None, eg: hip roof' },
+            { value: 'Verge Tiles', label: 'Verge Tiles' },
+            { value: 'Mono Ridges', label: 'Mono Ridges' },
+            { value: 'Barge Boards', label: 'Barge Boards' },
+            { value: 'Facias', label: 'Facias' },
+            { value: 'Shutterboard', label: 'Shutterboard' },
+            { value: 'Gable Trims', label: 'Gable Trims' },
+            { value: 'Apex Trims', label: 'Apex Trims' },
+            { value: 'None eg: hip roof', label: 'None, eg: hip roof' },
           ],
         },
 
@@ -778,8 +802,8 @@ export class RfqComponent implements OnInit {
           text: '⚠️ Important: Cover selection affects structural requirements and final pricing. Choose carefully based on your project needs.',
           labelConfig: {
             style: 'warning',
-            alignment: 'left'
-          }
+            alignment: 'left',
+          },
         },
 
         // Is quote cover needed
@@ -796,9 +820,9 @@ export class RfqComponent implements OnInit {
           ],
         },
 
-        // ADD CONDITIONAL FIELD FOR YES - type of exposed truss design required
+        // ADD CONDITIONAL FIELD FOR YES - type of cover truss design required
         {
-          name: 'exposedTrussType',
+          name: 'coverType',
           label: 'Select Cover Type',
           type: 'select',
           required: true,
@@ -811,6 +835,85 @@ export class RfqComponent implements OnInit {
           conditional: {
             dependsOn: 'isQuoteCoverRequired',
             showWhen: 'yes',
+          },
+        },
+
+        // Tile Profile
+        {
+          name: 'tileProfile',
+          label: 'Tile Profile',
+          type: 'text',
+          required: true,
+          clearable: true,
+          conditional: {
+            dependsOn: 'coverType',
+            showWhen: 'tiles',
+          },
+        },
+
+        // Tile Colour
+        {
+          name: 'tileColour',
+          label: 'Tile Colour',
+          type: 'text',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'coverType',
+            showWhen: 'tiles',
+          },
+        },
+
+        // Tile Nailing
+        {
+          name: 'tileNailing',
+          label: 'Tile Nailing',
+          type: 'select',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'coverType',
+            showWhen: 'tiles',
+          },
+          options: [
+            { value: 'yes', label: 'Yes' },
+            { value: 'no', label: 'No' },
+          ],
+        },
+
+        // Sheet Profile
+        {
+          name: 'sheetProfile',
+          label: 'Sheet Profile',
+          type: 'text',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'coverType',
+            showWhen: 'sheeting',
+          },
+          options: [
+            { value: 'Corrugated', label: 'Corrugated' },
+            { value: 'sheeting', label: 'Concealed Fix' },
+            { value: 'slate', label: 'IBR' },
+            { value: 'slate', label: 'Craftlock' },
+            { value: 'slate', label: 'Widespan' },
+            { value: 'slate', label: 'Brownbuilt' },
+            { value: 'slate', label: 'Rheinzink Double Standing' },
+            { value: 'slate', label: 'Newlok' },
+          ],
+        },
+
+        // Sheet Colour
+        {
+          name: 'sheetColour',
+          label: 'Sheet Colour',
+          type: 'text',
+          required: false,
+          clearable: true,
+          conditional: {
+            dependsOn: 'coverType',
+            showWhen: 'sheeting',
           },
         },
 
@@ -834,11 +937,12 @@ export class RfqComponent implements OnInit {
         // Section title label
         {
           name: 'additional_details_info',
-          label: 'Provide additional information relevant to your RFQ. Optional fields that help us better understand your requirements.',
+          label:
+            'Provide additional information relevant to your RFQ. Optional fields that help us better understand your requirements.',
           type: 'label',
           labelConfig: {
-            style: 'caption'
-          }
+            style: 'caption',
+          },
         },
         {
           name: 'drawingsSectionTitle',
@@ -848,8 +952,8 @@ export class RfqComponent implements OnInit {
           labelConfig: {
             style: 'title',
             alignment: 'center',
-            bold: true
-          }
+            bold: true,
+          },
         },
 
         // Caption label
@@ -860,8 +964,8 @@ export class RfqComponent implements OnInit {
           text: 'Add dates for drawings and upload photos/scans. Picture fields will appear when drawing dates are selected.',
           labelConfig: {
             style: 'caption',
-            alignment: 'center'
-          }
+            alignment: 'center',
+          },
         },
 
         // Is quote cover needed
@@ -1115,10 +1219,6 @@ export class RfqComponent implements OnInit {
       ],
     },
 
-
-
-
-
     {
       // Extra Information section
       title: 'Extra Information',
@@ -1147,15 +1247,8 @@ export class RfqComponent implements OnInit {
           placeholder: 'Tip: 😁 Happy client = Retaining client',
           validators: [Validators.maxLength(500)],
         },
-
-
       ],
     },
-
-
-
-
-
 
     // {
     //   title: 'Additional Details', // NEW SECTION
@@ -1331,25 +1424,31 @@ export class RfqComponent implements OnInit {
     const submissionData = {
       ...event,
       isRepeatedSubmission: this.isRepeatMode,
-      originalSubmissionId: this.originalSubmissionId
+      originalSubmissionId: this.originalSubmissionId,
     };
 
     // Save submission using the service
-    this.formSubmissionService.createSubmission(
-      'RFQ',
-      'Request for Quote',
-      submissionData,
-      this.rfqSections
-    ).subscribe({
-      next: (response) => {
-        console.log('RFQ submitted successfully:', response);
-        alert(`RFQ ${this.isRepeatMode ? 'repeated' : 'submitted'} successfully! ID: ${response.submissionId}`);
-      },
-      error: (error) => {
-        console.error('Error submitting RFQ:', error);
-        alert('Error submitting RFQ. Please try again.');
-      }
-    });
+    this.formSubmissionService
+      .createSubmission(
+        'RFQ',
+        'Request for Quote',
+        submissionData,
+        this.rfqSections
+      )
+      .subscribe({
+        next: (response) => {
+          console.log('RFQ submitted successfully:', response);
+          alert(
+            `RFQ ${
+              this.isRepeatMode ? 'repeated' : 'submitted'
+            } successfully! ID: ${response.submissionId}`
+          );
+        },
+        error: (error) => {
+          console.error('Error submitting RFQ:', error);
+          alert('Error submitting RFQ. Please try again.');
+        },
+      });
   }
 
   // Load original submission data for repeating
@@ -1357,13 +1456,18 @@ export class RfqComponent implements OnInit {
     this.formSubmissionService.getSubmission(submissionId).subscribe({
       next: (submission) => {
         if (submission) {
-          this.repeatedSubmissionData = this.prepareDataForRepeat(submission.formData);
-          console.log('Loaded submission for repeat:', this.repeatedSubmissionData);
+          this.repeatedSubmissionData = this.prepareDataForRepeat(
+            submission.formData
+          );
+          console.log(
+            'Loaded submission for repeat:',
+            this.repeatedSubmissionData
+          );
         }
       },
       error: (error) => {
         console.error('Error loading submission for repeat:', error);
-      }
+      },
     });
   }
 
