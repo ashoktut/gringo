@@ -1,0 +1,290 @@
+/* Enhanced Angular App Layout with Material Design */
+:host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.sidenav-container {
+  height: 100%;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+}
+
+.sidenav {
+  width: 280px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  border-right: 1px solid rgba(25, 118, 210, 0.12);
+  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+
+.sidenav .mat-toolbar {
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  padding: 20px 24px;
+  box-shadow: none;
+  border-radius: 0;
+  margin-bottom: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidenav-header .app-icon {
+  margin-right: 16px;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidenav-header .app-title {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.sidenav .mat-mdc-nav-list {
+  padding: 16px 16px 0 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+}
+
+.sidenav .mat-mdc-list-item {
+  height: 56px;
+  margin: 4px 0;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.sidenav .mat-mdc-list-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  border-radius: 12px;
+}
+
+.sidenav .mat-mdc-list-item:hover::before {
+  opacity: 0.04;
+}
+
+.sidenav .mat-mdc-list-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+}
+
+.sidenav .mat-mdc-list-item.active-nav-item {
+  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  color: white;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.4);
+  transform: translateX(8px);
+}
+
+.sidenav .mat-mdc-list-item.active-nav-item::before {
+  background: white;
+  opacity: 0.1;
+}
+
+.sidenav .mat-mdc-list-item.active-nav-item .mat-icon {
+  color: white;
+}
+
+.sidenav .mat-mdc-list-item .mat-icon {
+  margin-right: 16px;
+  color: var(--primary-color);
+  transition: color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.sidenav .mat-mdc-list-item.active-nav-item .mat-icon {
+  color: white;
+}
+
+.main-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.2);
+  backdrop-filter: blur(10px);
+  margin: 0;
+  border: none;
+}
+
+.main-toolbar .mat-toolbar-row {
+  padding: 0 24px;
+}
+
+.toolbar-title {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  color: white;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.main-toolbar .mat-mdc-icon-button {
+  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.main-toolbar .mat-mdc-icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+.main-content {
+  padding: 0;
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  position: relative;
+}
+
+.main-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+  pointer-events: none;
+}
+
+/* Enhanced Material Design Menu Button Animation */
+.menu-button {
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.menu-button:hover {
+  transform: rotate(90deg);
+}
+
+/* Material Design Floating Action Button Style for Mobile Menu */
+@media (max-width: 768px) {
+  .sidenav {
+    width: 260px;
+  }
+
+  .main-content {
+    min-height: calc(100vh - 56px);
+  }
+
+  .main-toolbar {
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+  }
+}
+
+/* Advanced Material Design Navigation Animation */
+.mat-mdc-list-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.mat-mdc-list-item::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-mdc-list-item:hover::after {
+  left: 100%;
+}
+
+/* Smooth Material Design Sidenav Transitions */
+.sidenav-container .mat-drawer-transition .mat-drawer {
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.sidenav-container .mat-drawer-backdrop {
+  background-color: rgba(25, 118, 210, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+/* Material Design Focus States */
+.mat-mdc-list-item:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.mat-mdc-icon-button:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+/* Enhanced Material Design Typography in Navigation */
+.mat-mdc-list-item [matListItemTitle] {
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.25px;
+}
+
+/* Material Design State Layer Implementation */
+.mat-mdc-list-item {
+  --mdc-list-list-item-hover-state-layer-color: var(--primary-color);
+  --mdc-list-list-item-hover-state-layer-opacity: 0.04;
+  --mdc-list-list-item-focus-state-layer-color: var(--primary-color);
+  --mdc-list-list-item-focus-state-layer-opacity: 0.08;
+}
+
+/* Advanced Material Motion for Toolbar */
+.main-toolbar {
+  animation: slideInFromTop 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Material Design Divider Enhancement */
+.nav-divider {
+  border-color: rgba(25, 118, 210, 0.12);
+  margin: 8px 16px;
+}
+
+/* Custom Material Design Scrollbar */
+.sidenav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidenav::-webkit-scrollbar-track {
+  background: rgba(25, 118, 210, 0.05);
+  border-radius: 3px;
+}
+
+.sidenav::-webkit-scrollbar-thumb {
+  background: rgba(25, 118, 210, 0.3);
+  border-radius: 3px;
+}
+
+.sidenav::-webkit-scrollbar-thumb:hover {
+  background: rgba(25, 118, 210, 0.5);
+}

@@ -12,6 +12,17 @@ export interface SearchConfig {
   debounceTime?: number;
   minLength?: number;
   showClearButton?: boolean;
+  showHint?: boolean;
+  showSuggestions?: boolean;
+  variant?: 'default' | 'compact' | 'large';
+  enableKeyboardNavigation?: boolean;
+}
+
+export interface SearchSuggestion {
+  text: string;
+  value?: any;
+  icon?: string;
+  category?: string;
 }
 
 @Component({
@@ -25,79 +36,25 @@ export interface SearchConfig {
     MatIconModule,
     MatButtonModule
   ],
-  template: `
-    <div class="search-container">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>{{ config.placeholder || 'Search...' }}</mat-label>
-        <input
-          matInput
-          [formControl]="searchControl"
-          [placeholder]="config.placeholder || 'Search...'"
-          type="text"
-        >
-        <mat-icon matPrefix>search</mat-icon>
-
-        <button
-          *ngIf="config.showClearButton && searchControl.value"
-          mat-icon-button
-          matSuffix
-          (click)="clearSearch()"
-          type="button"
-          aria-label="Clear search">
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-form-field>
-    </div>
-  `,
-  styles: [`
-    .search-container {
-      width: 100%;
-      max-width: 400px;
-    }
-
-    .search-field {
-      width: 100%;
-    }
-
-    .search-field .mat-form-field-wrapper {
-      padding-bottom: 0;
-    }
-
-    /* More rounded edges for the search field */
-    .search-field .mat-mdc-form-field {
-      border-radius: 25px;
-    }
-
-    .search-field .mat-mdc-text-field-wrapper {
-      border-radius: 25px;
-    }
-
-    .search-field .mdc-notched-outline {
-      border-radius: 25px;
-    }
-
-    .search-field .mdc-notched-outline__leading,
-    .search-field .mdc-notched-outline__trailing {
-      border-radius: 25px;
-    }
-
-    .search-field .mdc-notched-outline__notch {
-      border-radius: 0;
-    }
-
-    @media (max-width: 768px) {
-      .search-container {
-        max-width: 100%;
-      }
-    }
-  `]
+  templateUrl: './search.component.html',
+  styleUrls: ['./search.component.css']
 })
 export class SearchComponent implements OnInit, OnDestroy {
   @Input() config: SearchConfig = {};
+  @Input() suggestions: SearchSuggestion[] = [];
+  @Input() isLoading = false;
+  @Input() showHint = false;
+  @Input() showSuggestions = false;
+  @Input() showNoResults = false;
+
   @Output() searchChange = new EventEmitter<string>();
   @Output() searchClear = new EventEmitter<void>();
+  @Output() suggestionSelected = new EventEmitter<SearchSuggestion>();
+  @Output() enterPressed = new EventEmitter<string>();
+  @Output() focusChange = new EventEmitter<boolean>();
 
   searchControl = new FormControl('');
+  isFocused = false;
   private destroy$ = new Subject<void>();
 
   ngOnInit() {
@@ -107,6 +64,10 @@ export class SearchComponent implements OnInit, OnDestroy {
       debounceTime: 300,
       minLength: 0,
       showClearButton: true,
+      showHint: false,
+      showSuggestions: false,
+      variant: 'default',
+      enableKeyboardNavigation: true,
       ...this.config
     };
 
@@ -133,9 +94,65 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  onFocus() {
+    this.isFocused = true;
+    this.focusChange.emit(true);
+  }
+
+  onBlur() {
+    // Delay to allow click events on suggestions
+    setTimeout(() => {
+      this.isFocused = false;
+      this.focusChange.emit(false);
+    }, 200);
+  }
+
+  onEnterPressed() {
+    const value = this.searchControl.value || '';
+    this.enterPressed.emit(value);
+  }
+
+  onEscapePressed() {
+    this.clearSearch();
+  }
+
   clearSearch() {
     this.searchControl.setValue('');
     this.searchClear.emit();
+  }
+
+  selectSuggestion(suggestion: SearchSuggestion) {
+    this.searchControl.setValue(suggestion.text);
+    this.suggestionSelected.emit(suggestion);
+    this.isFocused = false;
+  }
+
+  getContainerClasses(): string {
+    const classes = [];
+    if (this.config.variant) {
+      classes.push(`search-${this.config.variant}`);
+    }
+    if (this.isLoading) {
+      classes.push('search-loading');
+    }
+    if (this.searchControl.valid && this.searchControl.value) {
+      classes.push('search-success');
+    }
+    return classes.join(' ');
+  }
+
+  getSearchHint(): string {
+    const hints = [
+      'Type to search through all items',
+      'Use keywords for better results',
+      'Press Enter to search',
+      'Press Escape to clear'
+    ];
+    return hints[Math.floor(Math.random() * hints.length)];
+  }
+
+  trackSuggestion(index: number, suggestion: SearchSuggestion): any {
+    return suggestion.value || suggestion.text;
   }
 
   // Public method to programmatically set search value
@@ -146,5 +163,11 @@ export class SearchComponent implements OnInit, OnDestroy {
   // Public method to get current search value
   getSearchValue(): string {
     return this.searchControl.value || '';
+  }
+
+  // Public method to focus the search input
+  focus() {
+    // This would need ViewChild to access the input element
+    // Implementation depends on how the component is used
   }
 }

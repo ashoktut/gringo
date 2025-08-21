@@ -35,7 +35,7 @@ export class TemplateStorageService {
    */
   getTemplatesByFormType(formType: string): Observable<Template[]> {
     const templates = this.templatesSubject.value;
-    const filtered = templates.filter(t => 
+    const filtered = templates.filter(t =>
       t.formType === formType || t.isUniversal
     );
     return of(filtered);
@@ -47,13 +47,13 @@ export class TemplateStorageService {
   saveTemplate(template: Template): Observable<Template> {
     const templates = this.templatesSubject.value;
     const existingIndex = templates.findIndex(t => t.id === template.id);
-    
+
     if (existingIndex >= 0) {
       templates[existingIndex] = template;
     } else {
       templates.push(template);
     }
-    
+
     this.updateTemplatesAndSave(templates);
     return of(template);
   }
@@ -64,12 +64,12 @@ export class TemplateStorageService {
   deleteTemplate(id: string): Observable<boolean> {
     const templates = this.templatesSubject.value;
     const filteredTemplates = templates.filter(t => t.id !== id);
-    
+
     if (filteredTemplates.length !== templates.length) {
       this.updateTemplatesAndSave(filteredTemplates);
       return of(true);
     }
-    
+
     return of(false);
   }
 
@@ -79,13 +79,13 @@ export class TemplateStorageService {
   updateTemplate(id: string, updates: Partial<Template>): Observable<Template | null> {
     const templates = this.templatesSubject.value;
     const templateIndex = templates.findIndex(t => t.id === id);
-    
+
     if (templateIndex >= 0) {
       templates[templateIndex] = { ...templates[templateIndex], ...updates };
       this.updateTemplatesAndSave(templates);
       return of(templates[templateIndex]);
     }
-    
+
     return of(null);
   }
 
@@ -104,13 +104,13 @@ export class TemplateStorageService {
   searchTemplates(query: string): Observable<Template[]> {
     const templates = this.templatesSubject.value;
     const searchQuery = query.toLowerCase();
-    
+
     const filtered = templates.filter(template =>
       template.name.toLowerCase().includes(searchQuery) ||
       template.formType.toLowerCase().includes(searchQuery) ||
       template.placeholders.some(p => p.toLowerCase().includes(searchQuery))
     );
-    
+
     return of(filtered);
   }
 
@@ -118,10 +118,30 @@ export class TemplateStorageService {
     try {
       const stored = localStorage.getItem(this.STORAGE_KEY);
       if (stored) {
-        const templates = JSON.parse(stored).map((t: any) => ({
-          ...t,
-          uploadedAt: new Date(t.uploadedAt)
-        }));
+        const templates = JSON.parse(stored).map((t: any) => {
+          const template = {
+            ...t,
+            uploadedAt: new Date(t.uploadedAt)
+          };
+
+          // Restore ArrayBuffer from base64 if present
+          if (t._binaryContentB64) {
+            try {
+              const binaryString = atob(t._binaryContentB64);
+              const bytes = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+              }
+              // Ensure we create a proper ArrayBuffer
+              template.binaryContent = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
+              delete template._binaryContentB64;
+            } catch (error) {
+              console.warn('Failed to restore binary content for template:', t.id, error);
+            }
+          }
+
+          return template;
+        });
         this.templatesSubject.next(templates);
       }
     } catch (error) {
@@ -137,7 +157,28 @@ export class TemplateStorageService {
 
   private saveTemplatesToStorage(templates: Template[]): void {
     try {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(templates));
+      // Convert ArrayBuffers to base64 for JSON serialization
+      const templatesForStorage = templates.map(template => {
+        const templateCopy = { ...template };
+
+        if (template.binaryContent) {
+          try {
+            const bytes = new Uint8Array(template.binaryContent);
+            let binaryString = '';
+            for (let i = 0; i < bytes.length; i++) {
+              binaryString += String.fromCharCode(bytes[i]);
+            }
+            (templateCopy as any)._binaryContentB64 = btoa(binaryString);
+            delete templateCopy.binaryContent;
+          } catch (error) {
+            console.warn('Failed to serialize binary content for template:', template.id, error);
+          }
+        }
+
+        return templateCopy;
+      });
+
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(templatesForStorage));
     } catch (error) {
       console.error('Error saving templates to storage:', error);
     }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable, switchMap, map } from 'rxjs';
-import { Template, TemplateUploadRequest, TemplateGenerationRequest, TemplateType } from '../models/template.models';
+import { Template, TemplateUploadRequest, TemplateGenerationRequest, TemplateType, PdfGenerationOptions } from '../models/template.models';
 import { TemplateStorageService } from './template-storage.service';
 import { TemplateProcessingService } from './template-processing.service';
 import { PdfGenerationService } from './pdf-generation.service';
@@ -17,7 +17,7 @@ export class TemplateManagementService {
   ) {}
 
   /**
-   * Upload and process new template
+   * Upload and process new template with enhanced binary support
    */
   uploadTemplate(request: TemplateUploadRequest): Observable<Template> {
     // Validate file first
@@ -26,8 +26,8 @@ export class TemplateManagementService {
       throw new Error(validation.errors.join(', '));
     }
 
-    // Process file and save to storage
-    return this.processingService.processTemplateFile(request).pipe(
+    // Enhanced processing for binary content preservation
+    return this.processingService.processTemplateFileWithBinary(request).pipe(
       switchMap(template => this.storageService.saveTemplate(template))
     );
   }
@@ -69,20 +69,20 @@ export class TemplateManagementService {
         if (!originalTemplate) {
           throw new Error('Template not found');
         }
-        
+
         const clonedTemplate = this.processingService.cloneTemplate(
-          originalTemplate, 
-          newFormType, 
+          originalTemplate,
+          newFormType,
           newName
         );
-        
+
         return this.storageService.saveTemplate(clonedTemplate);
       })
     );
   }
 
   /**
-   * Generate PDF from template
+   * Generate PDF from template with enhanced docx support
    */
   generatePdf(request: TemplateGenerationRequest): Observable<void> {
     return this.storageService.getTemplateById(request.templateId).pipe(
@@ -90,8 +90,16 @@ export class TemplateManagementService {
         if (!template) {
           throw new Error('Template not found');
         }
-        
-        return this.pdfService.generatePdf(template, request.formData);
+
+        // Enhanced generation options for docx processing
+        const pdfOptions: PdfGenerationOptions = {
+          filename: request.outputFilename,
+          preserveWordFormatting: request.preserveFormatting ?? template.preserveFormatting,
+          imageQuality: request.imageProcessing?.quality ?? 0.9,
+          fontEmbedding: true
+        };
+
+        return this.pdfService.generatePdf(template, request.formData, pdfOptions);
       })
     );
   }
@@ -105,7 +113,7 @@ export class TemplateManagementService {
         if (!template) {
           throw new Error('Template not found');
         }
-        
+
         if (testData) {
           return this.pdfService.generatePdf(template, testData);
         } else {
@@ -191,7 +199,7 @@ export class TemplateManagementService {
         if (!template) {
           throw new Error('Template not found');
         }
-        
+
         // Create download
         const blob = new Blob([template.content], { type: 'text/plain' });
         const url = window.URL.createObjectURL(blob);

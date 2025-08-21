@@ -1,38 +1,110 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
+import { switchMap, map, catchError } from 'rxjs/operators';
 import { Template, TemplateGenerationRequest, PdfGenerationOptions } from '../models/template.models';
+import { DocxProcessingService } from './docx-processing.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PdfGenerationService {
 
+  constructor(
+    private docxProcessor: DocxProcessingService
+  ) {}
+
   /**
-   * Generate PDF from template and form data
+   * Generate PDF from template and form data with format preservation
    */
   generatePdf(
-    template: Template, 
-    formData: Record<string, any>, 
+    template: Template,
+    formData: Record<string, any>,
+    options?: PdfGenerationOptions
+  ): Observable<void> {
+
+    // Check if we should use docx processing for format preservation
+    if (this.shouldUseDocxProcessing(template)) {
+      console.log('🎯 Using docx library for format preservation');
+      return this.generatePdfWithDocx(template, formData, options);
+    }
+
+    // Fallback to string-based processing (loses formatting)
+    console.log('⚠️ Using fallback string replacement');
+    return this.generatePdfWithStringReplacement(template, formData, options);
+  }
+
+  /**
+   * Generate PDF using docx library (preserves formatting)
+   */
+  private generatePdfWithDocx(
+    template: Template,
+    formData: Record<string, any>,
+    options?: PdfGenerationOptions
+  ): Observable<void> {
+
+    return this.docxProcessor.processDocxTemplate(template, formData).pipe(
+      map(pdfBlob => {
+        const filename = options?.filename || this.generateFilename(template, formData);
+        this.downloadPdfBlob(pdfBlob, filename);
+      }),
+      catchError(error => {
+        console.error('❌ Docx processing failed, falling back to string replacement:', error);
+        return this.generatePdfWithStringReplacement(template, formData, options);
+      })
+    );
+  }
+
+  /**
+   * Generate PDF using string replacement (fallback method)
+   */
+  private generatePdfWithStringReplacement(
+    template: Template,
+    formData: Record<string, any>,
     options?: PdfGenerationOptions
   ): Observable<void> {
     return new Observable(observer => {
       try {
         // Extract and format all form fields
         const formattedData = this.formatFormData(formData);
-        
+
         // Create HTML content from template
         const htmlContent = this.populateTemplate(template, formattedData);
-        
+
         // Generate the PDF
         const filename = options?.filename || this.generateFilename(template, formData);
         this.renderPdf(htmlContent, filename, options);
-        
+
         observer.next();
         observer.complete();
       } catch (error) {
         observer.error(error);
       }
     });
+  }
+
+  /**
+   * Determine if docx processing should be used
+   */
+  private shouldUseDocxProcessing(template: Template): boolean {
+    return !!(
+      template.type === 'word' &&
+      template.preserveFormatting &&
+      (template.originalFile || template.binaryContent)
+    );
+  }
+
+  /**
+   * Download PDF blob to user's device
+   */
+  private downloadPdfBlob(pdfBlob: Blob, filename: string): void {
+    const url = URL.createObjectURL(pdfBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
   /**
@@ -48,7 +120,7 @@ export class PdfGenerationService {
    */
   private formatFormData(data: any, prefix: string = ''): Record<string, string> {
     const formatted: Record<string, string> = {};
-    
+
     if (!data || typeof data !== 'object') {
       return formatted;
     }
@@ -56,7 +128,7 @@ export class PdfGenerationService {
     Object.keys(data).forEach(key => {
       const value = data[key];
       const fieldKey = prefix ? `${prefix}.${key}` : key;
-      
+
       if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
         // Recursively process nested objects
         Object.assign(formatted, this.formatFormData(value, fieldKey));
@@ -168,30 +240,30 @@ export class PdfGenerationService {
               h1, h2, h3 { page-break-after: avoid; color: #000; }
               @page { margin: 20mm; }
             }
-            body { 
-              margin: 20px; 
-              font-family: Arial, sans-serif; 
-              line-height: 1.6; 
+            body {
+              margin: 20px;
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
               color: #333;
               background: white;
             }
-            table { 
-              width: 100%; 
-              border-collapse: collapse; 
-              margin: 10px 0; 
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 10px 0;
               font-size: 12px;
             }
-            th, td { 
-              padding: 8px; 
-              text-align: left; 
-              border: 1px solid #ddd; 
+            th, td {
+              padding: 8px;
+              text-align: left;
+              border: 1px solid #ddd;
               vertical-align: top;
             }
-            th { 
-              background-color: #f2f2f2; 
+            th {
+              background-color: #f2f2f2;
               font-weight: bold;
             }
-            h1, h2, h3 { 
+            h1, h2, h3 {
               color: #1976d2;
               margin-top: 20px;
               margin-bottom: 10px;
@@ -218,9 +290,9 @@ export class PdfGenerationService {
             <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
             <p>Template: ${template.name}</p>
           </div>
-          
+
           ${content}
-          
+
           <div class="footer">
             <p>This document was automatically generated from ${template.formType.toUpperCase()} form submission.</p>
           </div>
@@ -241,7 +313,7 @@ export class PdfGenerationService {
     printWindow.document.write(htmlContent);
     printWindow.document.close();
     printWindow.focus();
-    
+
     // Add delay to ensure content is loaded
     setTimeout(() => {
       printWindow.print();

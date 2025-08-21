@@ -12,7 +12,7 @@
       {{ isRepeatMode ? 'Repeat Request For Quote (RFQ)' : 'Request For Quote (RFQ)' }}
     </h1>
     <p *ngIf="!isRepeatMode">
-      This form demonstrates all available input types using our reusable form component.
+      Complete the form section by section. Click on a section header to expand it - only one section can be open at a time.
     </p>
     <div *ngIf="isRepeatMode" class="repeat-notice">
       <mat-icon>refresh</mat-icon>
@@ -25,7 +25,7 @@
 
   <app-reusable-form
     [sections]="rfqSections"
-    [multi]="true"
+    [multi]="false"
     [formTitle]="isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
     [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
     [initialData]="repeatedSubmissionData"

@@ -9,10 +9,11 @@ import { Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormSubmissionService } from '../../../services/form-submission.service';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-rfq',
-  imports: [CommonModule, ReusableFormComponent, MatIconModule],
+  imports: [CommonModule, ReusableFormComponent, MatIconModule, MatButtonModule],
   templateUrl: './rfq.component.html',
   styleUrl: './rfq.component.css',
 })
@@ -1497,7 +1498,10 @@ export class RfqComponent implements OnInit {
   }
 
   onFormValueChange(event: any) {
-    console.log('Form value changed:', event);
+    // Drastically reduce logging frequency for better performance
+    if (Math.random() < 0.001) { // Only log 0.1% of form changes
+      console.log('Form value changed:', event);
+    }
 
     // You can perform real-time validation or other actions here
     // For example, enable/disable submit button, show live preview, etc.

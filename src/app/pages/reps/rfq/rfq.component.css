@@ -27,6 +27,122 @@
   margin: 0;
 }
 
+/* Enhanced accordion styling for better UX */
+::ng-deep .mat-accordion {
+  margin-bottom: 20px;
+}
+
+::ng-deep .mat-expansion-panel {
+  margin-bottom: 8px !important;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  transition: all 0.3s ease;
+}
+
+::ng-deep .mat-expansion-panel:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+  transform: translateY(-1px);
+}
+
+::ng-deep .mat-expansion-panel.mat-expanded {
+  box-shadow: 0 6px 12px rgba(25, 118, 210, 0.2) !important;
+  border: 2px solid #1976d2;
+}
+
+::ng-deep .mat-expansion-panel-header {
+  padding: 16px 24px !important;
+  background-color: #f8f9fa !important;
+  border-radius: 8px 8px 0 0 !important;
+  transition: background-color 0.3s ease;
+}
+
+::ng-deep .mat-expansion-panel.mat-expanded .mat-expansion-panel-header {
+  background-color: #e3f2fd !important;
+  border-radius: 8px 8px 0 0 !important;
+}
+
+::ng-deep .mat-expansion-panel-header:hover {
+  background-color: #e9ecef !important;
+}
+
+::ng-deep .mat-expansion-panel.mat-expanded .mat-expansion-panel-header:hover {
+  background-color: #bbdefb !important;
+}
+
+::ng-deep .mat-panel-title {
+  font-weight: 600 !important;
+  color: #1976d2 !important;
+  font-size: 1.1rem !important;
+}
+
+::ng-deep .mat-panel-description {
+  color: #666 !important;
+  font-style: italic;
+}
+
+::ng-deep .mat-expansion-panel-content {
+  background-color: white !important;
+  border-radius: 0 0 8px 8px !important;
+}
+
+::ng-deep .mat-expansion-panel-body {
+  padding: 24px !important;
+}
+
+/* Animation for smooth transitions */
+::ng-deep .mat-expansion-panel-content {
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Add visual indicator for accordion behavior */
+::ng-deep .mat-expansion-panel-header .mat-expansion-indicator {
+  transition: transform 0.3s ease;
+}
+
+::ng-deep .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header {
+  cursor: pointer;
+}
+
+::ng-deep .mat-expansion-panel:not(.mat-expanded) .mat-expansion-panel-header::after {
+  content: "Click to expand";
+  font-size: 0.8rem;
+  color: #999;
+  margin-left: auto;
+  font-style: italic;
+}
+
+::ng-deep .mat-expansion-panel.mat-expanded .mat-expansion-panel-header::after {
+  content: "Currently active";
+  font-size: 0.8rem;
+  color: #1976d2;
+  margin-left: auto;
+  font-weight: 500;
+}
+
+/* Subtle animation for panel transitions */
+::ng-deep .mat-expansion-panel {
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* Add slight glow effect to expanded panel */
+::ng-deep .mat-expansion-panel.mat-expanded {
+  position: relative;
+}
+
+::ng-deep .mat-expansion-panel.mat-expanded::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(45deg, #1976d2, #42a5f5);
+  border-radius: 10px;
+  z-index: -1;
+  opacity: 0.1;
+}
+
 .form-info {
   margin-top: 30px;
   padding: 20px;

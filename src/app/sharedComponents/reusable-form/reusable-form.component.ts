@@ -198,6 +198,7 @@ export class ReusableFormComponent implements OnInit, OnChanges {
   @Output() formValueChange = new EventEmitter<any>();
 
   form!: FormGroup;
+  private lastErrorLog: { [key: string]: number } = {}; // Track error logging timestamps
 
   constructor(private fb: FormBuilder) {}
 
@@ -215,13 +216,18 @@ ngOnInit() {
   // Monitor form value changes
   this.form.valueChanges.subscribe((value) => {
     this.formValueChange.emit(value);
-    console.log('Form value changed:', value); // ✅ DEBUG LOG
-    console.log('Form valid after change:', this.isFormValid()); // ✅ DEBUG LOG
+
+    // Drastically reduce logging frequency for better performance
+    if (Math.random() < 0.001) { // Only log 0.1% of changes
+      console.log('Form value changed:', value);
+    }
   });
 
-  // ✅ ADD: Monitor form status changes
+  // Monitor form status changes with minimal logging
   this.form.statusChanges.subscribe((status) => {
-    console.log('Form status changed:', status); // ✅ DEBUG LOG
+    if (Math.random() < 0.001) { // Only log 0.1% of status changes
+      console.log('Form status changed:', status);
+    }
   });
 }
 
@@ -508,7 +514,21 @@ ngOnInit() {
 
       // Check if visible field is valid
       if (control.invalid) {
-        console.log(`Field ${field.name} is invalid:`, control.errors); // ✅ DEBUG LOG
+        // Drastically reduce validation error logging - only log 0.1% of errors with 30s cooldown
+        if (control.errors && Object.keys(control.errors).length > 0) {
+          const errorKey = `${field.name}_validation_error`;
+          const now = Date.now();
+          if (!this.lastErrorLog[errorKey] || (now - this.lastErrorLog[errorKey] > 30000 && Math.random() < 0.001)) {
+            this.lastErrorLog[errorKey] = now;
+
+            console.warn(`⚠️ Field validation error - ${field.name}:`, {
+              label: field.label,
+              type: field.type,
+              value: control.value,
+              errors: control.errors
+            });
+          }
+        }
         return false;
       }
     }

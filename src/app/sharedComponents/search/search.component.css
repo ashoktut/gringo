@@ -1,0 +1,423 @@
+/* Material Design Search Component - Enhanced Implementation */
+
+.search-container {
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  margin: 0 auto;
+}
+
+/* Enhanced Material Design Search Field */
+.search-field {
+  width: 100%;
+  position: relative;
+}
+
+.search-field .mat-mdc-form-field {
+  width: 100%;
+  border-radius: 28px;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
+  overflow: hidden;
+  border: 2px solid rgba(25, 118, 210, 0.08);
+}
+
+.search-field .mat-mdc-form-field:hover {
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.15);
+  border-color: rgba(25, 118, 210, 0.2);
+  transform: translateY(-1px);
+}
+
+.search-field .mat-mdc-form-field.mat-focused {
+  box-shadow: 0 6px 20px rgba(25, 118, 210, 0.2);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+/* Enhanced Text Field Wrapper */
+.search-field .mat-mdc-text-field-wrapper {
+  border-radius: 28px;
+  background: transparent;
+  padding: 8px 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+}
+
+.search-field .mat-mdc-text-field-wrapper:hover {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.02) 0%, rgba(25, 118, 210, 0.05) 100%);
+}
+
+/* Enhanced Notched Outline */
+.search-field .mdc-notched-outline {
+  border: none;
+}
+
+.search-field .mdc-notched-outline__leading,
+.search-field .mdc-notched-outline__trailing,
+.search-field .mdc-notched-outline__notch {
+  border: none;
+  background: transparent;
+}
+
+/* Enhanced Input Styling */
+.search-field .mat-mdc-input-element {
+  padding: 16px 20px;
+  font-size: 1rem;
+  font-weight: 400;
+  color: #333;
+  background: transparent;
+  border: none;
+  outline: none;
+  letter-spacing: 0.01em;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.search-field .mat-mdc-input-element::placeholder {
+  color: rgba(0, 0, 0, 0.6);
+  font-weight: 400;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.search-field .mat-mdc-input-element:focus::placeholder {
+  color: rgba(25, 118, 210, 0.6);
+  transform: translateX(4px);
+}
+
+/* Enhanced Label Styling */
+.search-field .mat-mdc-floating-label {
+  color: rgba(25, 118, 210, 0.8);
+  font-weight: 500;
+  font-size: 1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  letter-spacing: 0.02em;
+}
+
+.search-field .mat-mdc-floating-label.mdc-floating-label--float-above {
+  color: var(--primary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  transform: translateY(-28px) scale(0.9);
+}
+
+/* Enhanced Prefix Icon (Search Icon) */
+.search-field .mat-mdc-form-field-icon-prefix {
+  padding-left: 20px;
+  padding-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.search-field .mat-mdc-form-field-icon-prefix mat-icon {
+  color: var(--primary-color);
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  opacity: 0.8;
+}
+
+.search-field .mat-mdc-form-field.mat-focused .mat-mdc-form-field-icon-prefix mat-icon {
+  color: var(--primary-color);
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Enhanced Suffix Button (Clear Button) */
+.search-field .mat-mdc-form-field-icon-suffix {
+  padding-right: 16px;
+  padding-left: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(25, 118, 210, 0.1);
+  color: var(--primary-color);
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: var(--primary-color);
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform: translate(-50%, -50%);
+  opacity: 0.1;
+}
+
+.search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button:hover {
+  background: rgba(25, 118, 210, 0.15);
+  transform: scale(1.1) rotate(90deg);
+}
+
+.search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button:hover::before {
+  width: 32px;
+  height: 32px;
+}
+
+.search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Enhanced Focus and Error States */
+.search-field .mat-mdc-form-field.mat-form-field-invalid {
+  border-color: #f44336;
+  box-shadow: 0 4px 16px rgba(244, 67, 54, 0.2);
+}
+
+.search-field .mat-mdc-form-field.mat-form-field-invalid .mat-mdc-floating-label {
+  color: #f44336;
+}
+
+.search-field .mat-mdc-form-field.mat-form-field-invalid .mat-mdc-form-field-icon-prefix mat-icon {
+  color: #f44336;
+}
+
+/* Enhanced Animation States */
+.search-field .mat-mdc-form-field {
+  animation: searchFieldEntry 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes searchFieldEntry {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Search Results Hint Animation */
+.search-field .mat-mdc-input-element:focus + .search-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.search-hint {
+  position: absolute;
+  top: 100%;
+  left: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid rgba(25, 118, 210, 0.1);
+  border-radius: 16px;
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  color: rgba(25, 118, 210, 0.8);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.1);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  z-index: 10;
+}
+
+/* Search Variants */
+.search-compact .search-field .mat-mdc-text-field-wrapper {
+  height: 48px;
+}
+
+.search-compact .search-field .mat-mdc-input-element {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+}
+
+.search-large .search-field .mat-mdc-text-field-wrapper {
+  height: 64px;
+}
+
+.search-large .search-field .mat-mdc-input-element {
+  padding: 20px 24px;
+  font-size: 1.125rem;
+}
+
+/* Enhanced Search Suggestions Dropdown */
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid rgba(25, 118, 210, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
+  max-height: 300px;
+  overflow-y: auto;
+  z-index: 1000;
+  animation: dropdownSlideIn 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.search-suggestion {
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  border-bottom: 1px solid rgba(25, 118, 210, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-suggestion:last-child {
+  border-bottom: none;
+}
+
+.search-suggestion:hover {
+  background: linear-gradient(135deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.08) 100%);
+  transform: translateX(4px);
+}
+
+.search-suggestion mat-icon {
+  color: var(--primary-color);
+  opacity: 0.7;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .search-container {
+    max-width: 100%;
+    margin: 0;
+  }
+
+  .search-field .mat-mdc-text-field-wrapper {
+    height: 52px;
+  }
+
+  .search-field .mat-mdc-input-element {
+    padding: 14px 16px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  .search-field .mat-mdc-form-field-icon-prefix {
+    padding-left: 16px;
+  }
+
+  .search-field .mat-mdc-form-field-icon-suffix {
+    padding-right: 12px;
+  }
+
+  .search-hint {
+    left: 16px;
+    right: 16px;
+    font-size: 0.8125rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-field .mat-mdc-form-field {
+    border-radius: 24px;
+  }
+
+  .search-field .mat-mdc-text-field-wrapper {
+    border-radius: 24px;
+    height: 48px;
+  }
+
+  .search-field .mat-mdc-input-element {
+    padding: 12px 14px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .search-field .mat-mdc-form-field {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(144, 202, 249, 0.2);
+  }
+
+  .search-field .mat-mdc-input-element {
+    color: #ffffff;
+  }
+
+  .search-field .mat-mdc-input-element::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .search-field .mat-mdc-floating-label {
+    color: #90caf9;
+  }
+
+  .search-hint,
+  .search-suggestions {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-color: rgba(144, 202, 249, 0.2);
+    color: #90caf9;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .search-field .mat-mdc-form-field {
+    border: 3px solid var(--primary-color);
+  }
+
+  .search-field .mat-mdc-form-field-icon-prefix mat-icon,
+  .search-field .mat-mdc-form-field-icon-suffix mat-icon {
+    color: var(--primary-color);
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .search-field .mat-mdc-form-field,
+  .search-field .mat-mdc-input-element,
+  .search-field .mat-mdc-floating-label,
+  .search-field .mat-mdc-form-field-icon-prefix mat-icon,
+  .search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button,
+  .search-hint,
+  .search-suggestions,
+  .search-suggestion {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Loading State */
+.search-loading .search-field .mat-mdc-form-field-icon-prefix mat-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success State */
+.search-success .search-field .mat-mdc-form-field {
+  border-color: #4caf50;
+  box-shadow: 0 4px 16px rgba(76, 175, 80, 0.2);
+}
+
+.search-success .search-field .mat-mdc-form-field-icon-prefix mat-icon {
+  color: #4caf50;
+}
