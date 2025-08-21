@@ -1,0 +1,525 @@
+/* Material Design Button System - Comprehensive Implementation */
+
+/* Base Button Styles with Material Design Foundation */
+.mat-button-base {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  vertical-align: middle;
+  text-decoration: none;
+  text-align: center;
+  font-family: 'Roboto', 'Helvetica Neue', sans-serif;
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  letter-spacing: 0.02857em;
+  text-transform: uppercase;
+  transition: all 280ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  border-radius: 4px;
+  min-width: 64px;
+  padding: 8px 22px;
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+
+/* Material Design Ripple Effect */
+.mat-button-base::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  pointer-events: none;
+}
+
+.mat-button-base:hover::before {
+  opacity: 0.04;
+}
+
+.mat-button-base:focus::before {
+  opacity: 0.12;
+}
+
+.mat-button-base:active::before {
+  opacity: 0.1;
+}
+
+/* Material Design Button Variants */
+
+/* Text Button - Minimal Material Design */
+.mat-button {
+  color: var(--primary-color);
+  background-color: transparent;
+  box-shadow: none;
+  border-radius: 20px;
+  padding: 10px 24px;
+  font-weight: 500;
+  transition: all 250ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-button:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+  transform: translateY(-1px);
+}
+
+.mat-button:focus {
+  background-color: rgba(25, 118, 210, 0.12);
+}
+
+.mat-button:active {
+  background-color: rgba(25, 118, 210, 0.1);
+  transform: translateY(0);
+}
+
+/* Outlined Button - Enhanced Material Design */
+.mat-outlined-button {
+  color: var(--primary-color);
+  background-color: transparent;
+  border: 2px solid rgba(25, 118, 210, 0.5);
+  box-shadow: none;
+  border-radius: 24px;
+  padding: 10px 28px;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+  transition: all 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-outlined-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.1), transparent);
+  transition: left 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-outlined-button:hover {
+  border-color: var(--primary-color);
+  background-color: rgba(25, 118, 210, 0.04);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+}
+
+.mat-outlined-button:hover::after {
+  left: 100%;
+}
+
+.mat-outlined-button:focus {
+  border-color: var(--primary-color);
+  background-color: rgba(25, 118, 210, 0.08);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.mat-outlined-button:active {
+  background-color: rgba(25, 118, 210, 0.1);
+  transform: translateY(-1px);
+}
+
+/* Raised Button - Premium Material Design */
+.mat-raised-button {
+  color: white;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.2), 0 1px 10px rgba(25, 118, 210, 0.12), 0 4px 5px rgba(25, 118, 210, 0.1);
+  border-radius: 28px;
+  padding: 12px 32px;
+  font-weight: 600;
+  text-transform: none;
+  position: relative;
+  overflow: hidden;
+  transition: all 350ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-raised-button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, transparent 70%);
+  transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.mat-raised-button:hover {
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+  box-shadow: 0 6px 12px rgba(25, 118, 210, 0.3), 0 4px 20px rgba(25, 118, 210, 0.15), 0 8px 10px rgba(25, 118, 210, 0.12);
+  transform: translateY(-3px) scale(1.02);
+}
+
+.mat-raised-button:hover::after {
+  width: 120px;
+  height: 120px;
+}
+
+.mat-raised-button:focus {
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.3), 0 6px 12px rgba(25, 118, 210, 0.3);
+}
+
+.mat-raised-button:active {
+  background: linear-gradient(135deg, #0d47a1 0%, #01579b 100%);
+  transform: translateY(-1px) scale(1.01);
+  box-shadow: 0 4px 8px rgba(25, 118, 210, 0.25);
+}
+
+/* FAB (Floating Action Button) - Material Design Icon Button */
+.mat-fab {
+  color: white;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  padding: 0;
+  box-shadow: 0 3px 5px rgba(25, 118, 210, 0.2), 0 6px 10px rgba(25, 118, 210, 0.14), 0 1px 18px rgba(25, 118, 210, 0.12);
+  transition: all 300ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.mat-fab::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform: translate(-50%, -50%);
+}
+
+.mat-fab:hover {
+  background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+  box-shadow: 0 5px 8px rgba(25, 118, 210, 0.3), 0 8px 16px rgba(25, 118, 210, 0.2), 0 3px 22px rgba(25, 118, 210, 0.15);
+  transform: translateY(-4px) scale(1.1);
+}
+
+.mat-fab:hover::before {
+  width: 80px;
+  height: 80px;
+}
+
+.mat-fab:active {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 3px 6px rgba(25, 118, 210, 0.25);
+}
+
+/* Mini FAB */
+.mat-mini-fab {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+}
+
+/* Icon Button - Subtle Material Design */
+.mat-icon-button {
+  color: var(--primary-color);
+  background-color: transparent;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  padding: 0;
+  box-shadow: none;
+  transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.mat-icon-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: currentColor;
+  border-radius: 50%;
+  transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.mat-icon-button:hover {
+  background-color: rgba(25, 118, 210, 0.04);
+  transform: scale(1.1);
+}
+
+.mat-icon-button:hover::before {
+  width: 48px;
+  height: 48px;
+  opacity: 0.04;
+}
+
+.mat-icon-button:focus {
+  background-color: rgba(25, 118, 210, 0.12);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.mat-icon-button:active {
+  background-color: rgba(25, 118, 210, 0.1);
+  transform: scale(1.05);
+}
+
+/* Button Size Variants */
+.button-small {
+  padding: 6px 16px;
+  font-size: 0.8125rem;
+  min-width: 48px;
+}
+
+.button-large {
+  padding: 12px 36px;
+  font-size: 0.9375rem;
+  min-width: 80px;
+}
+
+.button-extra-large {
+  padding: 16px 48px;
+  font-size: 1rem;
+  min-width: 120px;
+  border-radius: 32px;
+}
+
+/* Color Variants with Enhanced Material Design */
+.button-accent {
+  color: #ff4081;
+}
+
+.mat-raised-button.button-accent {
+  background: linear-gradient(135deg, #ff4081 0%, #e91e63 100%);
+  box-shadow: 0 2px 4px rgba(255, 64, 129, 0.2), 0 1px 10px rgba(255, 64, 129, 0.12);
+}
+
+.mat-raised-button.button-accent:hover {
+  background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+  box-shadow: 0 6px 12px rgba(255, 64, 129, 0.3), 0 4px 20px rgba(255, 64, 129, 0.15);
+}
+
+.button-warn {
+  color: #ff9800;
+}
+
+.mat-raised-button.button-warn {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2), 0 1px 10px rgba(255, 152, 0, 0.12);
+}
+
+.mat-raised-button.button-warn:hover {
+  background: linear-gradient(135deg, #f57c00 0%, #ef6c00 100%);
+  box-shadow: 0 6px 12px rgba(255, 152, 0, 0.3), 0 4px 20px rgba(255, 152, 0, 0.15);
+}
+
+.button-success {
+  color: #4caf50;
+}
+
+.mat-raised-button.button-success {
+  background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2), 0 1px 10px rgba(76, 175, 80, 0.12);
+}
+
+.mat-raised-button.button-success:hover {
+  background: linear-gradient(135deg, #388e3c 0%, #2e7d32 100%);
+  box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3), 0 4px 20px rgba(76, 175, 80, 0.15);
+}
+
+/* Button States - Enhanced Material Design */
+.button-disabled {
+  pointer-events: none;
+  opacity: 0.38;
+  background: #e0e0e0 !important;
+  color: rgba(0, 0, 0, 0.26) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+.button-loading {
+  pointer-events: none;
+  position: relative;
+  color: transparent !important;
+}
+
+.button-loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Enhanced Animations */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* Button Groups - Material Design */
+.button-group {
+  display: inline-flex;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(25, 118, 210, 0.1);
+}
+
+.button-group .mat-button-base {
+  border-radius: 0;
+  border-right: 1px solid rgba(25, 118, 210, 0.12);
+  margin: 0;
+}
+
+.button-group .mat-button-base:last-child {
+  border-right: none;
+}
+
+.button-group .mat-button-base:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.button-group .mat-button-base:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+/* Accessibility Enhancements */
+.mat-button-base:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .mat-button-base {
+    border: 2px solid currentColor;
+  }
+
+  .mat-raised-button {
+    box-shadow: none;
+    border: 2px solid transparent;
+  }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  .mat-button-base {
+    transition: none;
+  }
+
+  .mat-button-base::before,
+  .mat-button-base::after {
+    transition: none;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .mat-button {
+    color: #90caf9;
+  }
+
+  .mat-outlined-button {
+    color: #90caf9;
+    border-color: rgba(144, 202, 249, 0.5);
+  }
+
+  .mat-icon-button {
+    color: #90caf9;
+  }
+}
+
+/* Enhanced Focus Indicators for Accessibility */
+.mat-button-base:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.mat-button-base:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.2);
+}
+
+/* Custom Button Animations */
+.button-pulse {
+  animation: pulse 2s infinite;
+}
+
+.button-bounce:hover {
+  animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+  0%, 20%, 60%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-10px); }
+  80% { transform: translateY(-5px); }
+}
+
+/* Legacy styles preserved for compatibility */
+button {
+  font-family: inherit;
+}
+
+/* Enhanced Material Design responsive button sizing */
+@media (max-width: 768px) {
+  .mat-button-base {
+    padding: 10px 20px;
+    font-size: 0.8125rem;
+  }
+
+  .mat-raised-button {
+    padding: 12px 24px;
+  }
+
+  .mat-fab {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+  }
+
+  .button-extra-large {
+    padding: 14px 36px;
+    font-size: 0.9375rem;
+  }
+}
+
+/* Enhanced touch target sizes for mobile */
+@media (pointer: coarse) {
+  .mat-button-base {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  .mat-icon-button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+}

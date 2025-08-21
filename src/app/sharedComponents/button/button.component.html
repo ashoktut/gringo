@@ -1,8 +1,56 @@
-<button
-  mat-button="filled"
-  [ngClass]="type"
-  [disabled]="disabled"
-  (click)="action.emit()"
->
-  {{ label }}
-</button>
+<ng-container [ngSwitch]="type">
+  <!-- Primary button -->
+  <button *ngSwitchCase="'primary'"
+          mat-raised-button
+          [color]="getColor()"
+          [disabled]="disabled"
+          (click)="action.emit()"
+          class="custom-button btn-primary">
+    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+    {{ label }}
+  </button>
+
+  <!-- Secondary button -->
+  <button *ngSwitchCase="'secondary'"
+          mat-button
+          [color]="getColor()"
+          [disabled]="disabled"
+          (click)="action.emit()"
+          class="custom-button btn-secondary">
+    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+    {{ label }}
+  </button>
+
+  <!-- Tertiary button -->
+  <button *ngSwitchCase="'tertiary'"
+          mat-stroked-button
+          [color]="getColor()"
+          [disabled]="disabled"
+          (click)="action.emit()"
+          class="custom-button btn-tertiary">
+    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+    {{ label }}
+  </button>
+
+  <!-- Success button -->
+  <button *ngSwitchCase="'success'"
+          mat-flat-button
+          [color]="getColor()"
+          [disabled]="disabled"
+          (click)="action.emit()"
+          class="custom-button btn-success">
+    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+    {{ label }}
+  </button>
+
+  <!-- Warning button -->
+  <button *ngSwitchCase="'warning'"
+          mat-raised-button
+          [color]="getColor()"
+          [disabled]="disabled"
+          (click)="action.emit()"
+          class="custom-button btn-warning">
+    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
+    {{ label }}
+  </button>
+</ng-container>

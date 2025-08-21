@@ -1,28 +1,93 @@
 
-<mat-accordion>
-  <mat-expansion-panel
-    (opened)="panelOpenState = false"
-    (closed)="panelOpenState = true"
-  >
-    <mat-expansion-panel-header>
-      <mat-panel-title> Navigation </mat-panel-title>
-      <mat-panel-description>
-        Click to {{ panelOpenState ? "open" : "close" }}
-      </mat-panel-description>
-    </mat-expansion-panel-header>
+<div class="home-container">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <mat-card class="hero-card">
+      <mat-card-content>
+        <div class="hero-content">
+          <h1>Welcome to Gringo</h1>
+          <p>Professional Services Management Platform</p>
+          <p class="hero-description">
+            Streamline your quote requests, manage templates, and track submissions all in one place.
+          </p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
 
-    <mat-nav-list aria-label="Select a form">
-      <ng-container *ngFor="let link of list; trackBy: trackLink">
-        <li
-          [routerLink]="[link.routePath]"
-          style="cursor: pointer"
-          class="mat-list-item"
-        >
-          {{ link.formName }}
-          <mat-divider></mat-divider>
-        </li>
-        <br />
-      </ng-container>
-    </mat-nav-list>
-  </mat-expansion-panel>
-</mat-accordion>
+  <!-- Stats Section -->
+  <div class="stats-section">
+    <mat-grid-list cols="3" rowHeight="120px" gutterSize="16px">
+      <mat-grid-tile *ngFor="let stat of stats">
+        <mat-card class="stat-card" [ngClass]="'stat-' + stat.color">
+          <mat-card-content>
+            <div class="stat-content">
+              <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
+              <div class="stat-info">
+                <h3>{{ stat.value }}</h3>
+                <p>{{ stat.label }}</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+
+  <!-- Quick Actions Section -->
+  <div class="actions-section">
+    <h2>Quick Actions</h2>
+    <mat-grid-list cols="2" rowHeight="200px" gutterSize="16px">
+      <mat-grid-tile *ngFor="let action of quickActions">
+        <mat-card class="action-card" [routerLink]="action.routePath">
+          <mat-card-header>
+            <div mat-card-avatar>
+              <mat-icon class="action-icon" [ngClass]="'icon-' + action.color">
+                {{ action.icon }}
+              </mat-icon>
+            </div>
+            <mat-card-title>{{ action.title }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ action.description }}</p>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-raised-button [color]="action.color" [routerLink]="action.routePath">
+              Get Started
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </mat-grid-tile>
+    </mat-grid-list>
+  </div>
+
+  <!-- Recent Activity Section -->
+  <div class="activity-section">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>history</mat-icon>
+          Recent Activity
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="activity-list">
+          <div class="activity-item" *ngFor="let activity of recentActivity">
+            <mat-icon class="activity-icon">{{ activity.icon }}</mat-icon>
+            <div class="activity-info">
+              <span class="activity-action">{{ activity.action }}</span>
+              <span class="activity-time">{{ activity.time }}</span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-button [routerLink]="'/submissions'">
+          View All
+          <mat-icon>arrow_forward</mat-icon>
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

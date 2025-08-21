@@ -1,17 +1,209 @@
+/* Angular Material Theme - Blue Theme */
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+
 /* MapLibre GL JS CSS - Required for proper map styling */
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
-/* You can add global styles to this file, and also import other style files */
+/* Material Design Custom Theme Variables */
+:root {
+  --primary-color: #1976d2;
+  --primary-variant: #1565c0;
+  --secondary-color: #03dac6;
+  --secondary-variant: #018786;
+  --background: #fafafa;
+  --surface: #ffffff;
+  --error: #b00020;
+  --on-primary: #ffffff;
+  --on-secondary: #000000;
+  --on-background: #000000;
+  --on-surface: #000000;
+  --on-error: #ffffff;
+}
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+/* Global Material Design Base Styles */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--background);
+  color: var(--on-background);
+  overflow-x: hidden;
+}
 
+/* Remove default margins and padding that can cause gaps */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-/* Custom map styling enhancements */
-.maplibregl-popup-content {
-  padding: 12px 16px;
+/* Ensure Angular Material components don't have unwanted spacing */
+.mat-drawer-container,
+.mat-sidenav-container,
+.mat-drawer-content,
+.mat-sidenav-content {
+  margin: 0;
+  padding: 0;
+}
+
+.mat-toolbar {
+  margin: 0;
+  padding: 0 24px;
+}
+
+/* Material Design Typography Scale */
+.mat-display-large {
+  font-size: 3.5rem;
+  font-weight: 400;
+  line-height: 4rem;
+  letter-spacing: -0.25px;
+}
+
+.mat-display-medium {
+  font-size: 2.875rem;
+  font-weight: 400;
+  line-height: 3.25rem;
+  letter-spacing: 0px;
+}
+
+.mat-display-small {
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 2.75rem;
+  letter-spacing: 0px;
+}
+
+.mat-headline-large {
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 2.5rem;
+  letter-spacing: 0px;
+}
+
+.mat-headline-medium {
+  font-size: 1.75rem;
+  font-weight: 400;
+  line-height: 2.25rem;
+  letter-spacing: 0px;
+}
+
+.mat-headline-small {
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 2rem;
+  letter-spacing: 0px;
+}
+
+/* Enhanced Material Design Elevation System */
+.elevation-1 { box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24); }
+.elevation-2 { box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23); }
+.elevation-3 { box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23); }
+.elevation-4 { box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22); }
+.elevation-5 { box-shadow: 0 19px 38px rgba(0,0,0,0.30), 0 15px 12px rgba(0,0,0,0.22); }
+
+/* Material Design Color Utilities */
+.primary-color { color: var(--primary-color) !important; }
+.secondary-color { color: var(--secondary-color) !important; }
+.surface-color { background-color: var(--surface) !important; }
+.primary-bg { background-color: var(--primary-color) !important; color: var(--on-primary) !important; }
+.secondary-bg { background-color: var(--secondary-color) !important; color: var(--on-secondary) !important; }
+
+/* Enhanced Material Design Animations */
+.mat-ripple-unbounded .mat-ripple-element {
+  background-color: rgba(25, 118, 210, 0.1);
+}
+
+/* Material Design Motion - Standard Easing */
+.material-easing {
+  transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.material-easing-decelerate {
+  transition-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1);
+}
+
+.material-easing-accelerate {
+  transition-timing-function: cubic-bezier(0.4, 0.0, 1, 1);
+}
+
+.material-easing-sharp {
+  transition-timing-function: cubic-bezier(0.4, 0.0, 0.6, 1);
+}
+
+/* Global Material Card Enhancements */
+.mat-mdc-card {
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-mdc-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+/* Material Design Button Enhancements */
+.mat-mdc-raised-button, .mat-mdc-unelevated-button {
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-mdc-raised-button:hover, .mat-mdc-unelevated-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+}
+
+/* Material Design Form Field Enhancements */
+.mat-mdc-form-field {
+  margin-bottom: 16px;
+}
+
+.mat-mdc-form-field .mat-mdc-form-field-outline {
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Material Design Expansion Panel Enhancements */
+.mat-expansion-panel {
+  border-radius: 12px !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  overflow: hidden;
+}
+
+.mat-expansion-panel.mat-expanded {
+  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15) !important;
+}
+
+.mat-expansion-panel-header {
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-expansion-panel-header:hover {
+  background-color: rgba(25, 118, 210, 0.04) !important;
+}
+
+/* Custom Blue Gradient Utilities */
+.gradient-primary {
+  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #03dac6 0%, #4fc3f7 100%);
+}
+
+.gradient-surface {
+  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+}
+
+/* Enhanced Map Styling with Material Design */
+.maplibregl-popup-content {
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  border: none;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
 }
 
 .maplibregl-popup-tip {
@@ -20,10 +212,87 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
 .maplibregl-marker {
   cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
-/* Custom styles for map controls */
+.maplibregl-marker:hover {
+  transform: scale(1.1);
+}
+
 .maplibregl-ctrl-group {
-  border-radius: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: none;
+}
+
+.maplibregl-ctrl-group button {
+  border-radius: 0;
+  transition: background-color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+}
+
+/* Material Design Loading States */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading-shimmer 2s infinite;
+}
+
+@keyframes loading-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Material Design State Layers */
+.state-layer-hover {
+  position: relative;
+  overflow: hidden;
+}
+
+.state-layer-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+  pointer-events: none;
+}
+
+.state-layer-hover:hover::before {
+  opacity: 0.04;
+}
+
+.state-layer-hover:focus::before {
+  opacity: 0.08;
+}
+
+.state-layer-hover:active::before {
+  opacity: 0.12;
+}
+
+/* Responsive Material Design Breakpoints */
+@media (max-width: 599px) { /* Mobile */
+  .hide-mobile { display: none !important; }
+  .mat-mdc-card { margin: 8px; }
+  .mat-toolbar { padding: 0 16px; }
+}
+
+@media (min-width: 600px) and (max-width: 959px) { /* Tablet */
+  .hide-tablet { display: none !important; }
+  .mat-mdc-card { margin: 12px; }
+}
+
+@media (min-width: 960px) and (max-width: 1279px) { /* Small Desktop */
+  .hide-small-desktop { display: none !important; }
+}
+
+@media (min-width: 1280px) { /* Large Desktop */
+  .hide-large-desktop { display: none !important; }
 }
