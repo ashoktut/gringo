@@ -15,7 +15,7 @@
 
 .search-field .mat-mdc-form-field {
   width: 100%;
-  border-radius: 28px;
+  border-radius: 16px;
   transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
   box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
@@ -37,10 +37,10 @@
 
 /* Enhanced Text Field Wrapper */
 .search-field .mat-mdc-text-field-wrapper {
-  border-radius: 28px;
+  border-radius: 50px;
   background: transparent;
-  padding: 8px 0;
-  height: 56px;
+  padding: 2px 0;
+  height: 32px;
   display: flex;
   align-items: center;
 }
@@ -63,8 +63,8 @@
 
 /* Enhanced Input Styling */
 .search-field .mat-mdc-input-element {
-  padding: 16px 20px;
-  font-size: 1rem;
+  padding: 6px 12px;
+  font-size: 0.85rem;
   font-weight: 400;
   color: #333;
   background: transparent;
@@ -103,17 +103,17 @@
 
 /* Enhanced Prefix Icon (Search Icon) */
 .search-field .mat-mdc-form-field-icon-prefix {
-  padding-left: 20px;
-  padding-right: 8px;
+  padding-left: 12px;
+  padding-right: 4px;
   display: flex;
   align-items: center;
 }
 
 .search-field .mat-mdc-form-field-icon-prefix mat-icon {
   color: var(--primary-color);
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
   transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   opacity: 0.8;
 }
@@ -126,15 +126,15 @@
 
 /* Enhanced Suffix Button (Clear Button) */
 .search-field .mat-mdc-form-field-icon-suffix {
-  padding-right: 16px;
-  padding-left: 8px;
+  padding-right: 8px;
+  padding-left: 4px;
   display: flex;
   align-items: center;
 }
 
 .search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: rgba(25, 118, 210, 0.1);
   color: var(--primary-color);
@@ -163,8 +163,8 @@
 }
 
 .search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button:hover::before {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
 }
 
 .search-field .mat-mdc-form-field-icon-suffix .mat-mdc-icon-button mat-icon {

@@ -17,49 +17,45 @@
 
   <!-- Stats Section -->
   <div class="stats-section">
-    <mat-grid-list cols="3" rowHeight="120px" gutterSize="16px">
-      <mat-grid-tile *ngFor="let stat of stats">
-        <mat-card class="stat-card" [ngClass]="'stat-' + stat.color">
-          <mat-card-content>
-            <div class="stat-content">
-              <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
-              <div class="stat-info">
-                <h3>{{ stat.value }}</h3>
-                <p>{{ stat.label }}</p>
-              </div>
+    <div class="stats-grid">
+      <mat-card *ngFor="let stat of stats" class="stat-card" [ngClass]="'stat-' + stat.color">
+        <mat-card-content>
+          <div class="stat-content">
+            <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
+            <div class="stat-info">
+              <h3>{{ stat.value }}</h3>
+              <p>{{ stat.label }}</p>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </mat-grid-tile>
-    </mat-grid-list>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 
   <!-- Quick Actions Section -->
   <div class="actions-section">
     <h2>Quick Actions</h2>
-    <mat-grid-list cols="2" rowHeight="200px" gutterSize="16px">
-      <mat-grid-tile *ngFor="let action of quickActions">
-        <mat-card class="action-card" [routerLink]="action.routePath">
-          <mat-card-header>
-            <div mat-card-avatar>
-              <mat-icon class="action-icon" [ngClass]="'icon-' + action.color">
-                {{ action.icon }}
-              </mat-icon>
-            </div>
-            <mat-card-title>{{ action.title }}</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <p>{{ action.description }}</p>
-          </mat-card-content>
-          <mat-card-actions align="end">
-            <button mat-raised-button [color]="action.color" [routerLink]="action.routePath">
-              Get Started
-              <mat-icon>arrow_forward</mat-icon>
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </mat-grid-tile>
-    </mat-grid-list>
+    <div class="actions-grid">
+      <mat-card *ngFor="let action of quickActions" class="action-card" [routerLink]="action.routePath">
+        <mat-card-header>
+          <div mat-card-avatar>
+            <mat-icon class="action-icon" [ngClass]="'icon-' + action.color">
+              {{ action.icon }}
+            </mat-icon>
+          </div>
+          <mat-card-title>{{ action.title }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ action.description }}</p>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-raised-button [color]="action.color" [routerLink]="action.routePath">
+            Get Started
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
   </div>
 
   <!-- Recent Activity Section -->
