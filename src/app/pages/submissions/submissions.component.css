@@ -1,0 +1,33 @@
+/* submissions.component.css - custom styles for submissions page */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-actions app-search {
+  flex: 1;
+}
+
+.header-actions button[mat-raised-button] {
+  height: 56px;
+  min-width: 120px;
+  border-radius: 28px;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.08);
+}
+
+/* .header-actions .search-field .mat-mdc-input-element {
+  border-radius: 28px !important;
+  height: 56px;
+  line-height: 56px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.header-actions .search-field .mat-mdc-text-field-wrapper {
+  height: 56px;
+  border-radius: 28px;
+} */

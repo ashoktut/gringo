@@ -47,7 +47,7 @@ export class RfqComponent implements OnInit {
     {
       // Quote timeline section
       title: 'Quote Timeline',
-      description: 'Set a realistic timeline ',
+      description: '',
       expanded: true,
       fields: [
         // Timeline guidance label
@@ -85,7 +85,7 @@ export class RfqComponent implements OnInit {
     {
       // Rep details section
       title: 'Rep Details',
-      description: 'Rep info & email recipients',
+      description: '',
       fields: [
         // Information label
         {
@@ -139,7 +139,7 @@ export class RfqComponent implements OnInit {
     // Roof timeline section
     {
       title: 'Roof Timeline',
-      description: 'ABK and P&G info',
+      description: '',
       fields: [
         // Timeline explanation label
         {
