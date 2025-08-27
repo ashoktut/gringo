@@ -249,32 +249,63 @@ export class PictureUploadComponent implements OnInit, OnDestroy, ControlValueAc
 
   private processFile(file: File): void {
     this.isProcessing = true;
-
     const reader = new FileReader();
     reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas and draw image
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          this.isProcessing = false;
+          this.showError('Error processing image');
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
 
-      this.pictureData = {
-        file,
-        dataUrl,
-        name: file.name,
-        size: file.size,
-        type: file.type
+        // Compress to JPEG
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            this.isProcessing = false;
+            this.showError('Error compressing image');
+            return;
+          }
+          const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, '') + '.jpg', { type: 'image/jpeg' });
+          const compressedReader = new FileReader();
+          compressedReader.onload = (ev) => {
+            const dataUrl = ev.target?.result as string;
+            this.pictureData = {
+              file: compressedFile,
+              dataUrl,
+              name: compressedFile.name,
+              size: compressedFile.size,
+              type: compressedFile.type
+            };
+            this.onChange(this.pictureData);
+            this.onTouched();
+            this.pictureSelected.emit(this.pictureData);
+            this.isProcessing = false;
+            this.showSuccess('Picture uploaded and compressed');
+          };
+          compressedReader.onerror = () => {
+            this.isProcessing = false;
+            this.showError('Error reading compressed image');
+          };
+          compressedReader.readAsDataURL(compressedFile);
+        }, 'image/jpeg', 0.8);
       };
-
-      this.onChange(this.pictureData);
-      this.onTouched();
-      this.pictureSelected.emit(this.pictureData);
-      this.isProcessing = false;
-
-      this.showSuccess('Picture uploaded successfully');
+      img.onerror = () => {
+        this.isProcessing = false;
+        this.showError('Error loading image');
+      };
+      img.src = e.target?.result as string;
     };
-
     reader.onerror = () => {
       this.isProcessing = false;
       this.showError('Error reading file');
     };
-
     reader.readAsDataURL(file);
   }
 

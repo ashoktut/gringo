@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { SidenavService } from '../../services/sidenav.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,6 +19,10 @@ import { RouterModule } from '@angular/router';
   styleUrl: './home.component.css'
 })
 export class HomeComponent {
+  constructor(private sidenavService: SidenavService) {}
+  toggleSidenav() {
+    this.sidenavService.toggle();
+  }
   quickActions = [
     {
       "title": "Create RFQ",

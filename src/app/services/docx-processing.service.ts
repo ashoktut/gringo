@@ -1,18 +1,17 @@
 import { Injectable } from '@angular/core';
 import { Observable, from, forkJoin } from 'rxjs';
 import { map, switchMap, tap } from 'rxjs/operators';
-import { Template, TemplateGenerationRequest, DocxProcessingOptions, ImageProcessingOptions } from '../models/template.models';
+import {
+  Template,
+  TemplateGenerationRequest,
+  DocxProcessingOptions,
+  ImageProcessingOptions,
+} from '../models/template.models';
 import { HttpClient } from '@angular/common/http';
 
 // Import pizzip and docxtemplater properly for bundling
-import PizZip from 'pizzip';
-import Docxtemplater from 'docxtemplater';
-
-// Remove the async loader since we're importing directly
-console.log('📚 Libraries loaded:', {
-  PizZip: !!PizZip,
-  Docxtemplater: !!Docxtemplater
-});
+import * as mammoth from 'mammoth';
+import html2pdf from 'html2pdf.js';
 
 export interface RfqProcessingResult {
   pdfBlob: Blob;
@@ -27,10 +26,9 @@ export interface RfqProcessingResult {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class DocxProcessingService {
-
   constructor(private http: HttpClient) {}
 
   /**
@@ -49,20 +47,21 @@ export class DocxProcessingService {
     clientEmail: string,
     options?: DocxProcessingOptions
   ): Observable<RfqProcessingResult> {
-
     const submissionId = this.generateSubmissionId(formData);
-    const filename = `RFQ-${submissionId}-${formData['clientName']?.replace(/\s+/g, '-') || 'Client'}.pdf`;
+    const filename = `RFQ-${submissionId}-${
+      formData['clientName']?.replace(/\s+/g, '-') || 'Client'
+    }.pdf`;
 
     console.log('🚀 Starting RFQ processing pipeline:', {
       templateName: template.name,
       submissionId,
       filename,
       hasTemplate: !!template.originalFile || !!template.binaryContent,
-      formDataKeys: Object.keys(formData)
+      formDataKeys: Object.keys(formData),
     });
 
     return this.processDocxTemplate(template, formData, options).pipe(
-      switchMap(pdfBlob => {
+      switchMap((pdfBlob) => {
         console.log('📄 PDF generated, starting distribution pipeline...');
 
         // Execute all operations in parallel
@@ -71,17 +70,23 @@ export class DocxProcessingService {
           downloadUrl: this.createDownloadUrl(pdfBlob, filename),
 
           // 2. Send emails
-          emailStatus: this.sendRfqEmails(pdfBlob, formData, recipients, clientEmail, filename),
+          emailStatus: this.sendRfqEmails(
+            pdfBlob,
+            formData,
+            recipients,
+            clientEmail,
+            filename
+          ),
 
           // 3. Upload to Google Drive
           googleDriveUrl: this.uploadToGoogleDrive(pdfBlob, filename, formData),
 
           // 4. Save to server
-          serverPath: this.saveToServer(pdfBlob, filename, submissionId)
+          serverPath: this.saveToServer(pdfBlob, filename, submissionId),
         }).pipe(
-          map(results => ({
+          map((results) => ({
             pdfBlob,
-            ...results
+            ...results,
           }))
         );
       })
@@ -96,43 +101,70 @@ export class DocxProcessingService {
     formData: Record<string, any>,
     options?: DocxProcessingOptions
   ): Observable<Blob> {
-
-    console.log('📄 Processing docx template:', {
+    console.log('📄 Processing docx template (new HTML flow):', {
       templateId: template.id,
       templateName: template.name,
       hasOriginalFile: !!template.originalFile,
       hasBinaryContent: !!template.binaryContent,
-      binaryContentSize: template.binaryContent ? template.binaryContent.byteLength : 0,
-      formDataFields: Object.keys(formData).length
+      binaryContentSize: template.binaryContent
+        ? template.binaryContent.byteLength
+        : 0,
+      formDataFields: Object.keys(formData).length,
     });
 
     if (!template.originalFile && !template.binaryContent) {
-      throw new Error('Template must have originalFile or binaryContent for docx processing');
+      throw new Error(
+        'Template must have originalFile or binaryContent for docx processing'
+      );
     }
 
-    const processingOptions: DocxProcessingOptions = {
-      preserveStyles: true,
-      preserveImages: true,
-      preserveTables: true,
-      preserveHeaders: true,
-      preserveFooters: true,
-      imageQuality: 0.9,
-      outputFormat: 'pdf', // ✅ PDF output
-      ...options
-    };
-
     return this.loadDocumentBinary(template).pipe(
-      switchMap(arrayBuffer => this.processAndConvertToPdf(arrayBuffer, formData, processingOptions))
+      switchMap(async (arrayBuffer) => {
+        // 1. Convert DOCX to HTML with mammoth
+        const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
+        // 2. Interpolate placeholders in HTML
+        const interpolatedHtml = this.interpolateHtmlPlaceholders(html, formData);
+        // 3. Convert HTML to PDF using html2pdf.js
+        const pdfBlob = await this.htmlToPdfBlob(interpolatedHtml);
+        return pdfBlob;
+      })
     );
+  }
+
+  /**
+   * Interpolate {{placeholders}} in HTML with formData values
+   */
+  private interpolateHtmlPlaceholders(html: string, data: Record<string, any>): string {
+    return html.replace(/{{(\w+)}}/g, (match, key) => {
+      return data[key] !== undefined ? String(data[key]) : '';
+    });
+  }
+
+  /**
+   * Convert HTML string to PDF Blob using html2pdf.js
+   */
+  private async htmlToPdfBlob(html: string): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+      const element = document.createElement('div');
+      element.innerHTML = html;
+      html2pdf()
+        .from(element)
+        .outputPdf('blob')
+        .then((blob: Blob) => resolve(blob))
+        .catch(reject);
+    });
   }
 
   /**
    * Load document as ArrayBuffer for processing
    */
   private loadDocumentBinary(template: Template): Observable<ArrayBuffer> {
-    return new Observable(observer => {
+    return new Observable((observer) => {
       if (template.binaryContent) {
-        console.log('📁 Using template binary content, size:', template.binaryContent.byteLength);
+        console.log(
+          '📁 Using template binary content, size:',
+          template.binaryContent.byteLength
+        );
 
         try {
           // Ensure we have a proper ArrayBuffer
@@ -143,23 +175,37 @@ export class DocxProcessingService {
           } else {
             // Convert to proper ArrayBuffer if it's a Uint8Array or similar
             const uint8Array = new Uint8Array(template.binaryContent);
-            arrayBuffer = uint8Array.buffer.slice(uint8Array.byteOffset, uint8Array.byteOffset + uint8Array.byteLength);
+            arrayBuffer = uint8Array.buffer.slice(
+              uint8Array.byteOffset,
+              uint8Array.byteOffset + uint8Array.byteLength
+            );
           }
 
           // ✅ FIXED: Validate this is a Word document FIRST
           if (!this.validateWordDocument(arrayBuffer)) {
-            observer.error(new Error('Template is not a valid Word document (.docx file required)'));
+            observer.error(
+              new Error(
+                'Template is not a valid Word document (.docx file required)'
+              )
+            );
             return;
           }
 
-          console.log('✅ Valid Word document detected, proceeding with docx processing');
+          console.log(
+            '✅ Valid Word document detected, proceeding with docx processing'
+          );
           observer.next(arrayBuffer);
           observer.complete();
           return;
-
         } catch (error) {
           console.error('❌ Error processing binary content:', error);
-          observer.error(new Error(`Failed to process template binary content: ${error instanceof Error ? error.message : String(error)}`));
+          observer.error(
+            new Error(
+              `Failed to process template binary content: ${
+                error instanceof Error ? error.message : String(error)
+              }`
+            )
+          );
           return;
         }
       }
@@ -171,7 +217,11 @@ export class DocxProcessingService {
 
           // ✅ FIXED: Validate Word document for file uploads too
           if (!this.validateWordDocument(arrayBuffer)) {
-            observer.error(new Error('Uploaded file is not a valid Word document (.docx file required)'));
+            observer.error(
+              new Error(
+                'Uploaded file is not a valid Word document (.docx file required)'
+              )
+            );
             return;
           }
 
@@ -179,7 +229,8 @@ export class DocxProcessingService {
           observer.next(arrayBuffer);
           observer.complete();
         };
-        reader.onerror = () => observer.error(new Error('Failed to read template file'));
+        reader.onerror = () =>
+          observer.error(new Error('Failed to read template file'));
         reader.readAsArrayBuffer(template.originalFile);
         return;
       }
@@ -191,68 +242,7 @@ export class DocxProcessingService {
   /**
    * Process document and convert directly to PDF
    */
-  private processAndConvertToPdf(
-    arrayBuffer: ArrayBuffer,
-    formData: Record<string, any>,
-    options: DocxProcessingOptions
-  ): Observable<Blob> {
-    return from(this.processDocxToPdf(arrayBuffer, formData, options));
-  }
-
-  /**
-   * Enhanced docx to PDF processing - FIXED VERSION
-   */
-  private async processDocxToPdf(
-    arrayBuffer: ArrayBuffer,
-    formData: Record<string, any>,
-    options: DocxProcessingOptions
-  ): Promise<Blob> {
-
-    try {
-      console.log('🔄 Processing Word template to PDF with RFQ data');
-
-      // ✅ FIXED: Proper Word document loading and processing
-      // 1. Load and parse the Word document using docxtemplater
-      const document = await this.loadDocxDocument(arrayBuffer);
-
-      // 2. Process RFQ placeholders with proper error handling
-      const processedData = this.preprocessRfqData(formData);
-      console.log('📊 Template data being applied:', processedData);
-
-      // 3. Replace placeholders in the Word document
-      document.setData(processedData);
-      document.render();
-
-      // 4. Get the processed Word document as buffer
-      const processedDocxBuffer = document.getZip().generate({
-        type: "arraybuffer",
-        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      });
-
-      console.log('✅ Word template processed successfully, size:', processedDocxBuffer.byteLength);
-
-      // 5. Convert the processed Word document to PDF
-      const pdfBlob = await this.convertToPdfWithFormatting(document, formData, options);
-
-      console.log('✅ PDF generated successfully, size:', pdfBlob.size, 'bytes');
-      return pdfBlob;
-
-    } catch (error) {
-      console.error('❌ Error processing docx to PDF:', error);
-
-      // ✅ FIXED: Better error handling - don't silently fallback
-      if (error instanceof Error && 'properties' in error) {
-        const props = (error as any).properties;
-        console.error('📋 Docxtemplater error details:', {
-          id: props.id,
-          explanation: props.explanation,
-          scope: props.scope
-        });
-      }
-
-      throw new Error(`Word template processing failed: ${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
+  // ...existing code...
 
   /**
    * Process document using docx library
@@ -262,7 +252,6 @@ export class DocxProcessingService {
     formData: Record<string, any>,
     options: DocxProcessingOptions
   ): Observable<Blob> {
-
     return from(this.processDocxDocument(arrayBuffer, formData, options));
   }
 
@@ -274,7 +263,6 @@ export class DocxProcessingService {
     formData: Record<string, any>,
     options: DocxProcessingOptions
   ): Promise<Blob> {
-
     try {
       // Note: This is a conceptual implementation
       // You'll need to install and import the actual docx library
@@ -289,7 +277,11 @@ export class DocxProcessingService {
 
       // 3. Process image placeholders
       if (options.preserveImages) {
-        await this.replaceImagePlaceholders(document, formData, options.imageQuality || 80);
+        await this.replaceImagePlaceholders(
+          document,
+          formData,
+          options.imageQuality || 80
+        );
       }
 
       // 4. Process table placeholders
@@ -299,107 +291,53 @@ export class DocxProcessingService {
 
       // 5. Convert to PDF or return as docx
       return await this.convertDocumentToPdf(document);
-
     } catch (error) {
       console.error('Error processing docx document:', error);
-      throw new Error(`Docx processing failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `Docx processing failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
   /**
    * Replace all placeholders in document with enhanced debugging
    */
-  private async replaceAllPlaceholders(
-    document: any,
-    processedData: Record<string, any>,
-    options: DocxProcessingOptions
-  ): Promise<void> {
-
-    try {
-      console.log('🔄 Replacing placeholders in Word document...');
-      console.log('📊 Template data summary:');
-      console.log(`  - Total fields: ${Object.keys(processedData).length}`);
-
-      // Log key fields for debugging
-      const keyFields = ['clientName', 'companyName', 'standNum', 'repName', 'clientEmail', 'dateSubmitted', 'dateDue'];
-      keyFields.forEach(field => {
-        if (processedData[field]) {
-          console.log(`  - ${field}: "${processedData[field]}"`);
-        }
-      });
-
-      // Show all available data fields
-      console.log('📋 All available template variables:');
-      Object.entries(processedData).forEach(([key, value]) => {
-        const preview = String(value).length > 50 ? String(value).substring(0, 50) + '...' : String(value);
-        console.log(`  {{${key}}} = "${preview}"`);
-      });
-
-      // Check if this is a fallback document
-      if (document.isFallback) {
-        console.warn('⚠️ Using fallback document - template processing will be skipped');
-        return;
-      }
-
-      // Set the template variables using docxtemplater
-      document.setData(processedData);
-
-      // Render the document (replace all variables)
-      document.render();
-
-      console.log('✅ All placeholders replaced successfully');
-      console.log('💡 Template processed with docxtemplater - placeholders like {{clientName}}, {{companyName}}, etc. should now be populated');
-
-    } catch (error: any) {
-      console.error('❌ Error replacing placeholders:', error);
-
-      // Enhanced error reporting for docxtemplater
-      if (error.properties) {
-        console.error('🔍 Template processing details:');
-
-        if (error.properties.errors instanceof Array) {
-          error.properties.errors.forEach((err: any, index: number) => {
-            console.error(`  Error ${index + 1}:`, {
-              message: err.message,
-              properties: err.properties
-            });
-          });
-        }
-
-        if (error.properties.id) {
-          console.error(`  Error type: ${error.properties.id}`);
-        }
-
-        if (error.properties.explanation) {
-          console.error(`  Explanation: ${error.properties.explanation}`);
-        }
-      }
-
-      // Don't throw error, continue with form-data-only processing
-      console.warn('⚠️ Template processing failed, continuing with form-data-only PDF generation');
-    }
-  }
+  // Deprecated docxtemplater placeholder replacement removed.
+  // This method is now obsolete and should not be used.
 
   /**
    * Enhanced PDF conversion with proper formatting - FIXED VERSION
    */
-  private async convertToPdfWithFormatting(document: any, formData: Record<string, any>, options: DocxProcessingOptions): Promise<Blob> {
-
+  private async convertToPdfWithFormatting(
+    document: any,
+    formData: Record<string, any>,
+    options: DocxProcessingOptions
+  ): Promise<Blob> {
     try {
       console.log('🔄 Converting processed Word document to PDF...');
 
       // Get the processed Word document as a buffer
       const processedDocxBuffer = document.getZip().generate({
-        type: "arraybuffer",
-        mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        type: 'arraybuffer',
+        mimeType:
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       });
 
-      console.log('📄 Processed Word document size:', processedDocxBuffer.byteLength);
+      console.log(
+        '📄 Processed Word document size:',
+        processedDocxBuffer.byteLength
+      );
 
       // ✅ FIXED: Try server-side conversion first (preserves formatting)
       if (this.hasServerPdfService()) {
         console.log('🔄 Attempting server-side PDF conversion...');
-        return await this.serverSidePdfConversion(processedDocxBuffer, formData, options);
+        return await this.serverSidePdfConversion(
+          processedDocxBuffer,
+          formData,
+          options
+        );
       }
 
       // ✅ FIXED: For now, return the processed Word document
@@ -408,43 +346,62 @@ export class DocxProcessingService {
       console.log('💡 Returning processed Word document instead');
 
       return new Blob([processedDocxBuffer], {
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       });
-
     } catch (error) {
       console.error('❌ Error converting to PDF:', error);
-      throw new Error(`PDF conversion failed: ${error instanceof Error ? error.message : String(error)}`);
+      throw new Error(
+        `PDF conversion failed: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
     }
   }
 
   /**
    * Server-side PDF conversion (recommended for quality) - FIXED VERSION
    */
-  private async serverSidePdfConversion(processedDocxBuffer: ArrayBuffer, formData: Record<string, any>, options: DocxProcessingOptions): Promise<Blob> {
-
+  private async serverSidePdfConversion(
+    processedDocxBuffer: ArrayBuffer,
+    formData: Record<string, any>,
+    options: DocxProcessingOptions
+  ): Promise<Blob> {
     const formData_req = new FormData();
-    formData_req.append('document', new Blob([processedDocxBuffer], {
-      type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    }), 'processed-template.docx');
+    formData_req.append(
+      'document',
+      new Blob([processedDocxBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      }),
+      'processed-template.docx'
+    );
 
-    formData_req.append('options', JSON.stringify({
-      format: 'pdf',
-      quality: 'high',
-      preserveFormatting: true,
-      embedFonts: true,
-      optimizeForPrint: true
-    }));
+    formData_req.append(
+      'options',
+      JSON.stringify({
+        format: 'pdf',
+        quality: 'high',
+        preserveFormatting: true,
+        embedFonts: true,
+        optimizeForPrint: true,
+      })
+    );
 
     try {
-      console.log('🔄 Sending processed Word document to server for PDF conversion...');
+      console.log(
+        '🔄 Sending processed Word document to server for PDF conversion...'
+      );
 
-      const response = await this.http.post('/api/documents/convert-to-pdf', formData_req, {
-        responseType: 'blob'
-      }).toPromise() as Blob;
+      const response = (await this.http
+        .post('/api/documents/convert-to-pdf', formData_req, {
+          responseType: 'blob',
+        })
+        .toPromise()) as Blob;
 
-      console.log('✅ Server-side PDF conversion successful, size:', response.size);
+      console.log(
+        '✅ Server-side PDF conversion successful, size:',
+        response.size
+      );
       return response;
-
     } catch (error) {
       console.error('❌ Server-side PDF conversion failed:', error);
       throw new Error('Server-side PDF conversion service unavailable');
@@ -454,8 +411,11 @@ export class DocxProcessingService {
   /**
    * Client-side PDF conversion fallback
    */
-  private async clientSidePdfConversion(processedDocxBuffer: ArrayBuffer, formData: Record<string, any>, options: DocxProcessingOptions): Promise<Blob> {
-
+  private async clientSidePdfConversion(
+    processedDocxBuffer: ArrayBuffer,
+    formData: Record<string, any>,
+    options: DocxProcessingOptions
+  ): Promise<Blob> {
     console.log('🔄 Converting to PDF using client-side conversion...');
 
     try {
@@ -464,7 +424,6 @@ export class DocxProcessingService {
 
       console.log('✅ Client-side PDF generated successfully');
       return pdfContent;
-
     } catch (error) {
       console.error('❌ Error in client-side PDF conversion:', error);
 
@@ -490,8 +449,11 @@ Generated: ${new Date().toISOString()}`;
   /**
    * Create download URL for immediate download
    */
-  private createDownloadUrl(pdfBlob: Blob, filename: string): Observable<string> {
-    return new Observable(observer => {
+  private createDownloadUrl(
+    pdfBlob: Blob,
+    filename: string
+  ): Observable<string> {
+    return new Observable((observer) => {
       const url = URL.createObjectURL(pdfBlob);
 
       // Trigger automatic download
@@ -515,23 +477,24 @@ Generated: ${new Date().toISOString()}`;
     recipients: string[],
     clientEmail: string,
     filename: string
-  ): Observable<{sent: boolean; recipients: string[]; error?: string}> {
-
-    const allRecipients = [...recipients, clientEmail].filter(email => email && email.trim());
+  ): Observable<{ sent: boolean; recipients: string[]; error?: string }> {
+    const allRecipients = [...recipients, clientEmail].filter(
+      (email) => email && email.trim()
+    );
 
     if (allRecipients.length === 0) {
-      return new Observable(observer => {
+      return new Observable((observer) => {
         observer.next({
           sent: false,
           recipients: [],
-          error: 'No email recipients provided'
+          error: 'No email recipients provided',
         });
         observer.complete();
       });
     }
 
     // Convert blob to base64 for email attachment
-    return new Observable(observer => {
+    return new Observable((observer) => {
       const reader = new FileReader();
       reader.onload = () => {
         const base64Content = (reader.result as string).split(',')[1];
@@ -543,8 +506,8 @@ Generated: ${new Date().toISOString()}`;
           attachment: {
             filename: filename,
             content: base64Content,
-            contentType: 'application/pdf'
-          }
+            contentType: 'application/pdf',
+          },
         };
 
         // Mock email sending - replace with actual email service
@@ -561,7 +524,7 @@ Generated: ${new Date().toISOString()}`;
         observer.next({
           sent: false,
           recipients: allRecipients,
-          error: 'Failed to process PDF for email'
+          error: 'Failed to process PDF for email',
         });
         observer.complete();
       };
@@ -577,7 +540,6 @@ Generated: ${new Date().toISOString()}`;
     filename: string,
     formData: Record<string, any>
   ): Observable<string> {
-
     const driveData = {
       file: pdfBlob,
       filename: filename,
@@ -588,13 +550,13 @@ Generated: ${new Date().toISOString()}`;
           submissionId: this.generateSubmissionId(formData),
           clientName: formData['clientName'],
           repName: formData['repName'],
-          submissionDate: new Date().toISOString()
-        }
-      }
+          submissionDate: new Date().toISOString(),
+        },
+      },
     };
 
     // Mock Google Drive upload - replace with actual Google Drive API
-    return new Observable(observer => {
+    return new Observable((observer) => {
       console.log('☁️ Uploading to Google Drive:', filename);
       setTimeout(() => {
         const driveUrl = `https://drive.google.com/file/d/mock-file-id-${Date.now()}/view`;
@@ -612,7 +574,6 @@ Generated: ${new Date().toISOString()}`;
     filename: string,
     submissionId: string
   ): Observable<string> {
-
     const serverData = {
       file: pdfBlob,
       filename: filename,
@@ -620,12 +581,12 @@ Generated: ${new Date().toISOString()}`;
       metadata: {
         submissionId: submissionId,
         createdAt: new Date().toISOString(),
-        fileSize: pdfBlob.size
-      }
+        fileSize: pdfBlob.size,
+      },
     };
 
     // Mock server storage - replace with actual file upload service
-    return new Observable(observer => {
+    return new Observable((observer) => {
       console.log('💾 Saving to server:', filename);
       setTimeout(() => {
         const serverPath = `/uploads/rfq-submissions/${new Date().getFullYear()}/${this.getMonthName()}/${filename}`;
@@ -642,7 +603,6 @@ Generated: ${new Date().toISOString()}`;
     document: any,
     formData: Record<string, any>
   ): Promise<void> {
-
     console.log('🔧 Processing special RFQ placeholders');
 
     // Handle basic form data placeholders only
@@ -653,7 +613,7 @@ Generated: ${new Date().toISOString()}`;
       '{{DRAWING_SECTION}}': 'Drawings processed',
       '{{SUBMISSION_SUMMARY}}': 'Summary processed',
       '{{RFQ_TIMELINE}}': 'Timeline processed',
-      '{{CONTACT_INFO}}': 'Contact info processed'
+      '{{CONTACT_INFO}}': 'Contact info processed',
     };
 
     Object.entries(specialPlaceholders).forEach(([placeholder, content]) => {
@@ -714,84 +674,7 @@ Generated: ${new Date().toISOString()}`;
     return count;
   }
 
-  private async loadDocxDocument(arrayBuffer: ArrayBuffer): Promise<any> {
-    try {
-      console.log('📄 Loading and parsing Word document...');
-
-      // Libraries are now directly imported
-      if (!PizZip || !Docxtemplater) {
-        throw new Error('Required libraries (pizzip/docxtemplater) are not available');
-      }
-
-      // Validate array buffer
-      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-        throw new Error('Invalid or empty document buffer');
-      }
-
-      console.log('📊 Document buffer size:', arrayBuffer.byteLength, 'bytes');
-
-      // Validate this is actually a Word document
-      if (!this.validateWordDocument(arrayBuffer)) {
-        throw new Error('Template is not a valid Word document (.docx file required)');
-      }
-
-      // ✅ FIX: Check and repair template placeholders before processing
-      const repairedArrayBuffer = await this.repairTemplatePlaceholders(arrayBuffer);
-
-      // Create a PizZip instance with the repaired array buffer
-      const zip = new PizZip(repairedArrayBuffer);
-
-      // Create docxtemplater instance with better error handling
-      const doc = new Docxtemplater(zip, {
-        paragraphLoop: true,
-        linebreaks: true,
-        errorLogging: false, // Disable to prevent console spam
-        nullGetter: (part: any) => {
-          // Return empty string for missing variables instead of throwing
-          console.log(`🔍 Missing placeholder: ${part.value}`);
-          return '';
-        },
-        parser: (tag: string) => {
-          // Custom parser to handle placeholder format
-          return {
-            get: (scope: any) => {
-              const value = scope[tag];
-              if (value !== undefined) {
-                console.log(`✅ Found placeholder: ${tag} = ${value}`);
-                return value;
-              }
-              console.log(`⚠️ Missing placeholder: ${tag}`);
-              return '';
-            }
-          };
-        }
-      });
-
-      console.log('✅ Word document loaded successfully');
-      return doc;
-
-    } catch (error) {
-      console.error('❌ Error loading Word document:', {
-        message: error instanceof Error ? error.message : String(error),
-        arrayBufferSize: arrayBuffer?.byteLength || 0,
-        hasLibraries: !!(PizZip && Docxtemplater)
-      });
-
-      // ✅ FIX: Handle template errors gracefully
-      if (error instanceof Error && 'properties' in error) {
-        const props = (error as any).properties;
-        console.error('📋 Template error details:', props);
-
-        // If it's a template parsing error, try to fix it
-        if (props.id === 'multi_error' || props.id === 'duplicate_open_tag' || props.id === 'duplicate_close_tag') {
-          console.log('🔧 Attempting to repair template and retry...');
-          return await this.loadDocxDocumentWithRepair(arrayBuffer);
-        }
-      }
-
-      throw error; // Don't fallback silently - we need to fix the root cause
-    }
-  }
+  // ...existing code...
 
   /**
    * Replace text placeholders while preserving formatting
@@ -800,7 +683,6 @@ Generated: ${new Date().toISOString()}`;
     document: any,
     formData: Record<string, any>
   ): Promise<void> {
-
     console.log('🔄 Processing text placeholders with formatting preservation');
 
     // RFQ-specific field processing
@@ -809,11 +691,8 @@ Generated: ${new Date().toISOString()}`;
     console.log('📊 Template data to be applied:', processedData);
 
     try {
-      // Use docxtemplater's setData method to replace all placeholders
-      document.setData(processedData);
-
-      // Render the document with the data
-      document.render();
+  // Use docxtemplater's new API to replace all placeholders
+  document.render(processedData);
 
       console.log('✅ Template placeholders processed successfully');
     } catch (error) {
@@ -826,7 +705,7 @@ Generated: ${new Date().toISOString()}`;
           id: props.id,
           explanation: props.explanation,
           scope: props.scope,
-          offset: props.offset
+          offset: props.offset,
         });
 
         if (props.errors) {
@@ -843,8 +722,12 @@ Generated: ${new Date().toISOString()}`;
   /**
    * Process RFQ-specific data types with enhanced field mapping
    */
-  private preprocessRfqData(formData: Record<string, any>): Record<string, string> {
-    console.log('🔄 Processing RFQ form data for Word template placeholders...');
+  private preprocessRfqData(
+    formData: Record<string, any>
+  ): Record<string, string> {
+    console.log(
+      '🔄 Processing RFQ form data for Word template placeholders...'
+    );
     console.log('📊 Raw form data received:', formData);
 
     const processed: Record<string, string> = {};
@@ -867,7 +750,10 @@ Generated: ${new Date().toISOString()}`;
   /**
    * Add computed fields based on form data
    */
-  private addComputedFields(processed: Record<string, string>, formData: Record<string, any>): void {
+  private addComputedFields(
+    processed: Record<string, string>,
+    formData: Record<string, any>
+  ): void {
     // Computed submission info
     const today = new Date();
     processed['submissionDate'] = today.toLocaleDateString();
@@ -876,13 +762,17 @@ Generated: ${new Date().toISOString()}`;
 
     // Generate unique submission ID if not present
     if (!processed['submissionId']) {
-      processed['submissionId'] = `RFQ-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      processed['submissionId'] = `RFQ-${Date.now()}-${Math.random()
+        .toString(36)
+        .substr(2, 5)
+        .toUpperCase()}`;
     }
 
     // Project summary
     const projectParts = [];
     if (processed['companyName']) projectParts.push(processed['companyName']);
-    if (processed['standNum']) projectParts.push(`Stand ${processed['standNum']}`);
+    if (processed['standNum'])
+      projectParts.push(`Stand ${processed['standNum']}`);
     if (processed['municipality']) projectParts.push(processed['municipality']);
     processed['projectSummary'] = projectParts.join(' - ');
 
@@ -895,9 +785,12 @@ Generated: ${new Date().toISOString()}`;
 
     // Technical summary
     const techParts = [];
-    if (processed['structureType']) techParts.push(`Structure: ${processed['structureType']}`);
-    if (processed['mainPitch']) techParts.push(`Pitch: ${processed['mainPitch']}°`);
-    if (processed['maxTrussSpacing']) techParts.push(`Spacing: ${processed['maxTrussSpacing']}mm`);
+    if (processed['structureType'])
+      techParts.push(`Structure: ${processed['structureType']}`);
+    if (processed['mainPitch'])
+      techParts.push(`Pitch: ${processed['mainPitch']}°`);
+    if (processed['maxTrussSpacing'])
+      techParts.push(`Spacing: ${processed['maxTrussSpacing']}mm`);
     processed['technicalSummary'] = techParts.join(' | ');
 
     // Service summary
@@ -909,95 +802,98 @@ Generated: ${new Date().toISOString()}`;
   /**
    * Add standard template fields that are commonly expected
    */
-  private addStandardTemplateFields(processed: Record<string, string>, formData: Record<string, any>): void {
+  private addStandardTemplateFields(
+    processed: Record<string, string>,
+    formData: Record<string, any>
+  ): void {
     // Common alternative field names for Word templates
     const fieldMappings: Record<string, string> = {
       // Client information alternatives
-      'customerName': processed['clientName'] || '',
-      'customer': processed['clientName'] || '',
-      'contactName': processed['clientName'] || '',
-      'contact': processed['clientName'] || '',
-      'company': processed['companyName'] || '',
-      'organization': processed['companyName'] || '',
+      customerName: processed['clientName'] || '',
+      customer: processed['clientName'] || '',
+      contactName: processed['clientName'] || '',
+      contact: processed['clientName'] || '',
+      company: processed['companyName'] || '',
+      organization: processed['companyName'] || '',
 
       // Contact details alternatives
-      'phone': processed['clientPhone'] || '',
-      'telephone': processed['clientPhone'] || '',
-      'email': processed['clientEmail'] || '',
-      'emailAddress': processed['clientEmail'] || '',
+      phone: processed['clientPhone'] || '',
+      telephone: processed['clientPhone'] || '',
+      email: processed['clientEmail'] || '',
+      emailAddress: processed['clientEmail'] || '',
 
       // Project information alternatives
-      'stand': processed['standNum'] || '',
-      'standNumber': processed['standNum'] || '',
-      'erf': processed['standNum'] || '',
-      'erfNumber': processed['standNum'] || '',
+      stand: processed['standNum'] || '',
+      standNumber: processed['standNum'] || '',
+      erf: processed['standNum'] || '',
+      erfNumber: processed['standNum'] || '',
 
       // Location alternatives
-      'location': processed['municipality'] || '',
-      'area': processed['municipality'] || '',
-      'city': processed['municipality'] || '',
+      location: processed['municipality'] || '',
+      area: processed['municipality'] || '',
+      city: processed['municipality'] || '',
 
       // Building information alternatives
-      'building': processed['buildingType'] || '',
-      'buildingCategory': processed['buildingType'] || '',
-      'structure': processed['structureType'] || '',
+      building: processed['buildingType'] || '',
+      buildingCategory: processed['buildingType'] || '',
+      structure: processed['structureType'] || '',
 
       // Representative alternatives
-      'rep': processed['repName'] || '',
-      'representative': processed['repName'] || '',
-      'salesperson': processed['repName'] || '',
+      rep: processed['repName'] || '',
+      representative: processed['repName'] || '',
+      salesperson: processed['repName'] || '',
 
       // Dates alternatives
-      'dateSubmitted': processed['dateSubmitted'] || '',
-      'submissionDate': processed['submissionDate'] || '',
-      'dateDue': processed['dateDue'] || '',
-      'dueDate': processed['dateDue'] || '',
+      dateSubmitted: processed['dateSubmitted'] || '',
+      submissionDate: processed['submissionDate'] || '',
+      dateDue: processed['dateDue'] || '',
+      dueDate: processed['dateDue'] || '',
 
       // Technical specifications alternatives
-      'pitch': processed['mainPitch'] || '',
-      'mainPitch': processed['mainPitch'] || '',
-      'pitch1': processed['mainPitch'] || '',
-      'pitch2': processed['pitch2'] || '',
-      'secondaryPitch': processed['pitch2'] || '',
-      'spacing': processed['maxTrussSpacing'] || '',
-      'trussSpacing': processed['maxTrussSpacing'] || '',
-      'maxSpacing': processed['maxTrussSpacing'] || '',
+      pitch: processed['mainPitch'] || '',
+      mainPitch: processed['mainPitch'] || '',
+      pitch1: processed['mainPitch'] || '',
+      pitch2: processed['pitch2'] || '',
+      secondaryPitch: processed['pitch2'] || '',
+      spacing: processed['maxTrussSpacing'] || '',
+      trussSpacing: processed['maxTrussSpacing'] || '',
+      maxSpacing: processed['maxTrussSpacing'] || '',
 
       // Service alternatives
-      'service': processed['serviceType'] || '',
-      'services': processed['serviceType'] || '',
-      'workType': processed['serviceType'] || '',
+      service: processed['serviceType'] || '',
+      services: processed['serviceType'] || '',
+      workType: processed['serviceType'] || '',
 
       // Ceiling and construction details
-      'ceiling': processed['ceilingType'] || '',
-      'ceilingType': processed['ceilingType'] || '',
-      'walls': processed['wallCobbling'] || '',
-      'wallType': processed['wallCobbling'] || '',
+      ceiling: processed['ceilingType'] || '',
+      ceilingType: processed['ceilingType'] || '',
+      walls: processed['wallCobbling'] || '',
+      wallType: processed['wallCobbling'] || '',
 
       // Overhangs
-      'eaves': processed['eavesOverhang'] || '',
-      'gable': processed['gableOverhang'] || '',
-      'apex': processed['apexOverhang'] || '',
+      eaves: processed['eavesOverhang'] || '',
+      gable: processed['gableOverhang'] || '',
+      apex: processed['apexOverhang'] || '',
 
       // Specifications
-      'underlay': processed['ulaySpec'] || '',
-      'insulation': processed['insSpec'] || '',
-      'sundries': processed['trussSundry'] || '',
+      underlay: processed['ulaySpec'] || '',
+      insulation: processed['insSpec'] || '',
+      sundries: processed['trussSundry'] || '',
 
       // Loading
-      'solarLoading': processed['isSolarLoading'] || '',
-      'geyserLoading': processed['isGeyserLoading'] || '',
-      'exposedTruss': processed['isExposedTrussRequired'] || '',
+      solarLoading: processed['isSolarLoading'] || '',
+      geyserLoading: processed['isGeyserLoading'] || '',
+      exposedTruss: processed['isExposedTrussRequired'] || '',
 
       // Notes
-      'notes': processed['trussNotes'] || '',
-      'comments': processed['trussNotes'] || '',
-      'specialInstructions': processed['trussNotes'] || '',
+      notes: processed['trussNotes'] || '',
+      comments: processed['trussNotes'] || '',
+      specialInstructions: processed['trussNotes'] || '',
 
       // Timeline
-      'roofTimeline': processed['roofTimeline'] || '',
-      'timeline': processed['roofTimeline'] || '',
-      'schedule': processed['roofTimeline'] || ''
+      roofTimeline: processed['roofTimeline'] || '',
+      timeline: processed['roofTimeline'] || '',
+      schedule: processed['roofTimeline'] || '',
     };
 
     // Add all mapped fields
@@ -1016,10 +912,12 @@ Generated: ${new Date().toISOString()}`;
    */
   private addBooleanRepresentations(processed: Record<string, string>): void {
     const booleanFields = [
-      'isSolarLoading', 'isGeyserLoading', 'isExposedTrussRequired'
+      'isSolarLoading',
+      'isGeyserLoading',
+      'isExposedTrussRequired',
     ];
 
-    booleanFields.forEach(field => {
+    booleanFields.forEach((field) => {
       const value = processed[field];
       if (value) {
         const boolValue = this.parseBoolean(value);
@@ -1087,7 +985,11 @@ Generated: ${new Date().toISOString()}`;
    */
   private processObjectField(fieldName: string, value: any): string {
     // Handle location objects
-    if (fieldName === 'projectLocation' || fieldName.includes('location') || fieldName.includes('address')) {
+    if (
+      fieldName === 'projectLocation' ||
+      fieldName.includes('location') ||
+      fieldName.includes('address')
+    ) {
       const parts = [];
       if (value.address) parts.push(value.address);
       if (value.street) parts.push(value.street);
@@ -1126,15 +1028,15 @@ Generated: ${new Date().toISOString()}`;
    */
   private processArrayField(fieldName: string, value: any[]): string {
     const rfqArrayFields = [
-      'structureType',    // ["tiled", "sheeted"]
-      'serviceType',      // ["Supply Truss", "Erect Cover"]
-      'ulaySpec',         // ["Undertile", "Bubblefoil"]
-      'trussSundry',      // ["Verge Tiles", "Barge Boards"]
-      'ccMail'            // ["andri@roofing.com", "bryan@roofing.com"]
+      'structureType', // ["tiled", "sheeted"]
+      'serviceType', // ["Supply Truss", "Erect Cover"]
+      'ulaySpec', // ["Undertile", "Bubblefoil"]
+      'trussSundry', // ["Verge Tiles", "Barge Boards"]
+      'ccMail', // ["andri@roofing.com", "bryan@roofing.com"]
     ];
 
     if (rfqArrayFields.includes(fieldName)) {
-      return value.map(item => String(item)).join(', ');
+      return value.map((item) => String(item)).join(', ');
     }
 
     return value.join(', ');
@@ -1148,13 +1050,17 @@ Generated: ${new Date().toISOString()}`;
     formData: Record<string, any>,
     imageQuality: number
   ): Promise<void> {
-
     console.log('🖼️ Processing image placeholders');
 
     const imageFields = [
-      'sitePhoto', 'architecturalDrawing', 'referencePhoto',
-      'drawingPhoto1', 'drawingPhoto2', 'drawingPhoto3',
-      'drawingPhoto4', 'drawingPhoto5'
+      'sitePhoto',
+      'architecturalDrawing',
+      'referencePhoto',
+      'drawingPhoto1',
+      'drawingPhoto2',
+      'drawingPhoto3',
+      'drawingPhoto4',
+      'drawingPhoto5',
     ];
 
     for (const fieldName of imageFields) {
@@ -1163,7 +1069,12 @@ Generated: ${new Date().toISOString()}`;
 
       if (imageData && (imageData.url || imageData.base64)) {
         console.log(`Inserting image for ${fieldName}`);
-        await this.insertImageInDocument(document, placeholder, imageData, imageQuality);
+        await this.insertImageInDocument(
+          document,
+          placeholder,
+          imageData,
+          imageQuality
+        );
       }
     }
   }
@@ -1177,11 +1088,12 @@ Generated: ${new Date().toISOString()}`;
     imageData: any,
     quality: number
   ): Promise<void> {
-
     // Get image dimensions based on field type
     const dimensions = this.getImageDimensions(placeholder);
 
-    console.log(`Inserting image at ${placeholder} with dimensions ${dimensions.width}x${dimensions.height}`);
+    console.log(
+      `Inserting image at ${placeholder} with dimensions ${dimensions.width}x${dimensions.height}`
+    );
 
     // Placeholder for actual docx library image insertion
     // Actual implementation would:
@@ -1194,7 +1106,10 @@ Generated: ${new Date().toISOString()}`;
   /**
    * Get appropriate image dimensions for different RFQ image types
    */
-  private getImageDimensions(placeholder: string): { width: number; height: number } {
+  private getImageDimensions(placeholder: string): {
+    width: number;
+    height: number;
+  } {
     const dimensionMap: Record<string, { width: number; height: number }> = {
       '{{drawingPhoto1}}': { width: 450, height: 300 },
       '{{drawingPhoto2}}': { width: 450, height: 300 },
@@ -1203,7 +1118,7 @@ Generated: ${new Date().toISOString()}`;
       '{{drawingPhoto5}}': { width: 450, height: 300 },
       '{{sitePhoto}}': { width: 300, height: 225 },
       '{{architecturalDrawing}}': { width: 600, height: 400 },
-      '{{referencePhoto}}': { width: 300, height: 225 }
+      '{{referencePhoto}}': { width: 300, height: 225 },
     };
 
     return dimensionMap[placeholder] || { width: 250, height: 200 };
@@ -1216,7 +1131,6 @@ Generated: ${new Date().toISOString()}`;
     document: any,
     formData: Record<string, any>
   ): Promise<void> {
-
     console.log('📊 Processing table placeholders');
 
     // Example: Create dynamic tables for RFQ data
@@ -1234,9 +1148,14 @@ Generated: ${new Date().toISOString()}`;
       { label: 'Client Name', value: formData['clientName'] || '' },
       { label: 'Project Address', value: formData['standNum'] || '' },
       { label: 'Representative', value: formData['repName'] || '' },
-      { label: 'Structure Type', value: Array.isArray(formData['structureType']) ? formData['structureType'].join(', ') : formData['structureType'] || '' },
+      {
+        label: 'Structure Type',
+        value: Array.isArray(formData['structureType'])
+          ? formData['structureType'].join(', ')
+          : formData['structureType'] || '',
+      },
       { label: 'Solar Loading', value: formData['isSolarLoading'] || '' },
-      { label: 'Timeline', value: formData['roofTimeline'] || '' }
+      { label: 'Timeline', value: formData['roofTimeline'] || '' },
     ];
   }
 
@@ -1270,7 +1189,11 @@ Document processed at: ${new Date().toISOString()}`;
   /**
    * Utility methods
    */
-  private replaceInDocument(document: any, placeholder: string, value: string): void {
+  private replaceInDocument(
+    document: any,
+    placeholder: string,
+    value: string
+  ): void {
     // Placeholder for actual document text replacement
     console.log(`Replacing ${placeholder} with ${value} in document`);
   }
@@ -1280,12 +1203,21 @@ Document processed at: ${new Date().toISOString()}`;
    */
   private isDateField(fieldName: string): boolean {
     const dateFields = [
-      'dateSubmitted', 'dateDue', 'submissionDate', 'dueDate',
-      'drawings1', 'drawings2', 'drawings3', 'drawings4', 'drawings5'
+      'dateSubmitted',
+      'dateDue',
+      'submissionDate',
+      'dueDate',
+      'drawings1',
+      'drawings2',
+      'drawings3',
+      'drawings4',
+      'drawings5',
     ];
 
     // Also check for field names containing 'date'
-    return dateFields.includes(fieldName) || fieldName.toLowerCase().includes('date');
+    return (
+      dateFields.includes(fieldName) || fieldName.toLowerCase().includes('date')
+    );
   }
 
   /**
@@ -1293,15 +1225,21 @@ Document processed at: ${new Date().toISOString()}`;
    */
   private isBooleanField(fieldName: string): boolean {
     const booleanFields = [
-      'isSolarLoading', 'isGeyserLoading', 'isExposedTrussRequired',
-      'gateAccess', 'optionalP&G1', 'isRepeatedSubmission'
+      'isSolarLoading',
+      'isGeyserLoading',
+      'isExposedTrussRequired',
+      'gateAccess',
+      'optionalP&G1',
+      'isRepeatedSubmission',
     ];
 
     // Also check for field names starting with 'is' or 'has'
-    return booleanFields.includes(fieldName) ||
-           fieldName.startsWith('is') ||
-           fieldName.startsWith('has') ||
-           fieldName.startsWith('optional');
+    return (
+      booleanFields.includes(fieldName) ||
+      fieldName.startsWith('is') ||
+      fieldName.startsWith('has') ||
+      fieldName.startsWith('optional')
+    );
   }
 
   /**
@@ -1313,7 +1251,12 @@ Document processed at: ${new Date().toISOString()}`;
     const currentTime = new Date().toLocaleTimeString('en-ZA');
 
     // Create a basic PDF structure
-    const pdfContent = this.createBasicPdf(formData, submissionId, currentDate, currentTime);
+    const pdfContent = this.createBasicPdf(
+      formData,
+      submissionId,
+      currentDate,
+      currentTime
+    );
 
     return new Blob([pdfContent], { type: 'application/pdf' });
   }
@@ -1321,27 +1264,47 @@ Document processed at: ${new Date().toISOString()}`;
   /**
    * Create basic PDF structure with improved formatting
    */
-  private createBasicPdf(formData: Record<string, any>, submissionId: string, currentDate: string, currentTime: string): string {
+  private createBasicPdf(
+    formData: Record<string, any>,
+    submissionId: string,
+    currentDate: string,
+    currentTime: string
+  ): string {
     // Extract key information with proper formatting
-    const clientName = this.formatValueForPdf(formData['clientName']) || 'Not Specified';
-    const companyName = this.formatValueForPdf(formData['companyName']) || clientName;
-    const repName = this.formatValueForPdf(formData['repName']) || 'Not Specified';
-    const email = this.formatValueForPdf(formData['clientEmail']) || 'Not Specified';
-    const phone = this.formatValueForPdf(formData['clientPhone']) || 'Not Specified';
-    const standNum = this.formatValueForPdf(formData['standNum']) || 'Not Specified';
-    const municipality = this.formatValueForPdf(formData['municipality']) || 'Not Specified';
-    const timeline = this.formatValueForPdf(formData['roofTimeline']) || 'Not Specified';
+    const clientName =
+      this.formatValueForPdf(formData['clientName']) || 'Not Specified';
+    const companyName =
+      this.formatValueForPdf(formData['companyName']) || clientName;
+    const repName =
+      this.formatValueForPdf(formData['repName']) || 'Not Specified';
+    const email =
+      this.formatValueForPdf(formData['clientEmail']) || 'Not Specified';
+    const phone =
+      this.formatValueForPdf(formData['clientPhone']) || 'Not Specified';
+    const standNum =
+      this.formatValueForPdf(formData['standNum']) || 'Not Specified';
+    const municipality =
+      this.formatValueForPdf(formData['municipality']) || 'Not Specified';
+    const timeline =
+      this.formatValueForPdf(formData['roofTimeline']) || 'Not Specified';
 
     // Dates with proper formatting
-    const dateSubmitted = this.formatValueForPdf(formData['dateSubmitted']) || 'Not Specified';
-    const dateDue = this.formatValueForPdf(formData['dateDue']) || 'Not Specified';
+    const dateSubmitted =
+      this.formatValueForPdf(formData['dateSubmitted']) || 'Not Specified';
+    const dateDue =
+      this.formatValueForPdf(formData['dateDue']) || 'Not Specified';
 
     // Technical specifications
-    const structureType = this.formatValueForPdf(formData['structureType']) || 'Not Specified';
-    const serviceType = this.formatValueForPdf(formData['serviceType']) || 'Not Specified';
-    const mainPitch = this.formatValueForPdf(formData['mainPitch']) || 'Not Specified';
-    const maxSpacing = this.formatValueForPdf(formData['maxTrussSpacing']) || 'Not Specified';
-    const buildingType = this.formatValueForPdf(formData['buildingType']) || 'Not Specified';
+    const structureType =
+      this.formatValueForPdf(formData['structureType']) || 'Not Specified';
+    const serviceType =
+      this.formatValueForPdf(formData['serviceType']) || 'Not Specified';
+    const mainPitch =
+      this.formatValueForPdf(formData['mainPitch']) || 'Not Specified';
+    const maxSpacing =
+      this.formatValueForPdf(formData['maxTrussSpacing']) || 'Not Specified';
+    const buildingType =
+      this.formatValueForPdf(formData['buildingType']) || 'Not Specified';
 
     // Create organized form data sections
     const formDataSections = this.createFormDataSections(formData);
@@ -1483,30 +1446,42 @@ ${450 + contentLength}
 
     // Group fields by category
     const categories = {
-      'Dates': ['dateSubmitted', 'dateDue'],
-      'Contact': ['repName', 'ccMail', 'clientType'],
-      'Location': ['standNum', 'municipality', 'buildingType'],
-      'Structure': ['structureType', 'maxTrussSpacing', 'mainPitch', 'pitch2'],
-      'Services': ['serviceType', 'ceilingType', 'wallCobbling'],
-      'Overhangs': ['eavesOverhang', 'gableOverhang', 'apexOverhang'],
-      'Specifications': ['ulaySpec', 'insSpec', 'trussSundry'],
-      'Loading': ['isSolarLoading', 'solarLoadingArea', 'isGeyserLoading', 'geyserLoadingArea'],
-      'Exposed Truss': ['isExposedTrussRequired', 'exposedTrussType', 'exposedTrussType_2', 'exposedTrussType_3'],
-      'Notes': ['trussNotes', 'generalNotes'],
-      'Optional': ['optionalP&G1', 'p&g1Description', 'gateAccess']
+      Dates: ['dateSubmitted', 'dateDue'],
+      Contact: ['repName', 'ccMail', 'clientType'],
+      Location: ['standNum', 'municipality', 'buildingType'],
+      Structure: ['structureType', 'maxTrussSpacing', 'mainPitch', 'pitch2'],
+      Services: ['serviceType', 'ceilingType', 'wallCobbling'],
+      Overhangs: ['eavesOverhang', 'gableOverhang', 'apexOverhang'],
+      Specifications: ['ulaySpec', 'insSpec', 'trussSundry'],
+      Loading: [
+        'isSolarLoading',
+        'solarLoadingArea',
+        'isGeyserLoading',
+        'geyserLoadingArea',
+      ],
+      'Exposed Truss': [
+        'isExposedTrussRequired',
+        'exposedTrussType',
+        'exposedTrussType_2',
+        'exposedTrussType_3',
+      ],
+      Notes: ['trussNotes', 'generalNotes'],
+      Optional: ['optionalP&G1', 'p&g1Description', 'gateAccess'],
     };
 
     Object.entries(categories).forEach(([categoryName, fields]) => {
       const categoryData = fields
-        .map(field => {
+        .map((field) => {
           const value = this.formatValueForPdf(formData[field]);
           return value ? `(${field}: ${value})Tj 0 -10 Td` : '';
         })
-        .filter(line => line)
+        .filter((line) => line)
         .join(' ');
 
       if (categoryData) {
-        sections.push(`(${categoryName.toUpperCase()}:)Tj 0 -12 Td ${categoryData} 0 -8 Td`);
+        sections.push(
+          `(${categoryName.toUpperCase()}:)Tj 0 -12 Td ${categoryData} 0 -8 Td`
+        );
       }
     });
 
@@ -1520,7 +1495,7 @@ ${450 + contentLength}
     if (value === null || value === undefined) return '';
 
     if (Array.isArray(value)) {
-      return value.map(item => this.formatValueForPdf(item)).join(', ');
+      return value.map((item) => this.formatValueForPdf(item)).join(', ');
     }
 
     if (typeof value === 'object') {
@@ -1529,7 +1504,7 @@ ${450 + contentLength}
         return value.toLocaleDateString('en-ZA', {
           day: '2-digit',
           month: '2-digit',
-          year: 'numeric'
+          year: 'numeric',
         });
       }
 
@@ -1557,7 +1532,9 @@ ${450 + contentLength}
 
       // If object has multiple properties, create a readable summary
       if (keys.length > 0 && keys.length <= 5) {
-        return keys.map(key => `${key}: ${this.formatValueForPdf(value[key])}`).join(', ');
+        return keys
+          .map((key) => `${key}: ${this.formatValueForPdf(value[key])}`)
+          .join(', ');
       }
 
       // Fallback for complex objects
@@ -1585,7 +1562,7 @@ ${450 + contentLength}
       return date.toLocaleDateString('en-ZA', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: 'numeric',
       });
     } catch {
       return String(value);
@@ -1610,10 +1587,16 @@ ${450 + contentLength}
     try {
       // Check for DOCX magic numbers (ZIP file header)
       const header = new Uint8Array(arrayBuffer.slice(0, 4));
-      const isZip = (header[0] === 0x50 && header[1] === 0x4B && header[2] === 0x03 && header[3] === 0x04);
+      const isZip =
+        header[0] === 0x50 &&
+        header[1] === 0x4b &&
+        header[2] === 0x03 &&
+        header[3] === 0x04;
 
       if (!isZip) {
-        console.warn('❌ Document is not a valid ZIP-based file (DOCX format required)');
+        console.warn(
+          '❌ Document is not a valid ZIP-based file (DOCX format required)'
+        );
         return false;
       }
 
@@ -1629,56 +1612,11 @@ ${450 + contentLength}
   /**
    * Repair template placeholders that have formatting issues
    */
-  private async repairTemplatePlaceholders(arrayBuffer: ArrayBuffer): Promise<ArrayBuffer> {
-    try {
-      console.log('🔧 Checking template for placeholder issues...');
-
-      // Create a PizZip to extract and examine the document content
-      const zip = new PizZip(arrayBuffer);
-
-      // Get the main document XML
-      const documentXml = zip.file('word/document.xml');
-      if (!documentXml) {
-        throw new Error('Could not find document.xml in template');
-      }
-
-      let content = documentXml.asText();
-      console.log('📄 Original document content length:', content.length);
-
-      // ✅ FIX: Common placeholder issues in Word documents
-
-      // 1. Fix duplicate opening braces: {{{field}} -> {{field}}
-      content = content.replace(/\{\{\{([^}]+)\}\}/g, '{{$1}}');
-
-      // 2. Fix duplicate closing braces: {{field}}} -> {{field}}
-      content = content.replace(/\{\{([^}]+)\}\}\}/g, '{{$1}}');
-
-      // 3. Fix broken placeholders across XML tags
-      content = this.fixPlaceholdersAcrossXmlTags(content);
-
-      // 4. Fix common Word formatting issues
-      content = this.fixWordFormattingIssues(content);
-
-      // 5. Validate placeholders are now properly formed
-      const placeholders = this.extractPlaceholders(content);
-      console.log('🔍 Found placeholders after repair:', placeholders);
-
-      // Update the document XML in the ZIP
-      zip.file('word/document.xml', content);
-
-      // Generate the repaired array buffer
-      const repairedBuffer = zip.generate({
-        type: 'arraybuffer',
-        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-      });
-
-      console.log('✅ Template repaired successfully');
-      return repairedBuffer;
-
-    } catch (error) {
-      console.warn('⚠️ Could not repair template, using original:', error);
-      return arrayBuffer; // Return original if repair fails
-    }
+  private async repairTemplatePlaceholders(
+    arrayBuffer: ArrayBuffer
+  ): Promise<ArrayBuffer> {
+  // Removed PizZip and docxtemplater-based repair logic. This method is now a stub.
+  return arrayBuffer;
   }
 
   /**
@@ -1700,7 +1638,7 @@ ${450 + contentLength}
       /\{\{([^}<]*)<[^>]*>([^}]*)\}\}/g,
 
       // More complex patterns with multiple XML tags
-      /\{\{([^}<]*)<[^>]*>[^<]*<\/[^>]*>([^}]*)\}\}/g
+      /\{\{([^}<]*)<[^>]*>[^<]*<\/[^>]*>([^}]*)\}\}/g,
     ];
 
     // Apply fixes for each pattern
@@ -1708,12 +1646,14 @@ ${450 + contentLength}
       const before = content.length;
       content = content.replace(pattern, (match, ...groups) => {
         // Reconstruct the placeholder without XML tags
-        const fieldName = groups.filter(g => g && g.trim()).join('');
+        const fieldName = groups.filter((g) => g && g.trim()).join('');
         return `{{${fieldName}}}`;
       });
       const after = content.length;
       if (before !== after) {
-        console.log(`✅ Fixed pattern ${index + 1}: ${before - after} characters changed`);
+        console.log(
+          `✅ Fixed pattern ${index + 1}: ${before - after} characters changed`
+        );
       }
     });
 
@@ -1758,62 +1698,20 @@ ${450 + contentLength}
     return [...new Set(placeholders)]; // Remove duplicates
   }
 
-  /**
-   * Fallback method to load document with aggressive repair
-   */
-  private async loadDocxDocumentWithRepair(arrayBuffer: ArrayBuffer): Promise<any> {
-    try {
-      console.log('🚑 Attempting aggressive template repair...');
-
-      // Create a more permissive docxtemplater instance
-      const zip = new PizZip(arrayBuffer);
-
-      // Try to create a document that ignores errors
-      const doc = new Docxtemplater(zip, {
-        paragraphLoop: true,
-        linebreaks: true,
-        errorLogging: false,
-        delimiters: {
-          start: '{{',
-          end: '}}'
-        },
-        nullGetter: () => '', // Return empty string for any issues
-        parser: () => ({
-          get: () => '' // Default to empty string
-        })
-      });
-
-      console.log('✅ Document loaded with aggressive repair');
-      return doc;
-
-    } catch (error) {
-      console.error('❌ Aggressive repair failed:', error);
-
-      // Ultimate fallback: create a minimal document processor
-      return this.createFallbackDocumentProcessor(arrayBuffer);
-    }
-  }
+  // ...existing code...
 
   /**
-   * Create a fallback document processor when all else fails
+   * Load a DOCX document from an ArrayBuffer.
+   * This is a stub implementation. Replace with actual docx library logic.
    */
-  private createFallbackDocumentProcessor(arrayBuffer: ArrayBuffer): any {
-    console.log('🆘 Creating fallback document processor...');
-
+  private async loadDocxDocument(arrayBuffer: ArrayBuffer): Promise<any> {
+    // TODO: Replace with actual docx library logic, e.g., using docxtemplater or similar
+    // For now, return a mock object with minimal API for downstream code
     return {
-      isFallback: true,
-      setData: (data: any) => {
-        console.log('📝 Fallback processor received data:', Object.keys(data));
-      },
-      render: () => {
-        console.log('🔄 Fallback processor render called');
-      },
       getZip: () => ({
-        generate: (options: any) => {
-          console.log('📄 Fallback processor generating document...');
-          return arrayBuffer; // Return original document
-        }
-      })
+        generate: ({ type, mimeType }: { type: string; mimeType: string }) => arrayBuffer,
+      }),
+      render: (_data: any) => {},
     };
   }
 }
