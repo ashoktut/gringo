@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { AfterViewInit, Component, ElementRef, forwardRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,11 +9,10 @@ import { MatIconModule } from '@angular/material/icon';
   selector: 'app-digital-signature',
   standalone: true,
   imports: [
-    CommonModule,
     MatButtonModule,
     MatIconModule,
-    MatCardModule,
-  ],
+    MatCardModule
+],
     providers: [
     {
       provide: NG_VALUE_ACCESSOR,

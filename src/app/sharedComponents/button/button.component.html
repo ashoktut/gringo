@@ -1,56 +1,73 @@
-<ng-container [ngSwitch]="type">
+
+@switch (type) {
   <!-- Primary button -->
-  <button *ngSwitchCase="'primary'"
-          mat-raised-button
-          [color]="getColor()"
-          [disabled]="disabled"
-          (click)="action.emit()"
-          class="custom-button btn-primary">
-    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
-    {{ label }}
-  </button>
-
+  @case ('primary') {
+    <button
+      mat-raised-button
+      [color]="getColor()"
+      [disabled]="disabled"
+      (click)="action.emit()"
+      class="custom-button btn-primary">
+      @if (icon) {
+        <mat-icon>{{ icon }}</mat-icon>
+      }
+      {{ label }}
+    </button>
+  }
   <!-- Secondary button -->
-  <button *ngSwitchCase="'secondary'"
-          mat-button
-          [color]="getColor()"
-          [disabled]="disabled"
-          (click)="action.emit()"
-          class="custom-button btn-secondary">
-    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
-    {{ label }}
-  </button>
-
+  @case ('secondary') {
+    <button
+      mat-button
+      [color]="getColor()"
+      [disabled]="disabled"
+      (click)="action.emit()"
+      class="custom-button btn-secondary">
+      @if (icon) {
+        <mat-icon>{{ icon }}</mat-icon>
+      }
+      {{ label }}
+    </button>
+  }
   <!-- Tertiary button -->
-  <button *ngSwitchCase="'tertiary'"
-          mat-stroked-button
-          [color]="getColor()"
-          [disabled]="disabled"
-          (click)="action.emit()"
-          class="custom-button btn-tertiary">
-    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
-    {{ label }}
-  </button>
-
+  @case ('tertiary') {
+    <button
+      mat-stroked-button
+      [color]="getColor()"
+      [disabled]="disabled"
+      (click)="action.emit()"
+      class="custom-button btn-tertiary">
+      @if (icon) {
+        <mat-icon>{{ icon }}</mat-icon>
+      }
+      {{ label }}
+    </button>
+  }
   <!-- Success button -->
-  <button *ngSwitchCase="'success'"
-          mat-flat-button
-          [color]="getColor()"
-          [disabled]="disabled"
-          (click)="action.emit()"
-          class="custom-button btn-success">
-    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
-    {{ label }}
-  </button>
-
+  @case ('success') {
+    <button
+      mat-flat-button
+      [color]="getColor()"
+      [disabled]="disabled"
+      (click)="action.emit()"
+      class="custom-button btn-success">
+      @if (icon) {
+        <mat-icon>{{ icon }}</mat-icon>
+      }
+      {{ label }}
+    </button>
+  }
   <!-- Warning button -->
-  <button *ngSwitchCase="'warning'"
-          mat-raised-button
-          [color]="getColor()"
-          [disabled]="disabled"
-          (click)="action.emit()"
-          class="custom-button btn-warning">
-    <mat-icon *ngIf="icon">{{ icon }}</mat-icon>
-    {{ label }}
-  </button>
-</ng-container>
+  @case ('warning') {
+    <button
+      mat-raised-button
+      [color]="getColor()"
+      [disabled]="disabled"
+      (click)="action.emit()"
+      class="custom-button btn-warning">
+      @if (icon) {
+        <mat-icon>{{ icon }}</mat-icon>
+      }
+      {{ label }}
+    </button>
+  }
+}

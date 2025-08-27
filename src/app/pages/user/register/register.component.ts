@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import {
   FormGroup,
@@ -19,7 +19,7 @@ function passwordMismatch(form: FormGroup): ValidationErrors | null {
 
 @Component({
   selector: 'app-register',
-  imports: [MatInputModule, ReactiveFormsModule, CommonModule, MatButtonModule, RouterModule],
+  imports: [MatInputModule, ReactiveFormsModule, MatButtonModule, RouterModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })

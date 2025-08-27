@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -7,7 +7,7 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, CommonModule, MatInputModule, MatButtonModule, RouterModule],
+  imports: [ReactiveFormsModule, MatInputModule, MatButtonModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

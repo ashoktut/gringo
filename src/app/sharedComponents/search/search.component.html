@@ -11,45 +11,55 @@
       (keydown.enter)="onEnterPressed()"
       (keydown.escape)="onEscapePressed()"
       #searchInput
-    >
-    <mat-icon matPrefix [class.search-loading]="isLoading">
-      {{ isLoading ? 'sync' : 'search' }}
-    </mat-icon>
+      >
+      <mat-icon matPrefix [class.search-loading]="isLoading">
+        {{ isLoading ? 'sync' : 'search' }}
+      </mat-icon>
 
-    <button
-      *ngIf="config.showClearButton && searchControl.value"
-      mat-icon-button
-      matSuffix
-      (click)="clearSearch()"
-      type="button"
-      aria-label="Clear search"
-      class="clear-button">
-      <mat-icon>close</mat-icon>
-    </button>
-  </mat-form-field>
+      @if (config.showClearButton && searchControl.value) {
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="clearSearch()"
+          type="button"
+          aria-label="Clear search"
+          class="clear-button">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
 
-  <!-- Search Hint -->
-  <div class="search-hint" *ngIf="showHint && isFocused">
-    <mat-icon>lightbulb</mat-icon>
-    {{ getSearchHint() }}
+    <!-- Search Hint -->
+    @if (showHint && isFocused) {
+      <div class="search-hint">
+        <mat-icon>lightbulb</mat-icon>
+        {{ getSearchHint() }}
+      </div>
+    }
+
+    <!-- Search Suggestions Dropdown -->
+    @if (showSuggestions && suggestions.length > 0) {
+      <div class="search-suggestions">
+        @for (suggestion of suggestions; track trackSuggestion($index, suggestion)) {
+          <div
+            class="search-suggestion"
+            (click)="selectSuggestion(suggestion)"
+            [attr.aria-label]="'Select suggestion: ' + suggestion.text">
+            <mat-icon>{{ suggestion.icon || 'search' }}</mat-icon>
+            <span>{{ suggestion.text }}</span>
+            @if (suggestion.category) {
+              <mat-icon class="suggestion-arrow">arrow_forward</mat-icon>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- No Results Message -->
+    @if (showNoResults) {
+      <div class="search-no-results">
+        <mat-icon>search_off</mat-icon>
+        <span>No results found for "{{ searchControl.value }}"</span>
+      </div>
+    }
   </div>
-
-  <!-- Search Suggestions Dropdown -->
-  <div class="search-suggestions" *ngIf="showSuggestions && suggestions.length > 0">
-    <div
-      class="search-suggestion"
-      *ngFor="let suggestion of suggestions; trackBy: trackSuggestion"
-      (click)="selectSuggestion(suggestion)"
-      [attr.aria-label]="'Select suggestion: ' + suggestion.text">
-      <mat-icon>{{ suggestion.icon || 'search' }}</mat-icon>
-      <span>{{ suggestion.text }}</span>
-      <mat-icon class="suggestion-arrow" *ngIf="suggestion.category">arrow_forward</mat-icon>
-    </div>
-  </div>
-
-  <!-- No Results Message -->
-  <div class="search-no-results" *ngIf="showNoResults">
-    <mat-icon>search_off</mat-icon>
-    <span>No results found for "{{ searchControl.value }}"</span>
-  </div>
-</div>

@@ -10,25 +10,27 @@
   <mat-card-content class="signature-content">
     <div class="canvas-container">
       <canvas #signatureCanvas
-              [width]="canvasWidth"
-              [height]="canvasHeight"
-              class="signature-canvas"
-              [class.disabled]="isDisabled">
+        [width]="canvasWidth"
+        [height]="canvasHeight"
+        class="signature-canvas"
+        [class.disabled]="isDisabled">
         Your browser does not support the HTML5 canvas element.
       </canvas>
     </div>
 
-    <div class="signature-status" *ngIf="hasSignature()">
-      <mat-icon class="signature-check">check_circle</mat-icon>
-      <span>Signature captured</span>
-    </div>
+    @if (hasSignature()) {
+      <div class="signature-status">
+        <mat-icon class="signature-check">check_circle</mat-icon>
+        <span>Signature captured</span>
+      </div>
+    }
   </mat-card-content>
 
   <mat-card-actions align="end">
     <button mat-stroked-button
-            (click)="clearSignature()"
-            [disabled]="isDisabled || !hasSignature()"
-            class="clear-button">
+      (click)="clearSignature()"
+      [disabled]="isDisabled || !hasSignature()"
+      class="clear-button">
       <mat-icon>clear</mat-icon>
       Clear
     </button>

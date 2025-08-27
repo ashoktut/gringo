@@ -1,22 +1,21 @@
 <!-- Main container for the entire map picker component -->
-    <div class="maplibre-picker-container">
+<div class="maplibre-picker-container">
 
-      <!-- Controls Section: Search and Style Selection (only show if geocoding is enabled) -->
-      <div class="controls-row" *ngIf="enableGeocoding">
-
-        <!-- Address Search Input Field -->
-        <mat-form-field appearance="fill" class="search-field">
-          <mat-label>Search Address</mat-label>
-          <input matInput
-                 [(ngModel)]="searchAddress"
-                 placeholder="Enter address to search"
-                 (keyup.enter)="searchLocation()">
+  <!-- Controls Section: Search and Style Selection (only show if geocoding is enabled) -->
+  @if (enableGeocoding) {
+    <div class="controls-row">
+      <!-- Address Search Input Field -->
+      <mat-form-field appearance="fill" class="search-field">
+        <mat-label>Search Address</mat-label>
+        <input matInput
+          [(ngModel)]="searchAddress"
+          placeholder="Enter address to search"
+          (keyup.enter)="searchLocation()">
           <!-- Search button inside the input field -->
           <button mat-icon-button matSuffix type="button" (click)="searchLocation()">
             <mat-icon>search</mat-icon>
           </button>
         </mat-form-field>
-
         <!-- Map Style Selection Dropdown -->
         <mat-form-field appearance="fill" class="style-field">
           <mat-label>Map Style</mat-label>
@@ -29,29 +28,36 @@
           </mat-select>
         </mat-form-field>
       </div>
+    }
 
-      <!-- Map Container: This div will hold the actual MapLibre map -->
-      <div #mapContainer
-           [style.height]="height"
-           [style.width]="'100%'"
-           class="map-container">
-      </div>
+    <!-- Map Container: This div will hold the actual MapLibre map -->
+    <div #mapContainer
+      [style.height]="height"
+      [style.width]="'100%'"
+      class="map-container">
+    </div>
 
-      <!-- Selected Location Display: Shows details when a location is selected -->
-      <div *ngIf="value" class="location-display">
+    <!-- Selected Location Display: Shows details when a location is selected -->
+    @if (value) {
+      <div class="location-display">
         <div class="location-info">
           <h4>📍 Selected Location</h4>
           <p><strong>Coordinates:</strong> {{value.lat.toFixed(6)}}, {{value.lng.toFixed(6)}}</p>
-          <p *ngIf="value.address"><strong>Address:</strong> {{value.address}}</p>
+          @if (value.address) {
+            <p><strong>Address:</strong> {{value.address}}</p>
+          }
         </div>
         <!-- Button to clear the selected location -->
         <button mat-raised-button color="warn" (click)="clearLocation()">
           <mat-icon>clear</mat-icon> Clear Location
         </button>
       </div>
+    }
 
-      <!-- Instructions: Shows when no location is selected to guide the user -->
-      <div class="instructions" *ngIf="!value">
+    <!-- Instructions: Shows when no location is selected to guide the user -->
+    @if (!value) {
+      <div class="instructions">
         <p><mat-icon>info</mat-icon> Click on the map to select a location</p>
       </div>
-    </div>
+    }
+  </div>

@@ -4,21 +4,23 @@ import {
   FormSection, // ADD THIS IMPORT
   ReusableFormComponent,
 } from '../../../sharedComponents/reusable-form/reusable-form.component';
-import { CommonModule } from '@angular/common';
+
 import { Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormSubmissionService } from '../../../services/form-submission.service';
 import { MatIconModule } from '@angular/material/icon';
+
 import { MatButtonModule } from '@angular/material/button';
+import { DocxProcessingService } from '../../../services/docx-processing.service';
+import { TemplateManagementService } from '../../../services/template-management.service';
 
 @Component({
   selector: 'app-rfq',
   imports: [
-    CommonModule,
     ReusableFormComponent,
     MatIconModule,
-    MatButtonModule,
-  ],
+    MatButtonModule
+],
   templateUrl: './rfq.component.html',
   styleUrl: './rfq.component.css',
 })
@@ -31,7 +33,9 @@ export class RfqComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private formSubmissionService: FormSubmissionService
+    private formSubmissionService: FormSubmissionService,
+    private docxProcessingService: DocxProcessingService,
+    private templateManagementService: TemplateManagementService
   ) {}
 
   ngOnInit() {
@@ -1475,8 +1479,44 @@ export class RfqComponent implements OnInit {
             status: response.status,
           };
 
-          // Pass docxData to your DOCX generation service
-          // this.docxProcessingService.generateDocx(docxData);
+          // Fetch the first available RFQ template and generate PDF
+          this.templateManagementService.getTemplatesForForm('rfq').subscribe({
+            next: (templates) => {
+              if (templates && templates.length > 0) {
+                const template = templates[0];
+                const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
+                const clientEmail = docxData.clientEmail || '';
+                this.docxProcessingService.processRfqSubmission(
+                  template,
+                  docxData,
+                  recipients,
+                  clientEmail,
+                  {
+                    preserveStyles: true,
+                    preserveImages: true,
+                    preserveTables: true,
+                    outputFormat: 'pdf',
+                  }
+                ).subscribe({
+                  next: (result) => {
+                    if (result && result.downloadUrl) {
+                      // Trigger download
+                      window.open(result.downloadUrl, '_blank');
+                    }
+                  },
+                  error: (err) => {
+                    console.error('Error generating PDF:', err);
+                  },
+                });
+              } else {
+                alert('No RFQ template found. Please upload a template first.');
+              }
+            },
+            error: (err) => {
+              console.error('Error fetching templates:', err);
+            },
+          });
+
           console.log('RFQ submitted successfully:', response);
           alert(
             `RFQ ${

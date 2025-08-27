@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,7 +17,6 @@ import { TemplateManagementService } from '../../services/template-management.se
   selector: 'app-document-template',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatCardModule,
     MatButtonModule,
@@ -28,180 +27,192 @@ import { TemplateManagementService } from '../../services/template-management.se
     MatProgressBarModule,
     MatChipsModule,
     MatTooltipModule
-  ],
+],
   template: `
     <div class="document-template-container">
       <!-- Upload Section -->
       <mat-card class="upload-card">
         <mat-card-content>
           <div class="upload-area"
-               [class.dragover]="isDragOver"
-               (dragover)="onDragOver($event)"
-               (dragleave)="onDragLeave($event)"
-               (drop)="onDrop($event)"
-               (click)="fileInput.click()">
-
+            [class.dragover]="isDragOver"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onDrop($event)"
+            (click)="fileInput.click()">
+    
             <input #fileInput
-                   type="file"
-                   accept=".doc,.docx,.odt,.gdoc"
-                   (change)="onFileSelected($event)"
-                   style="display: none">
-
-            <div class="upload-content">
-              <mat-icon class="upload-icon">cloud_upload</mat-icon>
-              <h3>Upload Template Document</h3>
-              <p>Drag and drop your Word document or Google Doc here, or click to browse</p>
-              <div class="supported-formats">
-                <mat-chip-set>
-                  <mat-chip>Word (.docx, .doc)</mat-chip>
-                  <mat-chip>Google Docs (.gdoc)</mat-chip>
-                  <mat-chip>OpenDocument (.odt)</mat-chip>
-                </mat-chip-set>
+              type="file"
+              accept=".doc,.docx,.odt,.gdoc"
+              (change)="onFileSelected($event)"
+              style="display: none">
+    
+              <div class="upload-content">
+                <mat-icon class="upload-icon">cloud_upload</mat-icon>
+                <h3>Upload Template Document</h3>
+                <p>Drag and drop your Word document or Google Doc here, or click to browse</p>
+                <div class="supported-formats">
+                  <mat-chip-set>
+                    <mat-chip>Word (.docx, .doc)</mat-chip>
+                    <mat-chip>Google Docs (.gdoc)</mat-chip>
+                    <mat-chip>OpenDocument (.odt)</mat-chip>
+                  </mat-chip-set>
+                </div>
               </div>
             </div>
-          </div>
-
-          <!-- Form Type Selection -->
-          <div class="form-config" *ngIf="selectedFile">
-            <mat-form-field appearance="outline">
-              <mat-label>Form Type</mat-label>
-              <mat-select [(value)]="selectedFormType" required>
-                <mat-option value="rfq">RFQ (Request for Quote)</mat-option>
-                <mat-option value="rqr">RQR (Request for Requirement)</mat-option>
-                <mat-option value="invoice">Invoice</mat-option>
-                <mat-option value="quote">Quote</mat-option>
-                <mat-option value="report">Report</mat-option>
-                <mat-option value="other">Other</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <div class="universal-checkbox">
-              <mat-checkbox [(ngModel)]="isUniversal"
-                           matTooltip="Universal templates can be used with any form type">
-                Universal Template
-              </mat-checkbox>
-            </div>
-          </div>
-
-          <!-- File Info -->
-          <div class="file-info" *ngIf="selectedFile">
-            <div class="file-details">
-              <mat-icon>description</mat-icon>
-              <div class="file-metadata">
-                <div class="file-name">{{ selectedFile.name }}</div>
-                <div class="file-size">{{ formatFileSize(selectedFile.size) }}</div>
+    
+            <!-- Form Type Selection -->
+            @if (selectedFile) {
+              <div class="form-config">
+                <mat-form-field appearance="outline">
+                  <mat-label>Form Type</mat-label>
+                  <mat-select [(value)]="selectedFormType" required>
+                    <mat-option value="rfq">RFQ (Request for Quote)</mat-option>
+                    <mat-option value="rqr">RQR (Request for Requirement)</mat-option>
+                    <mat-option value="invoice">Invoice</mat-option>
+                    <mat-option value="quote">Quote</mat-option>
+                    <mat-option value="report">Report</mat-option>
+                    <mat-option value="other">Other</mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <div class="universal-checkbox">
+                  <mat-checkbox [(ngModel)]="isUniversal"
+                    matTooltip="Universal templates can be used with any form type">
+                    Universal Template
+                  </mat-checkbox>
+                </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Upload Progress -->
-          <div class="upload-progress" *ngIf="isUploading">
-            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-            <p>Processing template...</p>
-          </div>
-
-          <!-- Action Buttons -->
-          <div class="actions" *ngIf="selectedFile && !isUploading">
-            <button mat-raised-button
-                    color="primary"
-                    (click)="uploadTemplate()"
-                    [disabled]="!selectedFormType">
-              <mat-icon>upload</mat-icon>
-              Upload Template
-            </button>
-
-            <button mat-button
-                    (click)="clearSelection()">
-              <mat-icon>clear</mat-icon>
-              Clear
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- Template Preview -->
-      <mat-card class="preview-card" *ngIf="uploadedTemplate">
-        <mat-card-header>
-          <mat-card-title>Template Uploaded Successfully</mat-card-title>
-          <mat-card-subtitle>{{ uploadedTemplate.name }}</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="template-info">
-            <div class="info-row">
-              <span class="label">Type:</span>
-              <mat-chip>{{ getTemplateTypeDisplay(uploadedTemplate.type) }}</mat-chip>
-            </div>
-            <div class="info-row">
-              <span class="label">Form Type:</span>
-              <mat-chip [class.universal]="uploadedTemplate.isUniversal">
-                {{ uploadedTemplate.isUniversal ? 'Universal' : uploadedTemplate.formType.toUpperCase() }}
-              </mat-chip>
-            </div>
-            <div class="info-row" *ngIf="uploadedTemplate.placeholders.length > 0">
-              <span class="label">Placeholders Found:</span>
-              <div class="placeholders">
-                <mat-chip-set>
-                  <mat-chip *ngFor="let placeholder of uploadedTemplate.placeholders"
-                           class="placeholder-chip">
-                    {{ placeholder }}
-                  </mat-chip>
-                </mat-chip-set>
+            }
+    
+            <!-- File Info -->
+            @if (selectedFile) {
+              <div class="file-info">
+                <div class="file-details">
+                  <mat-icon>description</mat-icon>
+                  <div class="file-metadata">
+                    <div class="file-name">{{ selectedFile.name }}</div>
+                    <div class="file-size">{{ formatFileSize(selectedFile.size) }}</div>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-button
+            }
+    
+            <!-- Upload Progress -->
+            @if (isUploading) {
+              <div class="upload-progress">
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                <p>Processing template...</p>
+              </div>
+            }
+    
+            <!-- Action Buttons -->
+            @if (selectedFile && !isUploading) {
+              <div class="actions">
+                <button mat-raised-button
                   color="primary"
-                  (click)="testTemplate()"
-                  [disabled]="!canTestTemplate()">
-            <mat-icon>preview</mat-icon>
-            Test Template
-          </button>
-        </mat-card-actions>
-      </mat-card>
-
-      <!-- Template Usage Guide -->
-      <mat-card class="guide-card">
-        <mat-card-header>
-          <mat-card-title>Template Guide</mat-card-title>
-          <mat-card-subtitle>How to create effective templates</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="guide-content">
-            <h4>1. Use Placeholders</h4>
-            <p>Insert placeholders in your document using double curly braces:</p>
-            <div class="example-placeholders">
-              <mat-chip-set>
-                <mat-chip class="example-chip">{{ '{' }}{{ '{' }}clientName{{ '}' }}{{ '}' }}</mat-chip>
-                <mat-chip class="example-chip">{{ '{' }}{{ '{' }}dateSubmitted{{ '}' }}{{ '}' }}</mat-chip>
-                <mat-chip class="example-chip">{{ '{' }}{{ '{' }}repName{{ '}' }}{{ '}' }}</mat-chip>
-              </mat-chip-set>
+                  (click)="uploadTemplate()"
+                  [disabled]="!selectedFormType">
+                  <mat-icon>upload</mat-icon>
+                  Upload Template
+                </button>
+                <button mat-button
+                  (click)="clearSelection()">
+                  <mat-icon>clear</mat-icon>
+                  Clear
+                </button>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+    
+        <!-- Template Preview -->
+        @if (uploadedTemplate) {
+          <mat-card class="preview-card">
+            <mat-card-header>
+              <mat-card-title>Template Uploaded Successfully</mat-card-title>
+              <mat-card-subtitle>{{ uploadedTemplate.name }}</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="template-info">
+                <div class="info-row">
+                  <span class="label">Type:</span>
+                  <mat-chip>{{ getTemplateTypeDisplay(uploadedTemplate.type) }}</mat-chip>
+                </div>
+                <div class="info-row">
+                  <span class="label">Form Type:</span>
+                  <mat-chip [class.universal]="uploadedTemplate.isUniversal">
+                    {{ uploadedTemplate.isUniversal ? 'Universal' : uploadedTemplate.formType.toUpperCase() }}
+                  </mat-chip>
+                </div>
+                @if (uploadedTemplate.placeholders.length > 0) {
+                  <div class="info-row">
+                    <span class="label">Placeholders Found:</span>
+                    <div class="placeholders">
+                      <mat-chip-set>
+                        @for (placeholder of uploadedTemplate.placeholders; track placeholder) {
+                          <mat-chip
+                            class="placeholder-chip">
+                            {{ placeholder }}
+                          </mat-chip>
+                        }
+                      </mat-chip-set>
+                    </div>
+                  </div>
+                }
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button
+                color="primary"
+                (click)="testTemplate()"
+                [disabled]="!canTestTemplate()">
+                <mat-icon>preview</mat-icon>
+                Test Template
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        }
+    
+        <!-- Template Usage Guide -->
+        <mat-card class="guide-card">
+          <mat-card-header>
+            <mat-card-title>Template Guide</mat-card-title>
+            <mat-card-subtitle>How to create effective templates</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="guide-content">
+              <h4>1. Use Placeholders</h4>
+              <p>Insert placeholders in your document using double curly braces:</p>
+              <div class="example-placeholders">
+                <mat-chip-set>
+                  <mat-chip class="example-chip">{{ '{' }}{{ '{' }}clientName{{ '}' }}{{ '}' }}</mat-chip>
+                  <mat-chip class="example-chip">{{ '{' }}{{ '{' }}dateSubmitted{{ '}' }}{{ '}' }}</mat-chip>
+                  <mat-chip class="example-chip">{{ '{' }}{{ '{' }}repName{{ '}' }}{{ '}' }}</mat-chip>
+                </mat-chip-set>
+              </div>
+    
+              <h4>2. Common Placeholders</h4>
+              <div class="common-placeholders">
+                <div class="placeholder-category">
+                  <strong>Client Info:</strong>
+                  <span>clientName, clientEmail, clientPhone</span>
+                </div>
+                <div class="placeholder-category">
+                  <strong>Project Info:</strong>
+                  <span>standNum, structureType, buildingType</span>
+                </div>
+                <div class="placeholder-category">
+                  <strong>Dates:</strong>
+                  <span>dateSubmitted, dateDue, roofTimeline</span>
+                </div>
+              </div>
+    
+              <h4>3. Show All Data</h4>
+              <p>Use <code>{{ '{' }}{{ '{' }}ALL_FORM_DATA{{ '}' }}{{ '}' }}</code> to display a complete table of all form fields.</p>
             </div>
-
-            <h4>2. Common Placeholders</h4>
-            <div class="common-placeholders">
-              <div class="placeholder-category">
-                <strong>Client Info:</strong>
-                <span>clientName, clientEmail, clientPhone</span>
-              </div>
-              <div class="placeholder-category">
-                <strong>Project Info:</strong>
-                <span>standNum, structureType, buildingType</span>
-              </div>
-              <div class="placeholder-category">
-                <strong>Dates:</strong>
-                <span>dateSubmitted, dateDue, roofTimeline</span>
-              </div>
-            </div>
-
-            <h4>3. Show All Data</h4>
-            <p>Use <code>{{ '{' }}{{ '{' }}ALL_FORM_DATA{{ '}' }}{{ '}' }}</code> to display a complete table of all form fields.</p>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
+          </mat-card-content>
+        </mat-card>
+      </div>
+    `,
   styles: [`
     .document-template-container {
       max-width: 800px;

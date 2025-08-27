@@ -47,8 +47,8 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </h1>
           <p class="subtitle">
             {{ currentFormType ?
-               'Managing templates for ' + currentFormType.toUpperCase() + ' forms' :
-               'Upload and manage document templates for all form types' }}
+            'Managing templates for ' + currentFormType.toUpperCase() + ' forms' :
+            'Upload and manage document templates for all form types' }}
           </p>
         </div>
         <div class="header-stats">
@@ -62,7 +62,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </div>
         </div>
       </div>
-
+    
       <!-- Upload Section -->
       <mat-card class="upload-section">
         <mat-card-header>
@@ -82,7 +82,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </app-document-template>
         </mat-card-content>
       </mat-card>
-
+    
       <!-- Templates Management -->
       <div class="templates-management">
         <mat-card>
@@ -96,88 +96,105 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
               {{ currentFormType ? 'for ' + currentFormType.toUpperCase() : 'across all form types' }}
             </mat-card-subtitle>
           </mat-card-header>
-
+    
           <!-- Form Type Tabs -->
-          <mat-tab-group *ngIf="!currentFormType"
-                        [(selectedIndex)]="selectedTabIndex"
-                        (selectedTabChange)="onTabChange($event)">
-            <mat-tab label="All Templates">
-              <div class="tab-content">
-                <div class="templates-grid" *ngIf="allTemplates.length > 0; else noTemplatesAll">
-                  <div *ngFor="let template of allTemplates" class="template-card">
-                    <ng-container *ngTemplateOutlet="templateCardTemplate; context: { template: template }"></ng-container>
-                  </div>
+          @if (!currentFormType) {
+            <mat-tab-group
+              [(selectedIndex)]="selectedTabIndex"
+              (selectedTabChange)="onTabChange($event)">
+              <mat-tab label="All Templates">
+                <div class="tab-content">
+                  @if (allTemplates.length > 0) {
+                    <div class="templates-grid">
+                      @for (template of allTemplates; track template) {
+                        <div class="template-card">
+                          <ng-container *ngTemplateOutlet="templateCardTemplate; context: { template: template }"></ng-container>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="empty-state">
+                      <mat-icon>description</mat-icon>
+                      <h3>No Templates Found</h3>
+                      <p>Upload your first template to get started.</p>
+                    </div>
+                  }
                 </div>
-                <ng-template #noTemplatesAll>
-                  <div class="empty-state">
-                    <mat-icon>description</mat-icon>
-                    <h3>No Templates Found</h3>
-                    <p>Upload your first template to get started.</p>
+              </mat-tab>
+              @for (formType of availableFormTypes; track formType) {
+                <mat-tab
+                  [label]="formType.toUpperCase()">
+                  <div class="tab-content">
+                    @if (getTemplatesForFormType(formType).length > 0) {
+                      <div class="templates-grid">
+                        @for (template of getTemplatesForFormType(formType); track template) {
+                          <div class="template-card">
+                            <ng-container *ngTemplateOutlet="templateCardTemplate; context: { template: template }"></ng-container>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="empty-state">
+                        <mat-icon>description</mat-icon>
+                        <h3>No {{ formType.toUpperCase() }} Templates</h3>
+                        <p>Upload a template specifically for {{ formType }} forms.</p>
+                      </div>
+                    }
                   </div>
-                </ng-template>
-              </div>
-            </mat-tab>
-
-            <mat-tab *ngFor="let formType of availableFormTypes"
-                     [label]="formType.toUpperCase()">
-              <div class="tab-content">
-                <div class="templates-grid" *ngIf="getTemplatesForFormType(formType).length > 0; else noTemplatesForm">
-                  <div *ngFor="let template of getTemplatesForFormType(formType)" class="template-card">
-                    <ng-container *ngTemplateOutlet="templateCardTemplate; context: { template: template }"></ng-container>
-                  </div>
-                </div>
-                <ng-template #noTemplatesForm>
-                  <div class="empty-state">
-                    <mat-icon>description</mat-icon>
-                    <h3>No {{ formType.toUpperCase() }} Templates</h3>
-                    <p>Upload a template specifically for {{ formType }} forms.</p>
-                  </div>
-                </ng-template>
-              </div>
-            </mat-tab>
-          </mat-tab-group>
-
+                </mat-tab>
+              }
+            </mat-tab-group>
+          }
+    
           <!-- Single Form Type View -->
-          <div *ngIf="currentFormType" class="single-form-view">
-            <div class="templates-grid" *ngIf="filteredTemplates.length > 0; else noTemplatesCurrent">
-              <div *ngFor="let template of filteredTemplates" class="template-card">
-                <ng-container *ngTemplateOutlet="templateCardTemplate; context: { template: template }"></ng-container>
-              </div>
+          @if (currentFormType) {
+            <div class="single-form-view">
+              @if (filteredTemplates.length > 0) {
+                <div class="templates-grid">
+                  @for (template of filteredTemplates; track template) {
+                    <div class="template-card">
+                      <ng-container *ngTemplateOutlet="templateCardTemplate; context: { template: template }"></ng-container>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="empty-state">
+                  <mat-icon>description</mat-icon>
+                  <h3>No {{ currentFormType.toUpperCase() }} Templates</h3>
+                  <p>Upload a template for {{ currentFormType }} forms using the upload section above.</p>
+                </div>
+              }
             </div>
-            <ng-template #noTemplatesCurrent>
-              <div class="empty-state">
-                <mat-icon>description</mat-icon>
-                <h3>No {{ currentFormType.toUpperCase() }} Templates</h3>
-                <p>Upload a template for {{ currentFormType }} forms using the upload section above.</p>
-              </div>
-            </ng-template>
-          </div>
+          }
         </mat-card>
       </div>
-
+    
       <!-- Quick Actions -->
-      <mat-card class="quick-actions" *ngIf="availableFormTypes.length > 0">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon>flash_on</mat-icon>
-            Quick Actions
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="action-buttons">
-            <button mat-raised-button
-                    color="primary"
-                    *ngFor="let formType of availableFormTypes"
-                    [routerLink]="['/templates', formType]"
-                    class="form-type-button">
-              <mat-icon>{{ getFormTypeIcon(formType) }}</mat-icon>
-              {{ formType.toUpperCase() }} Templates
-              <mat-chip class="count-chip">{{ getTemplatesForFormType(formType).length }}</mat-chip>
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
+      @if (availableFormTypes.length > 0) {
+        <mat-card class="quick-actions">
+          <mat-card-header>
+            <mat-card-title>
+              <mat-icon>flash_on</mat-icon>
+              Quick Actions
+            </mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="action-buttons">
+              @for (formType of availableFormTypes; track formType) {
+                <button mat-raised-button
+                  color="primary"
+                  [routerLink]="['/templates', formType]"
+                  class="form-type-button">
+                  <mat-icon>{{ getFormTypeIcon(formType) }}</mat-icon>
+                  {{ formType.toUpperCase() }} Templates
+                  <mat-chip class="count-chip">{{ getTemplatesForFormType(formType).length }}</mat-chip>
+                </button>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
+    
       <!-- Template Instructions -->
       <mat-card class="instructions-card">
         <mat-card-header>
@@ -197,7 +214,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
                 <p>Use Word or Google Docs to create your template with placeholders like <code>{{ '{' }}{{ '{' }}clientName{{ '}' }}{{ '}' }}</code></p>
               </div>
             </div>
-
+    
             <div class="instruction-item">
               <div class="instruction-icon">
                 <mat-icon>upload</mat-icon>
@@ -207,7 +224,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
                 <p>Upload your document and specify which form type it's designed for</p>
               </div>
             </div>
-
+    
             <div class="instruction-item">
               <div class="instruction-icon">
                 <mat-icon>preview</mat-icon>
@@ -221,7 +238,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
         </mat-card-content>
       </mat-card>
     </div>
-
+    
     <!-- Template Card Template -->
     <ng-template #templateCardTemplate let-template="template">
       <mat-card class="template-item">
@@ -237,7 +254,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
             <span class="upload-date">{{ template.uploadedAt | date:'short' }}</span>
           </mat-card-subtitle>
         </mat-card-header>
-
+    
         <mat-card-content>
           <div class="template-details">
             <div class="detail-row">
@@ -248,41 +265,49 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
               <span class="label">Type:</span>
               <span class="value">{{ getTemplateTypeDisplay(template.type) }}</span>
             </div>
-            <div class="detail-row" *ngIf="template.placeholders.length > 0">
-              <span class="label">Placeholders:</span>
-              <span class="value">{{ template.placeholders.length }} found</span>
+            @if (template.placeholders.length > 0) {
+              <div class="detail-row">
+                <span class="label">Placeholders:</span>
+                <span class="value">{{ template.placeholders.length }} found</span>
+              </div>
+            }
+          </div>
+    
+          @if (template.placeholders.length > 0) {
+            <div class="placeholders-preview">
+              <mat-chip-set>
+                @for (placeholder of template.placeholders.slice(0, 3); track placeholder) {
+                  <mat-chip
+                    class="placeholder-chip">
+                    {{ placeholder }}
+                  </mat-chip>
+                }
+                @if (template.placeholders.length > 3) {
+                  <mat-chip
+                    class="more-chip">
+                    +{{ template.placeholders.length - 3 }} more
+                  </mat-chip>
+                }
+              </mat-chip-set>
             </div>
-          </div>
-
-          <div class="placeholders-preview" *ngIf="template.placeholders.length > 0">
-            <mat-chip-set>
-              <mat-chip *ngFor="let placeholder of template.placeholders.slice(0, 3)"
-                       class="placeholder-chip">
-                {{ placeholder }}
-              </mat-chip>
-              <mat-chip *ngIf="template.placeholders.length > 3"
-                       class="more-chip">
-                +{{ template.placeholders.length - 3 }} more
-              </mat-chip>
-            </mat-chip-set>
-          </div>
+          }
         </mat-card-content>
-
+    
         <mat-card-actions>
           <button mat-button
-                  color="primary"
-                  (click)="testTemplate(template)"
-                  matTooltip="Generate test PDF">
+            color="primary"
+            (click)="testTemplate(template)"
+            matTooltip="Generate test PDF">
             <mat-icon>preview</mat-icon>
             Test
           </button>
-
+    
           <button mat-button
-                  [matMenuTriggerFor]="templateMenu"
-                  matTooltip="More actions">
+            [matMenuTriggerFor]="templateMenu"
+            matTooltip="More actions">
             <mat-icon>more_vert</mat-icon>
           </button>
-
+    
           <mat-menu #templateMenu="matMenu">
             <button mat-menu-item (click)="cloneTemplate(template)">
               <mat-icon>content_copy</mat-icon>
@@ -294,8 +319,8 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
             </button>
             <mat-divider></mat-divider>
             <button mat-menu-item
-                    (click)="deleteTemplate(template.id)"
-                    class="delete-action">
+              (click)="deleteTemplate(template.id)"
+              class="delete-action">
               <mat-icon>delete</mat-icon>
               <span>Delete</span>
             </button>
@@ -303,7 +328,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
         </mat-card-actions>
       </mat-card>
     </ng-template>
-  `,
+    `,
   styles: [`
     .templates-container {
       padding: 24px;

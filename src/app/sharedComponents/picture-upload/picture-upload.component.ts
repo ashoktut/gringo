@@ -10,7 +10,7 @@ import {
   forwardRef
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -30,14 +30,13 @@ export interface PictureData {
   selector: 'app-picture-upload',
   standalone: true,
   imports: [
-    CommonModule,
     MatButtonModule,
     MatIconModule,
     MatMenuModule,
     MatCardModule,
     MatProgressSpinnerModule,
     MatSnackBarModule
-  ],
+],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -48,29 +47,32 @@ export interface PictureData {
   template: `
     <div class="picture-upload-container">
       <!-- Upload Button/Menu -->
-      <div class="upload-controls" *ngIf="!pictureData && !isCapturing">
-        <button
-          mat-raised-button
-          color="primary"
-          [matMenuTriggerFor]="uploadMenu"
-          [disabled]="disabled"
-          class="upload-button">
-          <mat-icon>add_a_photo</mat-icon>
-          {{ placeholder || 'Add Picture' }}
-        </button>
-
-        <mat-menu #uploadMenu="matMenu">
-          <button mat-menu-item (click)="triggerFileUpload()">
-            <mat-icon>upload</mat-icon>
-            <span>Upload from Device</span>
+      @if (!pictureData && !isCapturing) {
+        <div class="upload-controls">
+          <button
+            mat-raised-button
+            color="primary"
+            [matMenuTriggerFor]="uploadMenu"
+            [disabled]="disabled"
+            class="upload-button">
+            <mat-icon>add_a_photo</mat-icon>
+            {{ placeholder || 'Add Picture' }}
           </button>
-          <button mat-menu-item (click)="startCamera()" *ngIf="isCameraSupported">
-            <mat-icon>camera_alt</mat-icon>
-            <span>Take Picture</span>
-          </button>
-        </mat-menu>
-      </div>
-
+          <mat-menu #uploadMenu="matMenu">
+            <button mat-menu-item (click)="triggerFileUpload()">
+              <mat-icon>upload</mat-icon>
+              <span>Upload from Device</span>
+            </button>
+            @if (isCameraSupported) {
+              <button mat-menu-item (click)="startCamera()">
+                <mat-icon>camera_alt</mat-icon>
+                <span>Take Picture</span>
+              </button>
+            }
+          </mat-menu>
+        </div>
+      }
+    
       <!-- Hidden File Input -->
       <input
         #fileInput
@@ -78,82 +80,91 @@ export interface PictureData {
         accept="image/*"
         (change)="onFileSelected($event)"
         style="display: none;">
-
-      <!-- Camera Container -->
-      <div class="camera-container" *ngIf="isCapturing">
-        <mat-card class="camera-card">
-          <mat-card-header>
-            <mat-card-title>Take Picture</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <video
-              #videoElement
-              autoplay
-              playsinline
-              class="camera-video">
-            </video>
-            <canvas
-              #canvasElement
-              style="display: none;">
-            </canvas>
-          </mat-card-content>
-          <mat-card-actions align="end">
-            <button mat-button (click)="stopCamera()" color="warn">
-              <mat-icon>close</mat-icon>
-              Cancel
-            </button>
-            <button mat-raised-button (click)="capturePhoto()" color="primary">
-              <mat-icon>camera</mat-icon>
-              Capture
-            </button>
-          </mat-card-actions>
-        </mat-card>
-      </div>
-
-      <!-- Picture Preview -->
-      <div class="picture-preview" *ngIf="pictureData && !isCapturing">
-        <mat-card class="preview-card">
-          <mat-card-header>
-            <mat-card-title>{{ pictureData.name }}</mat-card-title>
-            <mat-card-subtitle>{{ formatFileSize(pictureData.size) }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <img
-              [src]="pictureData.dataUrl"
-              [alt]="pictureData.name"
-              class="preview-image">
-          </mat-card-content>
-          <mat-card-actions align="end" *ngIf="!disabled">
-            <button mat-button (click)="removePicture()" color="warn">
-              <mat-icon>delete</mat-icon>
-              Remove
-            </button>
-            <button mat-button [matMenuTriggerFor]="replaceMenu" color="primary">
-              <mat-icon>swap_horiz</mat-icon>
-              Replace
-            </button>
-
-            <mat-menu #replaceMenu="matMenu">
-              <button mat-menu-item (click)="triggerFileUpload()">
-                <mat-icon>upload</mat-icon>
-                <span>Upload Different</span>
-              </button>
-              <button mat-menu-item (click)="startCamera()" *ngIf="isCameraSupported">
-                <mat-icon>camera_alt</mat-icon>
-                <span>Take New Picture</span>
-              </button>
-            </mat-menu>
-          </mat-card-actions>
-        </mat-card>
-      </div>
-
-      <!-- Loading Spinner -->
-      <div class="loading-container" *ngIf="isProcessing">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Processing image...</p>
-      </div>
-    </div>
-  `,
+    
+        <!-- Camera Container -->
+        @if (isCapturing) {
+          <div class="camera-container">
+            <mat-card class="camera-card">
+              <mat-card-header>
+                <mat-card-title>Take Picture</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <video
+                  #videoElement
+                  autoplay
+                  playsinline
+                  class="camera-video">
+                </video>
+                <canvas
+                  #canvasElement
+                  style="display: none;">
+                </canvas>
+              </mat-card-content>
+              <mat-card-actions align="end">
+                <button mat-button (click)="stopCamera()" color="warn">
+                  <mat-icon>close</mat-icon>
+                  Cancel
+                </button>
+                <button mat-raised-button (click)="capturePhoto()" color="primary">
+                  <mat-icon>camera</mat-icon>
+                  Capture
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        }
+    
+        <!-- Picture Preview -->
+        @if (pictureData && !isCapturing) {
+          <div class="picture-preview">
+            <mat-card class="preview-card">
+              <mat-card-header>
+                <mat-card-title>{{ pictureData.name }}</mat-card-title>
+                <mat-card-subtitle>{{ formatFileSize(pictureData.size) }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <img
+                  [src]="pictureData.dataUrl"
+                  [alt]="pictureData.name"
+                  class="preview-image">
+                </mat-card-content>
+                @if (!disabled) {
+                  <mat-card-actions align="end">
+                    <button mat-button (click)="removePicture()" color="warn">
+                      <mat-icon>delete</mat-icon>
+                      Remove
+                    </button>
+                    <button mat-button [matMenuTriggerFor]="replaceMenu" color="primary">
+                      <mat-icon>swap_horiz</mat-icon>
+                      Replace
+                    </button>
+                    <mat-menu #replaceMenu="matMenu">
+                      <button mat-menu-item (click)="triggerFileUpload()">
+                        <mat-icon>upload</mat-icon>
+                        <span>Upload Different</span>
+                      </button>
+                      @if (isCameraSupported) {
+                        <button mat-menu-item (click)="startCamera()">
+                          <mat-icon>camera_alt</mat-icon>
+                          <span>Take New Picture</span>
+                        </button>
+                      }
+                    </mat-menu>
+                  </mat-card-actions>
+                }
+              </mat-card>
+            </div>
+          }
+    
+          <!-- Loading Spinner -->
+          @if (isProcessing) {
+            <div class="loading-container">
+              <mat-spinner diameter="50"></mat-spinner>
+              <p>Processing image...</p>
+            </div>
+          }
+        </div>
+    `,
   styleUrls: ['./picture-upload.component.css']
 })
 export class PictureUploadComponent implements OnInit, OnDestroy, ControlValueAccessor {
