@@ -4,16 +4,23 @@ import {
   FormSection, // ADD THIS IMPORT
   ReusableFormComponent,
 } from '../../../sharedComponents/reusable-form/reusable-form.component';
-import { CommonModule } from '@angular/common';
+
 import { Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormSubmissionService } from '../../../services/form-submission.service';
 import { MatIconModule } from '@angular/material/icon';
+
 import { MatButtonModule } from '@angular/material/button';
+import { DocxProcessingService } from '../../../services/docx-processing.service';
+import { TemplateManagementService } from '../../../services/template-management.service';
 
 @Component({
   selector: 'app-rfq',
-  imports: [CommonModule, ReusableFormComponent, MatIconModule, MatButtonModule],
+  imports: [
+    ReusableFormComponent,
+    MatIconModule,
+    MatButtonModule
+],
   templateUrl: './rfq.component.html',
   styleUrl: './rfq.component.css',
 })
@@ -26,7 +33,9 @@ export class RfqComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private formSubmissionService: FormSubmissionService
+    private formSubmissionService: FormSubmissionService,
+    private docxProcessingService: DocxProcessingService,
+    private templateManagementService: TemplateManagementService
   ) {}
 
   ngOnInit() {
@@ -499,7 +508,7 @@ export class RfqComponent implements OnInit {
 
         // Eaves overhang field
         {
-          name: 'eavesOverhang',
+          name: 'eavesOH',
           label: 'Eaves Overhang',
           type: 'text',
           required: true,
@@ -509,7 +518,7 @@ export class RfqComponent implements OnInit {
 
         // Gable overhang field
         {
-          name: 'gableOverhang',
+          name: 'gableOH',
           label: 'Gable Overhang',
           type: 'text',
           required: true,
@@ -519,7 +528,7 @@ export class RfqComponent implements OnInit {
 
         // Apex overhang field
         {
-          name: 'apexOverhang',
+          name: 'apexOH',
           label: 'Apex Overhang',
           type: 'text',
           required: false,
@@ -571,7 +580,7 @@ export class RfqComponent implements OnInit {
 
         // Is Solar Needed question field
         {
-          name: 'isSolarLoading',
+          name: 'solarLoad',
           label: 'Solar Loading Required ?',
           type: 'select',
           multiple: false,
@@ -585,21 +594,21 @@ export class RfqComponent implements OnInit {
 
         // ADD CONDITIONAL FIELD FOR YES - where do you need the solar installed on the structure, above bathroom
         {
-          name: 'solarLoadingArea',
+          name: 'solarArea',
           label: 'Which area requires solar loading?',
           type: 'text',
           required: true,
           clearable: true,
           placeholder: 'eg. Above bedroom',
           conditional: {
-            dependsOn: 'isSolarLoading',
+            dependsOn: 'solarLoad',
             showWhen: 'yes',
           },
         },
 
         // Is Geyser Needed question field
         {
-          name: 'isGeyserLoading',
+          name: 'geyserLoad',
           label: 'Geyser Loading Required ?',
           type: 'select',
           multiple: false,
@@ -613,21 +622,21 @@ export class RfqComponent implements OnInit {
 
         // ADD CONDITIONAL FIELD FOR YES - where do you need the geyser installed on the structure
         {
-          name: 'geyserLoadingArea',
-          label: 'Which area requires solar loading?',
+          name: 'geyserArea',
+          label: 'Which area requires geyser loading?',
           type: 'text',
           required: true,
           clearable: true,
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
-            dependsOn: 'isGeyserLoading',
+            dependsOn: 'geyserLoad',
             showWhen: 'yes',
           },
         },
 
         // Is Exposed Trusses Needed question field
         {
-          name: 'isExposedTrussRequired',
+          name: 'exposedTruss',
           label: 'Exposed trusses Required in design ?',
           type: 'select',
           multiple: false,
@@ -641,7 +650,7 @@ export class RfqComponent implements OnInit {
 
         // ADD CONDITIONAL FIELD FOR YES - type of exposed truss design required
         {
-          name: 'exposedTrussType',
+          name: 'trussType',
           label: 'Exposed Truss Design',
           type: 'select',
           required: true,
@@ -651,35 +660,35 @@ export class RfqComponent implements OnInit {
             { value: 'completely', label: 'Completely Exposed' },
           ],
           conditional: {
-            dependsOn: 'isExposedTrussRequired',
+            dependsOn: 'exposedTruss',
             showWhen: 'yes',
           },
         },
 
         // ADD CONDITIONAL FIELD FOR YES - type of exposed truss manual
         {
-          name: 'exposedTrussType_2',
+          name: 'trussType2',
           label: 'Exposed Truss Design Type Required',
           type: 'text',
           required: true,
           clearable: true,
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
-            dependsOn: 'isExposedTrussRequired',
+            dependsOn: 'exposedTruss',
             showWhen: 'yes',
           },
         },
 
         // ADD CONDITIONAL FIELD FOR YES - which areas of the structure needs exposed truss
         {
-          name: 'exposedTrussType_3',
+          name: 'trussArea',
           label: 'Areas That Require Exposed trusses',
           type: 'text',
           required: true,
           clearable: true,
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
-            dependsOn: 'isExposedTrussRequired',
+            dependsOn: 'exposedTruss',
             showWhen: 'yes',
           },
         },
@@ -732,7 +741,7 @@ export class RfqComponent implements OnInit {
 
         // ADD CONDITIONAL FIELD FOR YES - where do you need the geyser installed on the structure
         {
-          name: 'p&g1Description',
+          name: 'pg1Desc',
           label: 'P&G1 Description',
           type: 'text',
           required: true,
@@ -761,6 +770,20 @@ export class RfqComponent implements OnInit {
             { value: 'public', label: 'Public Building' },
             { value: 'other', label: 'Other Building Type' },
           ],
+        },
+
+        // ADD CONDITIONAL FIELD FOR OTHER building type
+        {
+          name: 'otherBuild',
+          label: 'Other Building Type',
+          type: 'text',
+          required: true,
+          clearable: true,
+          placeholder: 'Other Building Type',
+          conditional: {
+            dependsOn: 'buildingType',
+            showWhen: 'other',
+          },
         },
 
         // municipality field
@@ -809,7 +832,7 @@ export class RfqComponent implements OnInit {
 
         // Is quote cover needed
         {
-          name: 'isQuoteCoverRequired',
+          name: 'coverReq',
           label: 'Quote Cover Needed?',
           type: 'select',
           multiple: false,
@@ -834,7 +857,7 @@ export class RfqComponent implements OnInit {
             { value: 'slate', label: 'Slate, but not by LCP' },
           ],
           conditional: {
-            dependsOn: 'isQuoteCoverRequired',
+            dependsOn: 'coverReq',
             showWhen: 'yes',
           },
         },
@@ -1248,6 +1271,15 @@ export class RfqComponent implements OnInit {
           placeholder: 'Tip: 😁 Happy client = Retaining client',
           validators: [Validators.maxLength(500)],
         },
+
+        // Rep Signature Field
+        {
+          name: 'repSign',
+          label: 'Rep Signature',
+          type: 'signature',
+          required: true,
+          placeholder: 'Please sign here to confirm your request',
+        },
       ],
     },
 
@@ -1438,6 +1470,53 @@ export class RfqComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
+          // Merge metadata into form data for DOCX
+          const docxData = {
+            ...submissionData,
+            submissionId: response.submissionId,
+            createdAt: response.createdAt,
+            updatedAt: response.updatedAt,
+            status: response.status,
+          };
+
+          // Fetch the first available RFQ template and generate PDF
+          this.templateManagementService.getTemplatesForForm('rfq').subscribe({
+            next: (templates) => {
+              if (templates && templates.length > 0) {
+                const template = templates[0];
+                const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
+                const clientEmail = docxData.clientEmail || '';
+                this.docxProcessingService.processRfqSubmission(
+                  template,
+                  docxData,
+                  recipients,
+                  clientEmail,
+                  {
+                    preserveStyles: true,
+                    preserveImages: true,
+                    preserveTables: true,
+                    outputFormat: 'pdf',
+                  }
+                ).subscribe({
+                  next: (result) => {
+                    if (result && result.downloadUrl) {
+                      // Trigger download
+                      window.open(result.downloadUrl, '_blank');
+                    }
+                  },
+                  error: (err) => {
+                    console.error('Error generating PDF:', err);
+                  },
+                });
+              } else {
+                alert('No RFQ template found. Please upload a template first.');
+              }
+            },
+            error: (err) => {
+              console.error('Error fetching templates:', err);
+            },
+          });
+
           console.log('RFQ submitted successfully:', response);
           alert(
             `RFQ ${
@@ -1499,7 +1578,8 @@ export class RfqComponent implements OnInit {
 
   onFormValueChange(event: any) {
     // Drastically reduce logging frequency for better performance
-    if (Math.random() < 0.001) { // Only log 0.1% of form changes
+    if (Math.random() < 0.001) {
+      // Only log 0.1% of form changes
       console.log('Form value changed:', event);
     }
 

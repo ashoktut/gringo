@@ -86,11 +86,30 @@ export class PdfGenerationService {
    * Determine if docx processing should be used
    */
   private shouldUseDocxProcessing(template: Template): boolean {
-    return !!(
+    console.log('🔍 Evaluating template for docx processing:');
+    console.log(`  • Template name: "${template.name}"`);
+    console.log(`  • Template type: "${template.type}"`);
+    console.log(`  • Preserve formatting: ${template.preserveFormatting}`);
+    console.log(`  • Has original file: ${!!template.originalFile}`);
+    console.log(`  • Has binary content: ${!!template.binaryContent}`);
+    console.log(`  • Binary content size: ${template.binaryContent?.byteLength || 0} bytes`);
+
+    const canUseDocx = !!(
       template.type === 'word' &&
       template.preserveFormatting &&
       (template.originalFile || template.binaryContent)
     );
+
+    console.log(`  • 🎯 Will use docx processing: ${canUseDocx}`);
+
+    if (!canUseDocx) {
+      console.warn('⚠️ Falling back to string replacement because:');
+      if (template.type !== 'word') console.warn(`    - Template type is "${template.type}" (need "word")`);
+      if (!template.preserveFormatting) console.warn('    - preserveFormatting is disabled');
+      if (!template.originalFile && !template.binaryContent) console.warn('    - No binary content available');
+    }
+
+    return canUseDocx;
   }
 
   /**

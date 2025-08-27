@@ -3,6 +3,7 @@
   <div class="upload-controls" *ngIf="!pictureData && !isCapturing">
     <button
       mat-raised-button
+      type="button"
       color="primary"
       [matMenuTriggerFor]="uploadMenu"
       [disabled]="disabled"
@@ -12,11 +13,11 @@
     </button>
 
     <mat-menu #uploadMenu="matMenu">
-      <button mat-menu-item (click)="triggerFileUpload()">
+  <button mat-menu-item type="button" (click)="triggerFileUpload()">
         <mat-icon>upload</mat-icon>
         <span>Upload from Device</span>
       </button>
-      <button mat-menu-item (click)="startCamera()" *ngIf="isCameraSupported">
+  <button mat-menu-item type="button" (click)="startCamera()" *ngIf="isCameraSupported">
         <mat-icon>camera_alt</mat-icon>
         <span>Take Picture</span>
       </button>
@@ -50,11 +51,11 @@
         </canvas>
       </mat-card-content>
       <mat-card-actions align="end">
-        <button mat-button (click)="stopCamera()" color="warn">
+  <button mat-button type="button" (click)="stopCamera()" color="warn">
           <mat-icon>close</mat-icon>
           Cancel
         </button>
-        <button mat-raised-button (click)="capturePhoto()" color="primary">
+  <button mat-raised-button type="button" (click)="capturePhoto()" color="primary">
           <mat-icon>camera</mat-icon>
           Capture
         </button>
@@ -76,21 +77,21 @@
           class="preview-image">
       </mat-card-content>
       <mat-card-actions align="end" *ngIf="!disabled">
-        <button mat-button (click)="removePicture()" color="warn">
+  <button mat-button type="button" (click)="removePicture()" color="warn">
           <mat-icon>delete</mat-icon>
           Remove
         </button>
-        <button mat-button [matMenuTriggerFor]="replaceMenu" color="primary">
+  <button mat-button type="button" [matMenuTriggerFor]="replaceMenu" color="primary">
           <mat-icon>swap_horiz</mat-icon>
           Replace
         </button>
 
         <mat-menu #replaceMenu="matMenu">
-          <button mat-menu-item (click)="triggerFileUpload()">
+          <button mat-menu-item type="button" (click)="triggerFileUpload()">
             <mat-icon>upload</mat-icon>
             <span>Upload Different</span>
           </button>
-          <button mat-menu-item (click)="startCamera()" *ngIf="isCameraSupported">
+          <button mat-menu-item type="button" (click)="startCamera()" *ngIf="isCameraSupported">
             <mat-icon>camera_alt</mat-icon>
             <span>Take New Picture</span>
           </button>

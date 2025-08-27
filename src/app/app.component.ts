@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
+import { SidenavService } from './services/sidenav.service';
+import { MatSidenav } from '@angular/material/sidenav';
 import { RouterOutlet, Router, NavigationEnd, RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatToolbarModule } from '@angular/material/toolbar';
@@ -29,11 +31,11 @@ import { map, shareReplay, filter } from 'rxjs/operators';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
+  @ViewChild('drawer') drawer!: MatSidenav;
   title = 'Gringo - Professional Services';
   currentRoute = '';
 
   isHandset$: Observable<boolean>;
-
   navItems = [
     { name: 'Home', route: '/', icon: 'home' },
     { name: 'RFQ Form', route: '/rfq', icon: 'request_quote' },
@@ -44,8 +46,15 @@ export class AppComponent {
 
   constructor(
     private breakpointObserver: BreakpointObserver,
-    private router: Router
+    private router: Router,
+    private sidenavService: SidenavService
   ) {
+    // Listen for sidenav toggle requests from the service
+    this.sidenavService.toggle$.subscribe(() => {
+      if (this.drawer) {
+        this.drawer.toggle();
+      }
+    });
     // Initialize responsive observable
     this.isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset)
       .pipe(

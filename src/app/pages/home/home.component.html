@@ -1,12 +1,12 @@
-
 <div class="home-container">
+
   <!-- Hero Section -->
   <div class="hero-section">
     <mat-card class="hero-card">
       <mat-card-content>
         <div class="hero-content">
           <h1>Welcome to Gringo</h1>
-          <p>Professional Services Management Platform</p>
+          <p>Forms Made Easy</p>
           <p class="hero-description">
             Streamline your quote requests, manage templates, and track submissions all in one place.
           </p>
@@ -18,17 +18,19 @@
   <!-- Stats Section -->
   <div class="stats-section">
     <div class="stats-grid">
-      <mat-card *ngFor="let stat of stats" class="stat-card" [ngClass]="'stat-' + stat.color">
-        <mat-card-content>
-          <div class="stat-content">
-            <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
-            <div class="stat-info">
-              <h3>{{ stat.value }}</h3>
-              <p>{{ stat.label }}</p>
+      @for (stat of stats; track stat) {
+        <mat-card class="stat-card" [ngClass]="'stat-' + stat.color">
+          <mat-card-content>
+            <div class="stat-content">
+              <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
+              <div class="stat-info">
+                <h3>{{ stat.value }}</h3>
+                <p>{{ stat.label }}</p>
+              </div>
             </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
   </div>
 
@@ -36,25 +38,27 @@
   <div class="actions-section">
     <h2>Quick Actions</h2>
     <div class="actions-grid">
-      <mat-card *ngFor="let action of quickActions" class="action-card" [routerLink]="action.routePath">
-        <mat-card-header>
-          <div mat-card-avatar>
-            <mat-icon class="action-icon" [ngClass]="'icon-' + action.color">
-              {{ action.icon }}
-            </mat-icon>
-          </div>
-          <mat-card-title>{{ action.title }}</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <p>{{ action.description }}</p>
-        </mat-card-content>
-        <mat-card-actions align="end">
-          <button mat-raised-button [color]="action.color" [routerLink]="action.routePath">
-            Get Started
-            <mat-icon>arrow_forward</mat-icon>
-          </button>
-        </mat-card-actions>
-      </mat-card>
+      @for (action of quickActions; track action) {
+        <mat-card class="action-card" [routerLink]="action.routePath">
+          <mat-card-header>
+            <div mat-card-avatar>
+              <mat-icon class="action-icon" [ngClass]="'icon-' + action.color">
+                {{ action.icon }}
+              </mat-icon>
+            </div>
+            <mat-card-title>{{ action.title }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p>{{ action.description }}</p>
+          </mat-card-content>
+          <mat-card-actions align="end">
+            <button mat-raised-button [color]="action.color" [routerLink]="action.routePath">
+              Get Started
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      }
     </div>
   </div>
 
@@ -69,13 +73,15 @@
       </mat-card-header>
       <mat-card-content>
         <div class="activity-list">
-          <div class="activity-item" *ngFor="let activity of recentActivity">
-            <mat-icon class="activity-icon">{{ activity.icon }}</mat-icon>
-            <div class="activity-info">
-              <span class="activity-action">{{ activity.action }}</span>
-              <span class="activity-time">{{ activity.time }}</span>
+          @for (activity of recentActivity; track activity) {
+            <div class="activity-item">
+              <mat-icon class="activity-icon">{{ activity.icon }}</mat-icon>
+              <div class="activity-info">
+                <span class="activity-action">{{ activity.action }}</span>
+                <span class="activity-time">{{ activity.time }}</span>
+              </div>
             </div>
-          </div>
+          }
         </div>
       </mat-card-content>
       <mat-card-actions align="end">

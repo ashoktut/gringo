@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+
 import { Component, Input, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, forwardRef } from '@angular/core';
 import { FormsModule, ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,14 +19,13 @@ interface LocationValue {
 @Component({
   selector: 'app-map-libre-picker',
   imports: [
-    CommonModule,
     FormsModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
     MatIconModule,
-    MatSelectModule,
-  ],
+    MatSelectModule
+],
   providers: [
         // This provider enables the component to work with Angular reactive forms
     // It tells Angular that this component can be used as a form control

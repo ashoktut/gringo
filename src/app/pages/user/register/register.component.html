@@ -4,42 +4,55 @@
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Username</mat-label>
     <input matInput type="text" formControlName="username" required />
-    <mat-error *ngIf="registerForm.get('username')?.errors?.['required']">
-      Username is required.
-    </mat-error>
-    <mat-error *ngIf="registerForm.get('username')?.errors?.['minlength']">
-      Username must be at least 6 characters long.
-    </mat-error>
+    @if (registerForm.get('username')?.errors?.['required']) {
+      <mat-error>
+        Username is required.
+      </mat-error>
+    }
+    @if (registerForm.get('username')?.errors?.['minlength']) {
+      <mat-error>
+        Username must be at least 6 characters long.
+      </mat-error>
+    }
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Password</mat-label>
     <input matInput type="password" formControlName="password" required />
-    <mat-error *ngIf="registerForm.get('password')?.errors?.['required']">
-      Password is required.
-    </mat-error>
-    <mat-error *ngIf="registerForm.get('password')?.errors?.['minlength']">
-      Password must be at least 8 characters long.
-    </mat-error>
+    @if (registerForm.get('password')?.errors?.['required']) {
+      <mat-error>
+        Password is required.
+      </mat-error>
+    }
+    @if (registerForm.get('password')?.errors?.['minlength']) {
+      <mat-error>
+        Password must be at least 8 characters long.
+      </mat-error>
+    }
   </mat-form-field>
 
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Confirm Password</mat-label>
     <input matInput type="password" formControlName="confirmPassword" required />
-    <mat-error *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">
-      Confirmation required.
-    </mat-error>
-    <mat-error *ngIf="registerForm.get('confirmPassword')?.errors?.['minlength']">
-      Password must be at least 8 characters long.
-    </mat-error>
-    <mat-error
-      *ngIf="
-        registerForm.getError('passwordMismatch') &&
-        registerForm.get('confirmPassword')?.touched
-      "
-    >
-      Passwords do not match.
-    </mat-error>
+    @if (registerForm.get('confirmPassword')?.errors?.['required']) {
+      <mat-error>
+        Confirmation required.
+      </mat-error>
+    }
+    @if (registerForm.get('confirmPassword')?.errors?.['minlength']) {
+      <mat-error>
+        Password must be at least 8 characters long.
+      </mat-error>
+    }
+    @if (
+      registerForm.getError('passwordMismatch') &&
+      registerForm.get('confirmPassword')?.touched
+      ) {
+      <mat-error
+        >
+        Passwords do not match.
+      </mat-error>
+    }
   </mat-form-field>
 </form>
 

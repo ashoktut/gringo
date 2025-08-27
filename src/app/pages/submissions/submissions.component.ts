@@ -47,105 +47,114 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
           </button>
         </div>
       </div>
-
-      <div class="search-results" *ngIf="isSearching && searchTerm">
-        <p class="search-info">
-          <mat-icon>search</mat-icon>
-          Found {{ filteredSubmissions.length }} result(s) for "{{ searchTerm }}"
-        </p>
-      </div>
-
-      <div class="submissions-grid" *ngIf="displayedSubmissions.length > 0; else noSubmissions">
-        <mat-card *ngFor="let submission of displayedSubmissions" class="submission-card">
-          <mat-card-header>
-            <mat-card-title>{{ submission.formTitle }}</mat-card-title>
-            <mat-card-subtitle>
-              ID: {{ submission.submissionId }}
-            </mat-card-subtitle>
-          </mat-card-header>
-
-          <mat-card-content>
-            <div class="submission-details">
-              <p><strong>Client:</strong> {{ submission.formData?.clientName || 'N/A' }}</p>
-              <p><strong>Address:</strong> {{ submission.formData?.standNum || 'N/A' }}</p>
-              <p><strong>Status:</strong>
-                <mat-chip [color]="getStatusColor(submission.status)">
-                  {{ submission.status }}
-                </mat-chip>
-              </p>
-              <p><strong>Created:</strong> {{ submission.createdAt | date:'short' }}</p>
-              <p *ngIf="submission.isRepeatedSubmission">
-                <mat-icon class="repeat-icon">refresh</mat-icon>
-                <em>Repeated from {{ submission.originalSubmissionId }}</em>
-              </p>
-            </div>
-          </mat-card-content>
-
-          <mat-card-actions>
-            <button mat-button
-                    matTooltip="View Details"
-                    (click)="viewSubmission(submission.submissionId)">
-              <mat-icon>visibility</mat-icon>
-              View
-            </button>
-
-            <button mat-button
-                    color="primary"
-                    matTooltip="Generate PDF"
-                    [matMenuTriggerFor]="pdfMenu"
-                    [disabled]="!hasTemplatesForForm(submission.formType)">
-              <mat-icon>picture_as_pdf</mat-icon>
-              PDF
-            </button>
-
-            <button mat-button
-                    color="accent"
-                    matTooltip="Repeat RFQ"
-                    (click)="repeatSubmission(submission.submissionId)">
-              <mat-icon>refresh</mat-icon>
-              Repeat
-            </button>
-
-            <button mat-button
-                    color="warn"
-                    matTooltip="Delete Submission"
-                    (click)="deleteSubmission(submission.submissionId)">
-              <mat-icon>delete</mat-icon>
-              Delete
-            </button>
-
-            <!-- PDF Template Menu -->
-            <mat-menu #pdfMenu="matMenu">
-              <ng-container *ngFor="let template of getTemplatesForSubmission(submission)">
-                <button mat-menu-item (click)="generatePdfFromTemplate(submission, template)">
-                  <mat-icon>{{ getTemplateIcon(template.type) }}</mat-icon>
-                  <span>{{ template.name }}</span>
-                  <mat-chip *ngIf="template.isUniversal" class="universal-chip">Universal</mat-chip>
-                </button>
-              </ng-container>
-              <mat-divider *ngIf="getTemplatesForSubmission(submission).length > 0"></mat-divider>
-              <button mat-menu-item (click)="navigateToTemplates(submission.formType)">
-                <mat-icon>add</mat-icon>
-                <span>Manage Templates</span>
-              </button>
-            </mat-menu>
-          </mat-card-actions>
-        </mat-card>
-      </div>
-
-      <ng-template #noSubmissions>
-        <div class="no-submissions">
-          <mat-icon>description</mat-icon>
-          <h3>{{ isSearching ? 'No results found' : 'No submissions found' }}</h3>
-          <p *ngIf="!isSearching">Start by creating your first RFQ submission.</p>
-          <p *ngIf="isSearching">Try adjusting your search terms or clear the search to see all submissions.</p>
-          <button mat-raised-button color="primary" (click)="createNewRFQ()">
-            Create {{ isSearching ? 'New' : 'First' }} RFQ
-          </button>
+    
+      @if (isSearching && searchTerm) {
+        <div class="search-results">
+          <p class="search-info">
+            <mat-icon>search</mat-icon>
+            Found {{ filteredSubmissions.length }} result(s) for "{{ searchTerm }}"
+          </p>
         </div>
-      </ng-template>
+      }
+    
+      @if (displayedSubmissions.length > 0) {
+        <div class="submissions-grid">
+          @for (submission of displayedSubmissions; track submission) {
+            <mat-card class="submission-card">
+              <mat-card-header>
+                <mat-card-title>{{ submission.formTitle }}</mat-card-title>
+                <mat-card-subtitle>
+                  ID: {{ submission.submissionId }}
+                </mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="submission-details">
+                  <p><strong>Client:</strong> {{ submission.formData?.clientName || 'N/A' }}</p>
+                  <p><strong>Address:</strong> {{ submission.formData?.standNum || 'N/A' }}</p>
+                  <p><strong>Status:</strong>
+                  <mat-chip [color]="getStatusColor(submission.status)">
+                    {{ submission.status }}
+                  </mat-chip>
+                </p>
+                <p><strong>Created:</strong> {{ submission.createdAt | date:'short' }}</p>
+                @if (submission.isRepeatedSubmission) {
+                  <p>
+                    <mat-icon class="repeat-icon">refresh</mat-icon>
+                    <em>Repeated from {{ submission.originalSubmissionId }}</em>
+                  </p>
+                }
+              </div>
+            </mat-card-content>
+            <mat-card-actions>
+              <button mat-button
+                matTooltip="View Details"
+                (click)="viewSubmission(submission.submissionId)">
+                <mat-icon>visibility</mat-icon>
+                View
+              </button>
+              <button mat-button
+                color="primary"
+                matTooltip="Generate PDF"
+                [matMenuTriggerFor]="pdfMenu"
+                [disabled]="!hasTemplatesForForm(submission.formType)">
+                <mat-icon>picture_as_pdf</mat-icon>
+                PDF
+              </button>
+              <button mat-button
+                color="accent"
+                matTooltip="Repeat RFQ"
+                (click)="repeatSubmission(submission.submissionId)">
+                <mat-icon>refresh</mat-icon>
+                Repeat
+              </button>
+              <button mat-button
+                color="warn"
+                matTooltip="Delete Submission"
+                (click)="deleteSubmission(submission.submissionId)">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+              <!-- PDF Template Menu -->
+              <mat-menu #pdfMenu="matMenu">
+                @for (template of getTemplatesForSubmission(submission); track template) {
+                  <button mat-menu-item (click)="generatePdfFromTemplate(submission, template)">
+                    <mat-icon>{{ getTemplateIcon(template.type) }}</mat-icon>
+                    <span>{{ template.name }}</span>
+                    @if (template.isUniversal) {
+                      <mat-chip class="universal-chip">Universal</mat-chip>
+                    }
+                  </button>
+                }
+                @if (getTemplatesForSubmission(submission).length > 0) {
+                  <mat-divider></mat-divider>
+                }
+                <button mat-menu-item (click)="navigateToTemplates(submission.formType)">
+                  <mat-icon>add</mat-icon>
+                  <span>Manage Templates</span>
+                </button>
+              </mat-menu>
+            </mat-card-actions>
+          </mat-card>
+        }
+      </div>
+    } @else {
+      <div class="no-submissions">
+        <mat-icon>description</mat-icon>
+        <h3>{{ isSearching ? 'No results found' : 'No submissions found' }}</h3>
+        @if (!isSearching) {
+          <p>Start by creating your first RFQ submission.</p>
+        }
+        @if (isSearching) {
+          <p>Try adjusting your search terms or clear the search to see all submissions.</p>
+        }
+        <button mat-raised-button color="primary" (click)="createNewRFQ()">
+          Create {{ isSearching ? 'New' : 'First' }} RFQ
+        </button>
+      </div>
+    }
+    
     </div>
-  `,
+    `,
   styles: [`
     .submissions-container {
       padding: 24px;

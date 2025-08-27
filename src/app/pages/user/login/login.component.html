@@ -4,12 +4,16 @@
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>User email</mat-label>
     <input matInput type="email" formControlName="usermail" required />
-    <mat-error *ngIf="loginForm.get('usermail')?.errors?.['required']">
-      <small>User email is required.</small>
-    </mat-error>
-    <mat-error *ngIf="loginForm.get('usermail')?.errors?.['email']">
-      <small>Enter a valid email address.</small>
-    </mat-error>
+    @if (loginForm.get('usermail')?.errors?.['required']) {
+      <mat-error>
+        <small>User email is required.</small>
+      </mat-error>
+    }
+    @if (loginForm.get('usermail')?.errors?.['email']) {
+      <mat-error>
+        <small>Enter a valid email address.</small>
+      </mat-error>
+    }
   </mat-form-field>
 
   <br />
@@ -17,12 +21,16 @@
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Password</mat-label>
     <input matInput type="password" formControlName="password" required />
-    <mat-error *ngIf="loginForm.get('password')?.errors?.['required']">
-      <small>Password is required.</small>
-    </mat-error>
-    <mat-error *ngIf="loginForm.get('password')?.errors?.['minlength']">
-      <small>Enter atleast 8 characters.</small>
-    </mat-error>
+    @if (loginForm.get('password')?.errors?.['required']) {
+      <mat-error>
+        <small>Password is required.</small>
+      </mat-error>
+    }
+    @if (loginForm.get('password')?.errors?.['minlength']) {
+      <mat-error>
+        <small>Enter atleast 8 characters.</small>
+      </mat-error>
+    }
   </mat-form-field>
 </form>
 
@@ -30,11 +38,11 @@
   <button mat-raised-button color="primary" type="submit" (click)="onSubmit()" [routerLink]="['/home']">Login</button>
   <br>
 
-  <small>Forgot Password?
-    <button mat-button color="primary" type="button" [routerLink]="['/forgot-password']">Reset here</button>
-  </small>
+    <small>Forgot Password?
+      <button mat-button color="primary" type="button" [routerLink]="['/forgot-password']">Reset here</button>
+    </small>
 
-  <small>Not a member?
-    <button mat-button color="primary" type="button" [routerLink]="['/register']">Register here</button>
-  </small>
-</div>
+    <small>Not a member?
+      <button mat-button color="primary" type="button" [routerLink]="['/register']">Register here</button>
+    </small>
+  </div>

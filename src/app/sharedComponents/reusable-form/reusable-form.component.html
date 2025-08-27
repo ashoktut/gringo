@@ -1,44 +1,45 @@
 <div class="form-container">
-  <h2 *ngIf="formTitle" class="form-title">{{ formTitle }}</h2>
+  @if (formTitle) {
+    <h2 class="form-title">{{ formTitle }}</h2>
+  }
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dynamic-form">
     <!-- NEW: Grouped mode with sections -->
-    <ng-container *ngIf="sections?.length; else flatMode">
+    @if (sections?.length) {
       <mat-accordion [multi]="multi">
-        <mat-expansion-panel
-          *ngFor="let section of sections; trackBy: trackBySection"
-          [expanded]="section.expanded || false"
-        >
-          <mat-expansion-panel-header>
-            <mat-panel-title>{{ section.title }}</mat-panel-title>
-            <mat-panel-description *ngIf="section.description">
-              {{ section.description }}
-            </mat-panel-description>
-          </mat-expansion-panel-header>
-
-          <ng-container
-            *ngFor="let field of section.fields; trackBy: trackByFieldName"
-          >
-            <ng-container
-              [ngTemplateOutlet]="fieldTemplate"
-              [ngTemplateOutletContext]="{ $implicit: field }"
+        @for (section of sections; track trackBySection($index, section)) {
+          <mat-expansion-panel
+            [expanded]="section.expanded || false"
             >
-            </ng-container>
-          </ng-container>
-        </mat-expansion-panel>
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ section.title }}</mat-panel-title>
+              @if (section.description) {
+                <mat-panel-description>
+                  {{ section.description }}
+                </mat-panel-description>
+              }
+            </mat-expansion-panel-header>
+            @for (field of section.fields; track trackByFieldName($index, field)) {
+              <ng-container
+                [ngTemplateOutlet]="fieldTemplate"
+                [ngTemplateOutletContext]="{ $implicit: field }"
+                >
+              </ng-container>
+            }
+          </mat-expansion-panel>
+        }
       </mat-accordion>
-    </ng-container>
-
-    <!-- UPDATED: Flat mode (backward compatible) -->
-    <ng-template #flatMode>
-      <ng-container *ngFor="let field of fields; trackBy: trackByFieldName">
+    } @else {
+      @for (field of fields; track trackByFieldName($index, field)) {
         <ng-container
           [ngTemplateOutlet]="fieldTemplate"
           [ngTemplateOutletContext]="{ $implicit: field }"
-        >
+          >
         </ng-container>
-      </ng-container>
-    </ng-template>
+      }
+    }
+
+    <!-- UPDATED: Flat mode (backward compatible) -->
 
     <div class="form-actions">
       <button
@@ -47,7 +48,7 @@
         type="submit"
         [disabled]="!isFormValid()"
         class="submit-button"
-      >
+        >
         {{ submitButtonText }}
       </button>
 
@@ -55,7 +56,7 @@
       <div
         class="debug-info"
         style="margin-top: 10px; font-size: 12px; color: #666"
-      >
+        >
         Form Valid (Angular): {{ form.valid }}<br />
         Form Valid (Custom): {{ isFormValid() }}<br />
         Form Touched: {{ form.touched }}<br />
@@ -67,243 +68,267 @@
 
 <!-- NEW: Shared field template (moved all your existing field code here) -->
 <ng-template #fieldTemplate let-field>
-  <div [formGroup]="form" *ngIf="shouldShowField(field)">
-    <!-- Input Fields (text, email, password, number, tel) -->
-    <mat-form-field
-      *ngIf="isInputField(field.type)"
-      appearance="fill"
-      class="full-width"
-    >
-      <mat-label>{{ field.label }}</mat-label>
-      <input
-        matInput
-        [type]="field.type"
-        [formControlName]="field.name"
-        [placeholder]="field.placeholder || ''"
-        [required]="!!field.required"
-      />
-
-      <!-- Clear button -->
-      <button
-        *ngIf="field.clearable"
-        mat-icon-button
-        matSuffix
-        type="button"
-        aria-label="Clear"
-        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-
-      <mat-error *ngIf="hasFieldError(field.name)">
-        {{ getFieldError(field.name) }}
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Date Picker -->
-    <mat-form-field
-      *ngIf="field.type === 'date'"
-      appearance="fill"
-      class="full-width"
-    >
-      <mat-label>{{ field.label }}</mat-label>
-      <input
-        matInput
-        [matDatepicker]="picker"
-        [formControlName]="field.name"
-        [placeholder]="field.placeholder || 'DD/MM/YYYY'"
-        [required]="!!field.required"
-      />
-
-      <!-- Clear button for date -->
-      <button
-        *ngIf="field.clearable"
-        mat-icon-button
-        matSuffix
-        type="button"
-        aria-label="Clear date"
-        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-
-      <mat-datepicker-toggle
-        matIconSuffix
-        [for]="picker"
-      ></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-      <mat-error *ngIf="hasFieldError(field.name)">
-        {{ getFieldError(field.name) }}
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Select Dropdown -->
-    <mat-form-field
-      *ngIf="field.type === 'select'"
-      appearance="fill"
-      class="full-width"
-    >
-      <mat-label>{{ field.label }}</mat-label>
-      <mat-select
-        [formControlName]="field.name"
-        [multiple]="!!field.multiple"
-        [required]="!!field.required"
-      >
-        <mat-option *ngFor="let option of field.options" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-
-      <!-- Clear button for select -->
-      <button
-        *ngIf="field.clearable"
-        mat-icon-button
-        matSuffix
-        type="button"
-        aria-label="Clear selection"
-        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-
-      <mat-error *ngIf="hasFieldError(field.name)">
-        {{ getFieldError(field.name) }}
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Textarea -->
-    <mat-form-field
-      *ngIf="field.type === 'textarea'"
-      appearance="fill"
-      class="full-width"
-    >
-      <mat-label>{{ field.label }}</mat-label>
-      <textarea
-        matInput
-        [formControlName]="field.name"
-        [placeholder]="field.placeholder || ''"
-        [rows]="field.rows || 3"
-        [required]="!!field.required"
-      >
-      </textarea>
-
-      <!-- Clear button for textarea -->
-      <button
-        *ngIf="field.clearable"
-        mat-icon-button
-        matSuffix
-        type="button"
-        aria-label="Clear text"
-        (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
-        (click)="clearField(field, $event)"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-
-      <mat-error *ngIf="hasFieldError(field.name)">
-        {{ getFieldError(field.name) }}
-      </mat-error>
-    </mat-form-field>
-
-    <!-- Checkbox -->
-    <div *ngIf="field.type === 'checkbox'" class="checkbox-field">
-      <mat-checkbox [formControlName]="field.name">
-        {{ field.label }}
-      </mat-checkbox>
-      <div *ngIf="hasFieldError(field.name)" class="mat-error">
-        {{ getFieldError(field.name) }}
-      </div>
-    </div>
-
-    <!-- Radio Group -->
-    <div *ngIf="field.type === 'radio'" class="radio-field">
-      <label class="field-label">{{ field.label }}</label>
-      <mat-radio-group [formControlName]="field.name" class="radio-group">
-        <mat-radio-button
-          *ngFor="let option of field.options"
-          [value]="option.value"
-          class="radio-button"
-        >
-          {{ option.label }}
-        </mat-radio-button>
-      </mat-radio-group>
-      <div *ngIf="hasFieldError(field.name)" class="mat-error">
-        {{ getFieldError(field.name) }}
-      </div>
-    </div>
-
-    <!-- MapLibre Map Field -->
-    <div *ngIf="field.type === 'map'" class="map-field">
-      <!-- Field label -->
-      <label class="field-label">{{ field.label }}</label>
-
-      <!-- Map picker component with all configuration options -->
-      <app-map-libre-picker
-        [formControlName]="field.name"
-        [defaultCenter]="field.mapConfig?.defaultCenter || [28.0473, -26.2041]"
-        [zoom]="field.mapConfig?.zoom || 10"
-        [height]="field.mapConfig?.height || '400px'"
-        [enableGeocoding]="field.mapConfig?.enableGeocoding !== false"
-        [enableLocationPicker]="field.mapConfig?.enableLocationPicker !== false"
-        [style]="field.mapConfig?.style || 'liberty'"
-      >
-      </app-map-libre-picker>
-
-      <!-- Show validation errors if any -->
-      <div *ngIf="hasFieldError(field.name)" class="mat-error">
-        {{ getFieldError(field.name) }}
-      </div>
-    </div>
-
-    <!-- 🖊️ Digital Signature Field -->
-    <div *ngIf="field.type === 'signature'" class="signature-field">
-      <!-- Digital signature component with all configuration options -->
-      <app-digital-signature
-        [formControlName]="field.name"
-        [label]="field.label"
-        [placeholder]="field.placeholder"
-        [canvasWidth]="field.signatureConfig?.canvasWidth || 600"
-        [canvasHeight]="field.signatureConfig?.canvasHeight || 200"
-        [strokeColor]="field.signatureConfig?.strokeColor || '#000000'"
-        [strokeWidth]="field.signatureConfig?.strokeWidth || 2"
-        [backgroundColor]="field.signatureConfig?.backgroundColor || '#FFFFFF'"
-      >
-      </app-digital-signature>
-
-      <!-- Show validation errors if any -->
-      <div *ngIf="hasFieldError(field.name)" class="mat-error">
-        {{ getFieldError(field.name) }}
-      </div>
-    </div>
-
-    <!-- 📸 Picture Upload Field -->
-    <div *ngIf="field.type === 'picture'" class="picture-field">
-      <label *ngIf="field.label" class="field-label">{{ field.label }}</label>
-      <app-picture-upload
-        [formControlName]="field.name"
-        [placeholder]="field.pictureConfig?.placeholder || field.placeholder || 'Add Picture'"
-        [maxFileSize]="field.pictureConfig?.maxFileSize || 5242880"
-        [acceptedTypes]="field.pictureConfig?.acceptedTypes || ['image/jpeg', 'image/png', 'image/webp', 'image/gif']"
-        [required]="!!field.required"
-        [disabled]="form.get(field.name)?.disabled || false"
-        (error)="onPictureError($event, field.name)"
-      >
-      </app-picture-upload>
-
-      <!-- Show validation errors if any -->
-      <div *ngIf="hasFieldError(field.name)" class="mat-error">
-        {{ getFieldError(field.name) }}
-      </div>
-    </div>
-
-    <!-- 🏷️ Label Field (Display-only text) -->
-    <div *ngIf="field.type === 'label'" class="label-field" [ngClass]="getLabelClasses(field)">
-      <div class="label-content" [ngStyle]="getLabelStyles(field)">
-        {{ field.text || field.label }}
-      </div>
-    </div>
-  </div>
-</ng-template>
+  @if (shouldShowField(field)) {
+    <div [formGroup]="form">
+      <!-- Input Fields (text, email, password, number, tel) -->
+      @if (isInputField(field.type)) {
+        <mat-form-field
+          appearance="fill"
+          class="full-width"
+          >
+          <mat-label>{{ field.label }}</mat-label>
+          <input
+            matInput
+            [type]="field.type"
+            [formControlName]="field.name"
+            [placeholder]="field.placeholder || ''"
+            [required]="!!field.required"
+            />
+            <!-- Clear button -->
+            @if (field.clearable) {
+              <button
+                mat-icon-button
+                matSuffix
+                type="button"
+                aria-label="Clear"
+                (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+                (click)="clearField(field, $event)"
+                >
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+            @if (hasFieldError(field.name)) {
+              <mat-error>
+                {{ getFieldError(field.name) }}
+              </mat-error>
+            }
+          </mat-form-field>
+        }
+        <!-- Date Picker -->
+        @if (field.type === 'date') {
+          <mat-form-field
+            appearance="fill"
+            class="full-width"
+            >
+            <mat-label>{{ field.label }}</mat-label>
+            <input
+              matInput
+              [matDatepicker]="picker"
+              [formControlName]="field.name"
+              [placeholder]="field.placeholder || 'DD/MM/YYYY'"
+              [required]="!!field.required"
+              />
+              <!-- Clear button for date -->
+              @if (field.clearable) {
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  aria-label="Clear date"
+                  (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+                  (click)="clearField(field, $event)"
+                  >
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              <mat-datepicker-toggle
+                matIconSuffix
+                [for]="picker"
+              ></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+              @if (hasFieldError(field.name)) {
+                <mat-error>
+                  {{ getFieldError(field.name) }}
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- Select Dropdown -->
+          @if (field.type === 'select') {
+            <mat-form-field
+              appearance="fill"
+              class="full-width"
+              >
+              <mat-label>{{ field.label }}</mat-label>
+              <mat-select
+                [formControlName]="field.name"
+                [multiple]="!!field.multiple"
+                [required]="!!field.required"
+                >
+                @for (option of field.options; track option) {
+                  <mat-option [value]="option.value">
+                    {{ option.label }}
+                  </mat-option>
+                }
+              </mat-select>
+              <!-- Clear button for select -->
+              @if (field.clearable) {
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  aria-label="Clear selection"
+                  (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+                  (click)="clearField(field, $event)"
+                  >
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              @if (hasFieldError(field.name)) {
+                <mat-error>
+                  {{ getFieldError(field.name) }}
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- Textarea -->
+          @if (field.type === 'textarea') {
+            <mat-form-field
+              appearance="fill"
+              class="full-width"
+              >
+              <mat-label>{{ field.label }}</mat-label>
+              <textarea
+                matInput
+                [formControlName]="field.name"
+                [placeholder]="field.placeholder || ''"
+                [rows]="field.rows || 3"
+                [required]="!!field.required"
+                >
+              </textarea>
+              <!-- Clear button for textarea -->
+              @if (field.clearable) {
+                <button
+                  mat-icon-button
+                  matSuffix
+                  type="button"
+                  aria-label="Clear text"
+                  (pointerdown)="$event.preventDefault(); $event.stopPropagation()"
+                  (click)="clearField(field, $event)"
+                  >
+                  <mat-icon>close</mat-icon>
+                </button>
+              }
+              @if (hasFieldError(field.name)) {
+                <mat-error>
+                  {{ getFieldError(field.name) }}
+                </mat-error>
+              }
+            </mat-form-field>
+          }
+          <!-- Checkbox -->
+          @if (field.type === 'checkbox') {
+            <div class="checkbox-field">
+              <mat-checkbox [formControlName]="field.name">
+                {{ field.label }}
+              </mat-checkbox>
+              @if (hasFieldError(field.name)) {
+                <div class="mat-error">
+                  {{ getFieldError(field.name) }}
+                </div>
+              }
+            </div>
+          }
+          <!-- Radio Group -->
+          @if (field.type === 'radio') {
+            <div class="radio-field">
+              <label class="field-label">{{ field.label }}</label>
+              <mat-radio-group [formControlName]="field.name" class="radio-group">
+                @for (option of field.options; track option) {
+                  <mat-radio-button
+                    [value]="option.value"
+                    class="radio-button"
+                    >
+                    {{ option.label }}
+                  </mat-radio-button>
+                }
+              </mat-radio-group>
+              @if (hasFieldError(field.name)) {
+                <div class="mat-error">
+                  {{ getFieldError(field.name) }}
+                </div>
+              }
+            </div>
+          }
+          <!-- MapLibre Map Field -->
+          @if (field.type === 'map') {
+            <div class="map-field">
+              <!-- Field label -->
+              <label class="field-label">{{ field.label }}</label>
+              <!-- Map picker component with all configuration options -->
+              <app-map-libre-picker
+                [formControlName]="field.name"
+                [defaultCenter]="field.mapConfig?.defaultCenter || [28.0473, -26.2041]"
+                [zoom]="field.mapConfig?.zoom || 10"
+                [height]="field.mapConfig?.height || '400px'"
+                [enableGeocoding]="field.mapConfig?.enableGeocoding !== false"
+                [enableLocationPicker]="field.mapConfig?.enableLocationPicker !== false"
+                [style]="field.mapConfig?.style || 'liberty'"
+                >
+              </app-map-libre-picker>
+              <!-- Show validation errors if any -->
+              @if (hasFieldError(field.name)) {
+                <div class="mat-error">
+                  {{ getFieldError(field.name) }}
+                </div>
+              }
+            </div>
+          }
+          <!-- 🖊️ Digital Signature Field -->
+          @if (field.type === 'signature') {
+            <div class="signature-field">
+              <!-- Digital signature component with all configuration options -->
+              <app-digital-signature
+                [formControlName]="field.name"
+                [label]="field.label"
+                [placeholder]="field.placeholder"
+                [canvasWidth]="field.signatureConfig?.canvasWidth || 600"
+                [canvasHeight]="field.signatureConfig?.canvasHeight || 200"
+                [strokeColor]="field.signatureConfig?.strokeColor || '#000000'"
+                [strokeWidth]="field.signatureConfig?.strokeWidth || 2"
+                [backgroundColor]="field.signatureConfig?.backgroundColor || '#FFFFFF'"
+                >
+              </app-digital-signature>
+              <!-- Show validation errors if any -->
+              @if (hasFieldError(field.name)) {
+                <div class="mat-error">
+                  {{ getFieldError(field.name) }}
+                </div>
+              }
+            </div>
+          }
+          <!-- 📸 Picture Upload Field -->
+          @if (field.type === 'picture') {
+            <div class="picture-field">
+              @if (field.label) {
+                <label class="field-label">{{ field.label }}</label>
+              }
+              <app-picture-upload
+                [formControlName]="field.name"
+                [placeholder]="field.pictureConfig?.placeholder || field.placeholder || 'Add Picture'"
+                [maxFileSize]="field.pictureConfig?.maxFileSize || 5242880"
+                [acceptedTypes]="field.pictureConfig?.acceptedTypes || ['image/jpeg', 'image/png', 'image/webp', 'image/gif']"
+                [required]="!!field.required"
+                [disabled]="form.get(field.name)?.disabled || false"
+                (error)="onPictureError($event, field.name)"
+                >
+              </app-picture-upload>
+              <!-- Show validation errors if any -->
+              @if (hasFieldError(field.name)) {
+                <div class="mat-error">
+                  {{ getFieldError(field.name) }}
+                </div>
+              }
+            </div>
+          }
+          <!-- 🏷️ Label Field (Display-only text) -->
+          @if (field.type === 'label') {
+            <div class="label-field" [ngClass]="getLabelClasses(field)">
+              <div class="label-content" [ngStyle]="getLabelStyles(field)">
+                {{ field.text || field.label }}
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </ng-template>

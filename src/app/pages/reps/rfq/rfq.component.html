@@ -11,16 +11,20 @@
     <h1>
       {{ isRepeatMode ? 'Repeat Request For Quote (RFQ)' : 'Request For Quote (RFQ)' }}
     </h1>
-    <p *ngIf="!isRepeatMode">
-      Complete the form section by section. Click on a section header to expand it - only one section can be open at a time.
-    </p>
-    <div *ngIf="isRepeatMode" class="repeat-notice">
-      <mat-icon>refresh</mat-icon>
+    @if (!isRepeatMode) {
       <p>
-        Creating new RFQ based on submission #{{ originalSubmissionId?.split('-')?.[1] || originalSubmissionId }}.
-        Review and update as needed.
+        Complete the form section by section. Click on a section header to expand it - only one section can be open at a time.
       </p>
-    </div>
+    }
+    @if (isRepeatMode) {
+      <div class="repeat-notice">
+        <mat-icon>refresh</mat-icon>
+        <p>
+          Creating new RFQ based on submission #{{ originalSubmissionId?.split('-')?.[1] || originalSubmissionId }}.
+          Review and update as needed.
+        </p>
+      </div>
+    }
   </div>
 
   <app-reusable-form
@@ -31,7 +35,7 @@
     [initialData]="repeatedSubmissionData"
     (formSubmit)="onFormSubmit($event)"
     (formValueChange)="onFormValueChange($event)"
-  >
+    >
   </app-reusable-form>
 
   <div class="form-info">
