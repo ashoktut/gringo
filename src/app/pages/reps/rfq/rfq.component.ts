@@ -497,10 +497,10 @@ export class RfqComponent implements OnInit {
           ],
         },
 
-        // Wall cobbling field
+        // Wall corbel field
         {
-          name: 'wallCobbling',
-          label: 'Wall Cobbling',
+          name: 'wallCorbel',
+          label: 'Wall Corbel',
           type: 'text',
           required: false,
           clearable: true,
@@ -727,7 +727,7 @@ export class RfqComponent implements OnInit {
 
         // optional p&g1 question field
         {
-          name: 'optionalP&G1',
+          name: 'optionalPG1',
           label: 'Optional P&G1',
           type: 'select',
           multiple: false,
@@ -748,7 +748,7 @@ export class RfqComponent implements OnInit {
           clearable: true,
           placeholder: 'List all the items required in a short description',
           conditional: {
-            dependsOn: 'optionalP&G1',
+            dependsOn: 'optionalPG1',
             showWhen: 'yes',
           },
         },
@@ -1471,13 +1471,15 @@ export class RfqComponent implements OnInit {
       .subscribe({
         next: (response) => {
           // Merge metadata into form data for DOCX
-          const docxData = {
+          const docxDataRaw = {
             ...submissionData,
             submissionId: response.submissionId,
             createdAt: response.createdAt,
             updatedAt: response.updatedAt,
             status: response.status,
           };
+          // Process all fields for PDF output (labels always shown, values empty if not filled)
+  const docxData = this.processFieldsForPdf(docxDataRaw, this.rfqSections);
 
           // Fetch the first available RFQ template and generate PDF
           this.templateManagementService.getTemplatesForForm('rfq').subscribe({
@@ -1586,4 +1588,85 @@ export class RfqComponent implements OnInit {
     // You can perform real-time validation or other actions here
     // For example, enable/disable submit button, show live preview, etc.
   }
+
+  /**
+   * Processes all fields for PDF output, ensuring all labels are present and
+   * values are empty string if not filled or not shown (conditional/dependent fields).
+   */
+  private processFieldsForPdf(formData: any, rfqSections: FormSection[]): any {
+    const processed: any = {};
+
+    rfqSections.forEach(section => {
+      section.fields.forEach(field => {
+        // Always use the value or empty string
+        let value = formData[field.name] ?? '';
+
+        // For conditional fields, always set their value (yes/no/other)
+        // For dependent fields, set value if condition met, else empty string
+        if (field.conditional) {
+          const depValue = formData[field.conditional.dependsOn];
+          if (field.conditional.showWhen === 'hasValue') {
+            if (!depValue) value = '';
+          } else if (depValue !== field.conditional.showWhen) {
+            value = '';
+          }
+        }
+
+        // Special logic for computed display fields
+        if (field.name === 'ulaySpec') {
+          if (Array.isArray(formData.ulaySpec)) {
+            if (formData.ulaySpec.includes('OtherIns')) {
+              processed.membraneType = formData.insSpec || '';
+            } else {
+              processed.membraneType = formData.ulaySpec.join(', ');
+            }
+          } else if (formData.ulaySpec === 'OtherIns') {
+            processed.membraneType = formData.insSpec || '';
+          } else {
+            processed.membraneType = formData.ulaySpec || '';
+          }
+        }
+
+        // Solar Area (dependent)
+        if (field.name === 'solarLoad') {
+          processed.solarLoad = formData.solarLoad ?? '';
+          processed.solarAreaDisplay = formData.solarLoad === 'yes' ? formData.solarArea || '' : '';
+        }
+
+        // Geyser Area (dependent)
+        if (field.name === 'geyserLoad') {
+          processed.geyserLoad = formData.geyserLoad ?? '';
+          processed.geyserAreaDisplay = formData.geyserLoad === 'yes' ? formData.geyserArea || '' : '';
+        }
+
+        // Exposed Truss (dependent)
+        if (field.name === 'exposedTruss') {
+          processed.exposedTruss = formData.exposedTruss ?? '';
+          processed.trussTypeDisplay = formData.exposedTruss === 'yes' ? formData.trussType || '' : '';
+          processed.trussType2Display = formData.exposedTruss === 'yes' ? formData.trussType2 || '' : '';
+          processed.trussAreaDisplay = formData.exposedTruss === 'yes' ? formData.trussArea || '' : '';
+        }
+
+        // Optional P&G1 (dependent)
+        if (field.name === 'optionalPG1') {
+          processed.optionalPG1 = formData.optionalPG1 ?? '';
+          processed.pg1DescDisplay = formData.optionalPG1 === 'yes' ? formData.pg1Desc || '' : '';
+        }
+
+        // Building Type (Other)
+        if (field.name === 'buildingType') {
+          processed.buildingType = formData.buildingType ?? '';
+          processed.otherBuildDisplay = formData.buildingType === 'other' ? formData.otherBuild || '' : '';
+        }
+
+        // Always set the field (unless it's a computed display field above)
+        if (!processed.hasOwnProperty(field.name)) {
+          processed[field.name] = value;
+        }
+      });
+    });
+
+    return processed;
+  }
 }
+

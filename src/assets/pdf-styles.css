@@ -1,0 +1,202 @@
+/* ========== BASE ========== */
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  color: #1a237e;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+.pdf-page-margins {
+  margin: 24mm 16mm 24mm 16mm; /* top, right, bottom, left */
+  box-sizing: border-box;
+  background: #fff;
+}
+
+/* ========== HEADER ========== */
+.lcp-header-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 0;
+}
+.lcp-header {
+  padding: 0;
+  margin: 0;
+  border-bottom: none;
+  background: none;
+  display: block;
+}
+
+/* ========== FOOTER ========== */
+.lcp-footer-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-top: 0;
+}
+.lcp-footer {
+  padding: 0;
+  margin: 0;
+  border-top: none;
+  background: none;
+  display: block;
+  text-align: center;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+.footer-logos img {
+  height: 30px;
+  margin: 0 5px;
+}
+.footer-director {
+  font-size: 11px;
+  color: #1a237e;
+  margin-top: 5px;
+}
+
+/* ========== TITLES & SECTION HEADINGS ========== */
+.rfq-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px 0 5px 20px;
+}
+.rfq-title-main {
+  color: #e53935;
+  text-transform: uppercase;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: bold;
+  color: #1a237e;
+  border-bottom: 1px solid #1a237e;
+  margin-bottom: 5px;
+}
+
+/* ========== META & UTILITY ========== */
+.rfq-meta {
+  font-size: 8px;
+  margin: 0 0 10px 20px;
+}
+.office-use {
+  font-weight: bold;
+  color: #e53935;
+}
+.important-info {
+  color: #fff;
+  background: #fbc02d;
+  font-weight: bold;
+  padding: 2px 8px;
+  display: inline-block;
+  transform: rotate(-10deg);
+  margin: 10px 0;
+}
+
+/* ========== FORM ELEMENTS ========== */
+.pdf-checkbox-square {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1.5px solid #1a237e;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-left: 4px;
+  margin-right: 2px;
+  background: #fff;
+}
+
+/* ========== SECTIONS ========== */
+.rfq-section {
+  margin: 15px 20px;
+  padding: 10px;
+  border-bottom: 1px solid #bdbdbd;
+}
+.rfq-section-3col {
+  margin-bottom: 10px;
+}
+.rfq-3col-row {
+  display: flex;
+  flex-wrap: nowrap;
+  margin-bottom: 4px;
+}
+.rfq-label-value {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 9px;
+  margin-right: 12px;
+  white-space: nowrap;
+}
+.rfq-label {
+  font-weight: bold;
+  font-size: 9px;
+}
+.rfq-value {
+  font-size: 9px;
+}
+
+/* ========== 2-COLUMN SECTION ========== */
+.rfq-section-2col {
+  margin-bottom: 10px;
+}
+.rfq-2col-row {
+  display: flex;
+  flex-wrap: nowrap;
+  margin-bottom: 4px;
+}
+.rfq-section-2col .section-title {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 12px;
+  margin-right: 12px;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+.rfq-section-2col .rfq-label-value {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: 9px;
+  margin-right: 12px;
+  white-space: nowrap;
+  margin-bottom: 0;
+}
+.rfq-section-2col .rfq-label {
+  font-weight: bold;
+  font-size: 9px;
+}
+.rfq-section-2col .rfq-value {
+  font-size: 9px;
+  font-weight: normal;
+}
+
+/* ========== ROWS ========== */
+.rfq-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 10px 20px;
+  gap: 0 16px;
+}
+.rfq-row > div {
+  flex: 0 0 calc(33.333% - 12px);
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+}
+.rfq-rect {
+  display: inline-block;
+  width: 80px;
+  height: 18px;
+  border: 1.5px solid #1a237e;
+  border-radius: 2px;
+  margin-left: 8px;
+  background: #fff;
+  vertical-align: middle;
+}
+.rfq-underline {
+  display: inline-block;
+  border-bottom: 1px solid #1a237e;
+  min-width: 60px;
+  height: 1em;
+  vertical-align: bottom;
+}

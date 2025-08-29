@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Request for Quote - LCP Roofing</title>
+    <link rel="stylesheet" href="assets/pdf-styles.css" />
+  </head>
+  <body>
+    <div class="pdf-page-margins">
+      <div class="lcp-header">
+        <img
+          src="assets/images/header.jpg"
+          class="lcp-header-img"
+          alt="LCP Roofing Logo"
+        />
+      </div>
+
+      <div class="rfq-title">
+        <span
+          >Request for Quote:
+          <span class="rfq-title-main">ROOF TRUSSES and COVERINGS</span></span
+        >
+      </div>
+      <div class="rfq-meta">
+        Submitted by: {{repName}} &nbsp; | &nbsp; Submission timestamp:
+        {{createdAt}} &nbsp; | &nbsp; Submission ID: {{submissionId}}
+      </div>
+
+      <div class="rfq-section office-use">
+        <span>Office use:</span> Emailed
+        <span class="pdf-checkbox-square"></span>
+      </div>
+
+      <div class="rfq-row">
+        <div>Drawn on <span class="rfq-rect"></span></div>
+        <div>Drawn By <span class="rfq-rect"></span></div>
+        <div>Customer no <span class="rfq-rect"></span></div>
+        <div>Quoted on <span class="rfq-rect"></span></div>
+        <div>Estimator <span class="rfq-rect"></span></div>
+        <div>Quote no <span class="rfq-rect"></span></div>
+        <div>Rate check <span class="rfq-rect"></span></div>
+      </div>
+
+      <div class="rfq-section rfq-section-3col">
+        <div class="rfq-3col-row">
+          <div class="rfq-label-value">
+            <span class="rfq-label">Date quote requested:</span>
+            <span class="rfq-value">{{dateSubmitted}}</span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">Requested by:</span>
+            <span class="rfq-value">{{repName}}</span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">ABK:</span>
+            <span class="rfq-value">{{abk}}</span>
+          </div>
+        </div>
+        <div class="rfq-3col-row">
+          <div class="rfq-label-value">
+            <span class="rfq-label">Date required by:</span>
+            <span class="rfq-value">{{dateDue}}</span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">Other:</span>
+            <span class="rfq-value"></span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">P&G2:</span>
+            <span class="rfq-value">{{pg2}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rfq-section rfq-section-2col">
+        <div class="rfq-2col-row">
+          <div class="section-title">PROJECT INFORMATION</div>
+          <div class="section-title">
+            Roof Required in:<span class="rfq-value">{{roofTimeline}}</span>
+          </div>
+        </div>
+        <div class="rfq-2col-row">
+          <div class="rfq-label-value">
+            <span class="rfq-label">Stand # or address:</span>
+            <span class="rfq-value">{{standNum}}</span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">Company:</span>
+            <span class="rfq-value">{{companyName}}</span>
+          </div>
+        </div>
+        <div class="rfq-2col-row">
+          <div class="rfq-label-value">
+            <span class="rfq-label">Client Name & Surname:</span>
+            <span class="rfq-value">{{clientName}}</span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">Client email:</span>
+            <span class="rfq-value">{{clientEmail}}</span>
+          </div>
+        </div>
+        <div class="rfq-2col-row">
+          <div class="rfq-label-value">
+            <span class="rfq-label">Contact No:</span>
+            <span class="rfq-value">{{clientPhone}}</span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">Copy email:</span>
+            <span class="rfq-value">{{ccMail}}</span>
+          </div>
+        </div>
+        <div class="rfq-2col-row">
+          <div class="rfq-label-value">
+            <span class="rfq-label">Building type:</span>
+            <span class="rfq-value">{{buildingType}}</span>
+          </div>
+          <div class="rfq-label-value">
+            <span class="rfq-label">Municipality:</span>
+            <span class="rfq-value">{{municipality}}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="rfq-section">
+        <div class="section-title">PROJECT DESIGN INFORMATION</div>
+        <div>Gate Access Payment: {{gateAccess}}</div>
+        <div>Structure for / Type: {{structureType}}</div>
+        <div>Maximum truss spacing: {{maxTrussSpacing}}</div>
+        <!-- ... add more fields as needed ... -->
+        <div>Roof Pitch: {{mainPitch}}</div>
+        <div>2nd Pitch: {{pitch2}}</div>
+        <div>Roofing Service Req: {{serviceType}}</div>
+        <div>Eaves Overhang: {{eavesOH}}</div>
+        <div>Gable Overhang: {{gableOH}}</div>
+        <div>Apex Overhang: {{apexOH}}</div>
+        <div>Membrane Type: {{membraneType}}</div>
+        <div>Ceiling Type: {{ceilingType}}</div>
+        <div>Wall Corbelling Size: {{wallCorbel}}</div>
+
+        <!-- Solar Loading Required (always shows yes/no) -->
+        <!-- Solar Area (shows value if solarLoad is yes, else blank) -->
+        <div>Solar Loadings: {{solarLoad}}</div>
+        <div>Solar Locations: {{solarAreaDisplay}}</div>
+
+        <!-- Geyser Loading Required (always shows yes/no) -->
+        <!-- Geyser Area (shows value if geyserLoad is yes, else blank) -->
+        <div>Geyser Loadings: {{geyserLoad}}</div>
+        <div>Geyser Locations: {{ geyserAreaDisplay }}</div>
+
+        <!-- Exposed Truss (always shows yes/no) -->
+        <div>Exposed Trusses Req: {{exposedTruss}}</div>
+        <div>If Yes: {{trussTypeDisplay}}</div>
+        <div>Exposed Truss Type: {{trussType2Display}}</div>
+        <div>Exposed Locations: {{trussAreaDisplay}}</div>
+
+        <!-- Truss Sundry -->
+        <div>Truss Sundries Req: {{trussSundry}}</div>
+        <!-- Truss Notes -->
+        <div>General Truss Notes: {{trussNotes}}</div>
+
+        <!-- Optional P&G1 (always shows yes/no) -->
+        <!-- pg1DescDisplay (shows value if optionalPG1 is yes, else blank) -->
+        <div>Optional P&G1: {{optionalPG1}}</div>
+        <div>Description: {{pg1DescDisplay}}</div>
+      </div>
+
+      <div class="rfq-section">
+        <div class="section-title">ROOF COVERING INFORMATION</div>
+        <!-- ... add more fields as needed ... -->
+        <div>Quote Cover: {{coverReq}}</div>
+        <div>Covering Type: {{coverType}}</div>
+        <div>Tile Profile: {{tileProfile}}</div>
+        <div>Tile Colour: {{tileColour}}</div>
+        <div>Tile Nailing: {{tileNailing}}</div>
+        <div>Sheet Profile: {{sheetProfile}}</div>
+        <div>Sheet Colour: {{sheetColour}}</div>
+
+        <div>General Cover Notes: {{coverNotes}}</div>
+      </div>
+
+      <div class="rfq-section">
+        <div class="section-title">DRAWING DETAILS & REVISIONS</div>
+        <!-- ... add more fields as needed ... -->
+      </div>
+
+      <div class="rfq-section">
+        <div class="section-title">IMAGES TAKEN OF DRAWINGS / SITE</div>
+        <!-- ... add more fields as needed ... -->
+      </div>
+
+      <div class="rfq-section">
+        <div class="section-title">GENERAL NOTES</div>
+        <div>{{generalNotes}}</div>
+        <div class="important-info">IMPORTANT INFO</div>
+        <!-- ... add more notes as needed ... -->
+      </div>
+
+      <div class="lcp-footer">
+        <img
+          src="assets/images/footer.png"
+          class="lcp-footer-img"
+          alt="footer"
+        />
+      </div>
+    </div>
+  </body>
+</html>
