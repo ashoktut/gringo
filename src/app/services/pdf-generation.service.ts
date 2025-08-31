@@ -22,14 +22,18 @@ export class PdfGenerationService {
     options?: PdfGenerationOptions
   ): Observable<void> {
 
-    // Check if we should use docx processing for format preservation
-    if (this.shouldUseDocxProcessing(template)) {
+    // Only attempt docx processing for Word templates
+    if (template.type === 'word' && this.shouldUseDocxProcessing(template)) {
       console.log('🎯 Using docx library for format preservation');
       return this.generatePdfWithDocx(template, formData, options);
     }
 
-    // Fallback to string-based processing (loses formatting)
-    console.log('⚠️ Using fallback string replacement');
+    // For non-Word templates, use string-based processing directly
+    if (template.type !== 'word') {
+      console.log('📝 Using string replacement for non-Word template');
+    } else {
+      console.log('⚠️ Using fallback string replacement');
+    }
     return this.generatePdfWithStringReplacement(template, formData, options);
   }
 
@@ -86,29 +90,29 @@ export class PdfGenerationService {
    * Determine if docx processing should be used
    */
   private shouldUseDocxProcessing(template: Template): boolean {
-    console.log('🔍 Evaluating template for docx processing:');
-    console.log(`  • Template name: "${template.name}"`);
-    console.log(`  • Template type: "${template.type}"`);
-    console.log(`  • Preserve formatting: ${template.preserveFormatting}`);
-    console.log(`  • Has original file: ${!!template.originalFile}`);
-    console.log(`  • Has binary content: ${!!template.binaryContent}`);
-    console.log(`  • Binary content size: ${template.binaryContent?.byteLength || 0} bytes`);
-
+    // Only log warnings if the template is a Word document
+    const isWord = template.type === 'word';
     const canUseDocx = !!(
-      template.type === 'word' &&
+      isWord &&
       template.preserveFormatting &&
       (template.originalFile || template.binaryContent)
     );
 
-    console.log(`  • 🎯 Will use docx processing: ${canUseDocx}`);
-
-    if (!canUseDocx) {
-      console.warn('⚠️ Falling back to string replacement because:');
-      if (template.type !== 'word') console.warn(`    - Template type is "${template.type}" (need "word")`);
-      if (!template.preserveFormatting) console.warn('    - preserveFormatting is disabled');
-      if (!template.originalFile && !template.binaryContent) console.warn('    - No binary content available');
+    if (isWord) {
+      console.log('🔍 Evaluating template for docx processing:');
+      console.log(`  • Template name: "${template.name}"`);
+      console.log(`  • Template type: "${template.type}"`);
+      console.log(`  • Preserve formatting: ${template.preserveFormatting}`);
+      console.log(`  • Has original file: ${!!template.originalFile}`);
+      console.log(`  • Has binary content: ${!!template.binaryContent}`);
+      console.log(`  • Binary content size: ${template.binaryContent?.byteLength || 0} bytes`);
+      console.log(`  • 🎯 Will use docx processing: ${canUseDocx}`);
+      if (!canUseDocx) {
+        console.warn('⚠️ Falling back to string replacement because:');
+        if (!template.preserveFormatting) console.warn('    - preserveFormatting is disabled');
+        if (!template.originalFile && !template.binaryContent) console.warn('    - No binary content available');
+      }
     }
-
     return canUseDocx;
   }
 

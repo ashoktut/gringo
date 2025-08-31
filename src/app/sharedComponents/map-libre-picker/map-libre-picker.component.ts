@@ -117,6 +117,100 @@ export class MapLibrePickerComponent implements OnInit, AfterViewInit, OnDestroy
         this.setupLocationPicker();
       }
 
+      // Handle missing images dynamically for multiple icons
+      // Dynamically load any Maki icon from assets/map-icons/{id}.svg, with alias support
+      const iconAlias: { [key: string]: string } = {
+        // General
+        'atm': 'bank',
+        'bank': 'bank',
+        'office': 'commercial',
+        'commercial': 'commercial',
+        'complex': 'residential-community',
+        'complexes': 'residential-community',
+        'apartment': 'residential-community',
+        'apartments': 'residential-community',
+        'residential': 'residential-community',
+        'residential_community': 'residential-community',
+        'building': 'building',
+        'buildings': 'building',
+        'home': 'home',
+        'house': 'home',
+        'houses': 'home',
+        'lift_gate': 'lift-gate',
+        'lift-gate': 'lift-gate',
+        'gate': 'gate',
+        'swimming_pool': 'swimming',
+        'swimming': 'swimming',
+        'cycling': 'bicycle',
+        'bicycle': 'bicycle',
+        'school': 'school',
+        'hospital': 'hospital',
+        'restaurant': 'restaurant',
+        'park': 'park',
+        'parking': 'parking',
+        'warehouse': 'warehouse',
+        'stadium': 'stadium',
+        'village': 'village',
+        'town': 'town',
+        'city': 'city',
+        // Roofing
+        'roof': 'home',
+        'roofing': 'home',
+        'gutter': 'building',
+        'gutters': 'building',
+        'tile': 'building',
+        'tiles': 'building',
+        'shingle': 'building',
+        'shingles': 'building',
+        'sheeting': 'building',
+        'metal_roof': 'building',
+        'flat_roof': 'building',
+        'pitched_roof': 'building',
+        // Trucking
+        'truck': 'car',
+        'trucking': 'car',
+        'lorry': 'car',
+        'semi': 'car',
+        'trailer': 'car',
+        'freight': 'car',
+        'delivery': 'car',
+        'logistics': 'car',
+        'transport': 'car',
+        'transportation': 'car',
+        'fleet': 'car',
+        // Construction
+        'construction': 'construction',
+        'site': 'construction',
+        'yard': 'construction',
+        'crane': 'construction',
+        'equipment': 'construction',
+        'machinery': 'construction',
+        'excavator': 'construction',
+        'bulldozer': 'construction',
+        'dump_truck': 'car',
+        'cement': 'construction',
+        'concrete': 'construction',
+        'scaffolding': 'construction',
+        'materials': 'warehouse',
+        'storage': 'warehouse',
+        'supply': 'warehouse',
+        'supplies': 'warehouse',
+        // Add more aliases as needed
+      };
+      this.map.on('styleimagemissing', (e: any) => {
+        const iconId = iconAlias[e.id] || e.id;
+        const imagePath = `/assets/map-icons/${iconId}.svg`;
+        this.map.loadImage(imagePath)
+          .then((image: any) => {
+            if (image) {
+              this.map.addImage(e.id, image);
+            }
+          })
+          .catch(() => {
+            // Optionally log missing icon or fallback
+          });
+      });
+
       // If component already has a value (from form), display it on the map
       if (this.value) {
         this.setMarker(this.value.lng, this.value.lat, this.value.address);

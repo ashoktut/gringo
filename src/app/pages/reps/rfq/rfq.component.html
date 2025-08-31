@@ -32,7 +32,7 @@
     [multi]="false"
     [formTitle]="isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
     [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
-    [initialData]="repeatedSubmissionData"
+    [initialData]="isRepeatMode ? repeatedSubmissionData : initialFormData"
     (formSubmit)="onFormSubmit($event)"
     (formValueChange)="onFormValueChange($event)"
     >

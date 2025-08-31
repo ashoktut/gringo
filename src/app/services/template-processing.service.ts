@@ -106,11 +106,11 @@ export class TemplateProcessingService {
     }
 
     // Check file type
-    const validExtensions = ['.doc', '.docx', '.odt', '.gdoc'];
+  const validExtensions = ['.doc', '.docx', '.odt', '.gdoc', '.html'];
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
 
     if (!validExtensions.includes(fileExtension)) {
-      errors.push('Please select a valid document file (.doc, .docx, .odt, .gdoc)');
+      errors.push('Please select a valid document file (.doc, .docx, .odt, .gdoc, .html)');
     }
 
     // Check file name
@@ -212,6 +212,8 @@ export class TemplateProcessingService {
         return 'google-docs';
       case 'odt':
         return 'odt';
+      case 'html':
+        return 'html';
       default:
         return 'word';
     }

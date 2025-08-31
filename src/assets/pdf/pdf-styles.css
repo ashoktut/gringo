@@ -1,0 +1,421 @@
+/* ================= BASE ================= */
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #1a237e;
+	margin: 0;
+	padding: 0;
+	background: #fff;
+}
+.pdf-page-margins {
+	margin: 24mm 16mm 24mm 16mm; /* top, right, bottom, left */
+	box-sizing: border-box;
+	background: #fff;
+}
+
+/* ========== HERO & HEADER ========== */
+.hero-message {
+    text-align: center;
+    padding: 16px 0 8px 0;
+    color: #fff;
+    background: rgba(25, 118, 210, 0.08);
+    border-radius: 0 0 8px 8px;
+}
+
+/* ================= HEADER ================= */
+.lcp-header-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-bottom: 0;
+    border-radius: 8px 8px 0 0;
+}
+.lcp-header {
+    padding: 0;
+    margin: 0;
+    border-bottom: none;
+    background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+    display: block;
+    border-radius: 8px 8px 0 0;
+    box-shadow: 0 2px 8px 0 #e3e7f1;
+}
+
+/* ================= FOOTER ================= */
+.lcp-footer-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 0;
+    border-radius: 0 0 8px 8px;
+}
+.lcp-footer {
+    padding: 0;
+    margin: 0;
+    border-top: none;
+    background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+    display: block;
+    text-align: center;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    border-radius: 0 0 8px 8px;
+    box-shadow: 0 -2px 8px 0 #e3e7f1;
+}
+
+/* ================= TITLES & SECTION HEADINGS ================= */
+.rfq-title {
+    font-size: 2.1em;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    letter-spacing: 0.5px;
+    color: #fff;
+    text-shadow: 0 2px 8px #1976d2cc;
+}
+.rfq-title-main {
+    color: #fbc02d;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 1.1em;
+}
+.section-title {
+    font-size: 1.15em;
+    font-weight: 700;
+    color: #1976d2;
+    border-bottom: 2px solid #1976d2;
+    margin-bottom: 10px;
+    padding-bottom: 2px;
+    letter-spacing: 0.5px;
+}
+
+/* ================= META & UTILITY ================= */
+.rfq-meta {
+    font-size: 0.95em;
+    margin: 0 0 10px 0;
+    color: #e3e7f1;
+    letter-spacing: 0.2px;
+}
+.office-use {
+	font-weight: bold;
+	color: #e53935;
+}
+.important-info {
+	color: #fff;
+	background: #fbc02d;
+	font-weight: bold;
+	padding: 2px 8px;
+	display: inline-block;
+	transform: rotate(-10deg);
+	margin: 10px 0;
+}
+
+/* ================= FORM ELEMENTS ================= */
+.pdf-checkbox-square {
+	display: inline-block;
+	width: 12px;
+	height: 12px;
+	border: 1.5px solid #1a237e;
+	border-radius: 2px;
+	vertical-align: middle;
+	margin-left: 4px;
+	margin-right: 2px;
+	background: #fff;
+}
+
+/* ================= SECTIONS ================= */
+.rfq-section {
+    margin: 18px 20px;
+    padding: 16px 18px;
+    border-bottom: 1px solid #bdbdbd;
+    background: #f8fafc;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px 0 #e3e7f1;
+}
+.rfq-section-3col {
+	margin-bottom: 10px;
+}
+.rfq-3col-row {
+	display: flex;
+	flex-wrap: nowrap;
+	margin-bottom: 4px;
+}
+.rfq-label-value {
+	flex: 1 1 0;
+	min-width: 0;
+	font-size: 9px;
+	margin-right: 12px;
+	white-space: nowrap;
+}
+.rfq-label {
+	font-weight: bold;
+	font-size: 9px;
+}
+.rfq-value {
+	font-size: 9px;
+}
+
+/* ================= 2-COLUMN SECTION ================= */
+.rfq-section-2col {
+	margin-bottom: 10px;
+}
+.rfq-2col-row {
+	display: flex;
+	flex-wrap: nowrap;
+	margin-bottom: 4px;
+}
+.rfq-section-2col .section-title {
+	flex: 1 1 0;
+	min-width: 0;
+	font-size: 12px;
+	margin-right: 12px;
+	margin-bottom: 0;
+	border-bottom: none;
+}
+.rfq-section-2col .rfq-label-value {
+	flex: 1 1 0;
+	min-width: 0;
+	font-size: 9px;
+	margin-right: 12px;
+	white-space: nowrap;
+	margin-bottom: 0;
+}
+.rfq-section-2col .rfq-label {
+	font-weight: bold;
+	font-size: 9px;
+}
+.rfq-section-2col .rfq-value {
+	font-size: 9px;
+	font-weight: normal;
+}
+
+/* ================= ROWS ================= */
+.rfq-row {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 10px 20px;
+	gap: 0 16px;
+}
+.rfq-row > div {
+	flex: 0 0 calc(33.333% - 12px);
+	box-sizing: border-box;
+	margin-bottom: 12px;
+	display: flex;
+	align-items: center;
+}
+.rfq-rect {
+	display: inline-block;
+	width: 80px;
+	height: 18px;
+	border: 1.5px solid #1a237e;
+	border-radius: 2px;
+	margin-left: 8px;
+	background: #fff;
+	vertical-align: middle;
+}
+.rfq-underline {
+	display: inline-block;
+	border-bottom: 1px solid #1a237e;
+	min-width: 60px;
+	height: 1em;
+	vertical-align: bottom;
+}
+
+/* ================= CUSTOMER ASSURANCE & ACCREDITATION SECTION ================= */
+.lcp-assurance-section {
+	margin: 28px 0 0 0;
+	padding: 18px 22px;
+	background: #f4f8fc;
+	border-left: 5px solid #1976d2;
+	border-radius: 6px;
+}
+.lcp-assurance-title {
+	font-size: 1.1em;
+	font-weight: 700;
+	color: #1976d2;
+	margin-bottom: 10px;
+}
+.lcp-assurance-contact {
+	font-size: 1em;
+	color: #333;
+	margin-bottom: 8px;
+}
+.lcp-accreditation {
+	margin-bottom: 10px;
+}
+.lcp-accreditation-badge {
+	display: inline-block;
+	background: #1976d2;
+	color: #fff;
+	font-weight: 600;
+	padding: 4px 12px;
+	border-radius: 4px;
+	font-size: 0.98em;
+	letter-spacing: 0.5px;
+}
+.lcp-assurance-list {
+	margin: 0 0 10px 18px;
+	padding: 0;
+	color: #444;
+	font-size: 0.98em;
+}
+.lcp-assurance-list li {
+	margin-bottom: 8px;
+	line-height: 1.5;
+}
+.lcp-assurance-highlight {
+	color: #b22222;
+	font-weight: 500;
+	display: block;
+	margin-top: 2px;
+}
+.lcp-assurance-summary {
+	margin-top: 12px;
+	color: #222;
+	font-size: 1em;
+}
+
+/* ========== INFO LISTS ========== */
+.rfq-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 8px 0;
+    font-size: 1em;
+}
+.rfq-info-list li {
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed #e3e7f1;
+    padding-bottom: 2px;
+    color: #222;
+}
+.rfq-info-list li span {
+    font-weight: 500;
+    color: #1976d2;
+}
+
+/* ========== NOTES & CALLOUTS ========== */
+.rfq-notes {
+    margin-top: 8px;
+    background: #fffde7;
+    border-left: 4px solid #fbc02d;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #333;
+    font-size: 0.98em;
+}
+
+/* ========== DRAWING & IMAGE SECTION OPTIMIZATION ========== */
+.image-container {
+    background: #e1f5fe;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px 0 #b3e5fc;
+    padding: 8px 0 8px 8px;
+    margin-bottom: 8px;
+    gap: 12px 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+}
+.image-container figure {
+    background: #fff;
+    border: 2px solid #42a5f5;
+    border-radius: 6px;
+    padding: 8px 4px 4px 4px;
+    margin: 0;
+    min-height: 100px;
+    box-shadow: 0 1px 4px 0 #b3e5fc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+.image-container figcaption {
+    font-size: 1em;
+    color: #0288d1;
+    margin-bottom: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* ========== SIGNATURE BLOCK BUSINESS CUE ========== */
+.signature-block {
+    background: #e3f2fd;
+    border-left: 6px solid #1976d2;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px 0 #bbdefb;
+    padding: 8px 16px;
+    margin-top: 18px;
+    margin-bottom: 8px;
+    align-items: flex-start;
+    gap: 4px;
+}
+.signature-label {
+    font-size: 1.1em;
+    color: #1976d2;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.signature-line {
+    width: 180px;
+    height: 3px;
+    background: linear-gradient(90deg, #1976d2 60%, #42a5f5 100%);
+    margin-top: 2px;
+    border-radius: 2px;
+}
+
+/* ========== CUSTOMER ASSURANCE SECTION BUSINESS EDGE ========== */
+.lcp-assurance-section {
+    background: linear-gradient(90deg, #f4f8fc 80%, #e3f2fd 100%);
+    border-left: 8px solid #43a047;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px 0 #c8e6c9;
+    margin-top: 24px;
+    padding: 20px 28px;
+}
+.lcp-assurance-title {
+    color: #43a047;
+    font-size: 1.2em;
+    font-weight: 800;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+.lcp-accreditation-badge {
+    background: #43a047;
+    color: #fff;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 1em;
+    letter-spacing: 0.5px;
+    box-shadow: 0 1px 4px 0 #c8e6c9;
+}
+.lcp-assurance-list {
+    color: #388e3c;
+    font-size: 1em;
+    margin: 0 0 10px 18px;
+    padding: 0;
+}
+.lcp-assurance-list li {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    font-weight: 600;
+}
+.lcp-assurance-highlight {
+    color: #e53935;
+    font-weight: 700;
+    display: block;
+    margin-top: 2px;
+    font-size: 1.05em;
+}
+.lcp-assurance-summary {
+    margin-top: 12px;
+    color: #222;
+    font-size: 1.05em;
+    font-weight: 600;
+}
+
+/* ========== GENERAL NOTES BUSINESS EDGE ========== */
+.rfq-section[aria-label="General Notes"] {
+    background: linear-gradient(90deg, #fffde7 80%, #ffe082 100%);
+    border-left: 8px solid #fbc02d;
+    box-shadow: 0 2px 8px 0 #ffe082;
+}

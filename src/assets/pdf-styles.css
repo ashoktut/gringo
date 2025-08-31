@@ -1,4 +1,24 @@
-/* ========== BASE ========== */
+/* ================= SIGNATURE FIELD ================= */
+.signature-block {
+  margin-top: 10px;
+  margin-bottom: 8px;
+  text-align: left;
+  max-width: 50px;
+}
+.signature-label {
+  font-size: 11px;
+  color: #333;
+  margin-bottom: 2px;
+}
+.signature-line {
+  display: block;
+  width: 120px;
+  height: 18px;
+  border-bottom: 1.5px solid #1a237e;
+  margin-top: 2px;
+  margin-bottom: 2px;
+}
+/* ================= BASE ================= */
 body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 12px;
@@ -13,7 +33,7 @@ body {
   background: #fff;
 }
 
-/* ========== HEADER ========== */
+/* ================= HEADER ================= */
 .lcp-header-img {
   width: 100%;
   height: auto;
@@ -28,7 +48,7 @@ body {
   display: block;
 }
 
-/* ========== FOOTER ========== */
+/* ================= FOOTER ================= */
 .lcp-footer-img {
   width: 100%;
   height: auto;
@@ -56,7 +76,7 @@ body {
   margin-top: 5px;
 }
 
-/* ========== TITLES & SECTION HEADINGS ========== */
+/* ================= TITLES & SECTION HEADINGS ================= */
 .rfq-title {
   font-size: 18px;
   font-weight: bold;
@@ -74,7 +94,7 @@ body {
   margin-bottom: 5px;
 }
 
-/* ========== META & UTILITY ========== */
+/* ================= META & UTILITY ================= */
 .rfq-meta {
   font-size: 8px;
   margin: 0 0 10px 20px;
@@ -93,7 +113,7 @@ body {
   margin: 10px 0;
 }
 
-/* ========== FORM ELEMENTS ========== */
+/* ================= FORM ELEMENTS ================= */
 .pdf-checkbox-square {
   display: inline-block;
   width: 12px;
@@ -106,7 +126,7 @@ body {
   background: #fff;
 }
 
-/* ========== SECTIONS ========== */
+/* ================= SECTIONS ================= */
 .rfq-section {
   margin: 15px 20px;
   padding: 10px;
@@ -135,7 +155,7 @@ body {
   font-size: 9px;
 }
 
-/* ========== 2-COLUMN SECTION ========== */
+/* ================= 2-COLUMN SECTION ================= */
 .rfq-section-2col {
   margin-bottom: 10px;
 }
@@ -169,7 +189,7 @@ body {
   font-weight: normal;
 }
 
-/* ========== ROWS ========== */
+/* ================= ROWS ================= */
 .rfq-row {
   display: flex;
   flex-wrap: wrap;
@@ -199,4 +219,58 @@ body {
   min-width: 60px;
   height: 1em;
   vertical-align: bottom;
+}
+
+/* ================= CUSTOMER ASSURANCE & ACCREDITATION SECTION ================= */
+.lcp-assurance-section {
+  margin: 28px 0 0 0;
+  padding: 18px 22px;
+  background: #f4f8fc;
+  border-left: 5px solid #1976d2;
+  border-radius: 6px;
+}
+.lcp-assurance-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #1976d2;
+  margin-bottom: 10px;
+}
+.lcp-assurance-contact {
+  font-size: 1em;
+  color: #333;
+  margin-bottom: 8px;
+}
+.lcp-accreditation {
+  margin-bottom: 10px;
+}
+.lcp-accreditation-badge {
+  display: inline-block;
+  background: #1976d2;
+  color: #fff;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.98em;
+  letter-spacing: 0.5px;
+}
+.lcp-assurance-list {
+  margin: 0 0 10px 18px;
+  padding: 0;
+  color: #444;
+  font-size: 0.98em;
+}
+.lcp-assurance-list li {
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+.lcp-assurance-highlight {
+  color: #b22222;
+  font-weight: 500;
+  display: block;
+  margin-top: 2px;
+}
+.lcp-assurance-summary {
+  margin-top: 12px;
+  color: #222;
+  font-size: 1em;
 }

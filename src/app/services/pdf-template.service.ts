@@ -146,10 +146,13 @@ export class PdfTemplateService {
   private createHtmlFromTemplate(template: Template, formFields: Record<string, any>, formType: string): string {
     let htmlContent = template.content;
 
-    // Replace all placeholders with form data
+    // Replace all placeholders with form data, rendering images as <img> tags
     Object.keys(formFields).forEach(key => {
       const placeholder = `{{${key}}}`;
-      const value = formFields[key];
+      let value = formFields[key];
+      if (typeof value === 'string' && value.startsWith('data:image/')) {
+        value = `<img src="${value}" alt="${key}" style="max-width: 400px; max-height: 200px; display: block; margin: 8px 0;" />`;
+      }
       htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), value);
     });
 
@@ -168,7 +171,10 @@ export class PdfTemplateService {
       .filter(key => !key.includes('.')) // Exclude nested field duplicates
       .map(key => {
         const label = this.formatFieldLabel(key);
-        const value = formFields[key];
+        let value = formFields[key];
+        if (typeof value === 'string' && value.startsWith('data:image/')) {
+          value = `<img src="${value}" alt="${key}" style="max-width: 200px; max-height: 100px; display: block;" />`;
+        }
         return `
           <tr>
             <td style="font-weight: bold; padding: 8px; border: 1px solid #ddd; background-color: #f9f9f9;">${label}</td>

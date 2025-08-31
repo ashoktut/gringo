@@ -26,7 +26,7 @@ export interface TemplateMetadata {
 
 export type TemplateType = 'rfq' | 'rqr' | 'invoice' | 'quote' | 'report';
 
-export type DocumentType = 'word' | 'google-docs' | 'odt' | 'pdf';
+export type DocumentType = 'word' | 'google-docs' | 'odt' | 'pdf' | 'html';
 
 export interface TemplateUploadRequest {
   file: File;

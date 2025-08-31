@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { MatButtonModule } from '@angular/material/button';
 import { DocxProcessingService } from '../../../services/docx-processing.service';
+import { PdfTemplateService } from '../../../services/pdf-template.service';
 import { TemplateManagementService } from '../../../services/template-management.service';
 
 @Component({
@@ -30,12 +31,16 @@ export class RfqComponent implements OnInit {
   originalSubmissionId: string | null = null;
   repeatedSubmissionData: any = null;
 
+  // Add a property to hold initial form data
+  initialFormData: any = {};
+
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private formSubmissionService: FormSubmissionService,
-    private docxProcessingService: DocxProcessingService,
-    private templateManagementService: TemplateManagementService
+  private route: ActivatedRoute,
+  private router: Router,
+  private formSubmissionService: FormSubmissionService,
+  private docxProcessingService: DocxProcessingService,
+  private templateManagementService: TemplateManagementService,
+  private pdfTemplateService: PdfTemplateService
   ) {}
 
   ngOnInit() {
@@ -47,6 +52,11 @@ export class RfqComponent implements OnInit {
         this.loadSubmissionForRepeat(params['submissionId']);
       }
     });
+    // Set default dateSubmitted if not in repeat mode
+    if (!this.isRepeatMode) {
+      const today = new Date();
+      this.initialFormData.dateSubmitted = today.toISOString().split('T')[0];
+    }
   }
   // To make a field not rquired, set required: false
   // To make a field required, set required: true
@@ -1486,30 +1496,36 @@ export class RfqComponent implements OnInit {
             next: (templates) => {
               if (templates && templates.length > 0) {
                 const template = templates[0];
-                const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
-                const clientEmail = docxData.clientEmail || '';
-                this.docxProcessingService.processRfqSubmission(
-                  template,
-                  docxData,
-                  recipients,
-                  clientEmail,
-                  {
-                    preserveStyles: true,
-                    preserveImages: true,
-                    preserveTables: true,
-                    outputFormat: 'pdf',
-                  }
-                ).subscribe({
-                  next: (result) => {
-                    if (result && result.downloadUrl) {
-                      // Trigger download
-                      window.open(result.downloadUrl, '_blank');
+                if (template.type === 'html') {
+                  // Use HTML template PDF generation
+                  this.pdfTemplateService.generatePdf(template.id, docxData, template.formType);
+                } else {
+                  // Use DOCX template PDF generation
+                  const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
+                  const clientEmail = docxData.clientEmail || '';
+                  this.docxProcessingService.processRfqSubmission(
+                    template,
+                    docxData,
+                    recipients,
+                    clientEmail,
+                    {
+                      preserveStyles: true,
+                      preserveImages: true,
+                      preserveTables: true,
+                      outputFormat: 'pdf',
                     }
-                  },
-                  error: (err) => {
-                    console.error('Error generating PDF:', err);
-                  },
-                });
+                  ).subscribe({
+                    next: (result) => {
+                      if (result && result.downloadUrl) {
+                        // Trigger download
+                        window.open(result.downloadUrl, '_blank');
+                      }
+                    },
+                    error: (err) => {
+                      console.error('Error generating PDF:', err);
+                    },
+                  });
+                }
               } else {
                 alert('No RFQ template found. Please upload a template first.');
               }
@@ -1596,6 +1612,15 @@ export class RfqComponent implements OnInit {
   private processFieldsForPdf(formData: any, rfqSections: FormSection[]): any {
     const processed: any = {};
 
+    // Always include these metadata fields if present in formData
+    ['createdAt', 'submissionId', 'repName'].forEach(key => {
+      if (formData[key] !== undefined) {
+        processed[key] = formData[key];
+      } else {
+        processed[key] = '';
+      }
+    });
+
     rfqSections.forEach(section => {
       section.fields.forEach(field => {
         // Always use the value or empty string
@@ -1657,6 +1682,29 @@ export class RfqComponent implements OnInit {
         if (field.name === 'buildingType') {
           processed.buildingType = formData.buildingType ?? '';
           processed.otherBuildDisplay = formData.buildingType === 'other' ? formData.otherBuild || '' : '';
+        }
+
+        // === IMAGE & SIGNATURE HANDLING ===
+        if (field.type === 'picture') {
+          // If value is a PictureData object, extract dataUrl; else use as-is
+          if (value && typeof value === 'object' && value.dataUrl) {
+            processed[field.name] = value.dataUrl;
+          } else if (typeof value === 'string' && value.startsWith('data:image/')) {
+            processed[field.name] = value;
+          } else {
+            processed[field.name] = '';
+          }
+          return; // Skip default assignment below
+        }
+
+        if (field.type === 'signature') {
+          // Signature is expected to be a base64 PNG data URL
+          if (typeof value === 'string' && value.startsWith('data:image/')) {
+            processed[field.name] = value;
+          } else {
+            processed[field.name] = '';
+          }
+          return; // Skip default assignment below
         }
 
         // Always set the field (unless it's a computed display field above)
