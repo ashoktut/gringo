@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { Template, TemplateType } from '../models/template.models';
+import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
+import { Template, TemplateType, DocumentType } from '../models/template.models';
+import { IndexedDbService } from './indexed-db.service';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +12,7 @@ export class TemplateStorageService {
   private templatesSubject = new BehaviorSubject<Template[]>([]);
   public templates$ = this.templatesSubject.asObservable();
 
-  constructor() {
+  constructor(private indexedDbService: IndexedDbService) {
     this.loadTemplatesFromStorage();
   }
 
@@ -48,14 +50,35 @@ export class TemplateStorageService {
     const templates = this.templatesSubject.value;
     const existingIndex = templates.findIndex(t => t.id === template.id);
 
-    if (existingIndex >= 0) {
+    if (existingIndex > -1) {
       templates[existingIndex] = template;
     } else {
       templates.push(template);
     }
 
-    this.updateTemplatesAndSave(templates);
-    return of(template);
+    return this.indexedDbService.save(
+      this.indexedDbService.STORES.TEMPLATES,
+      template.id,
+      template
+    ).pipe(
+      tap(() => {
+        this.templatesSubject.next([...templates]);
+        console.log('✅ Template saved to IndexedDB:', template.id);
+      }),
+      map(() => template),
+      catchError(error => {
+        console.error('❌ Failed to save template to IndexedDB:', error);
+        // Revert the local change if save failed
+        if (existingIndex > -1) {
+          this.loadTemplatesFromStorage();
+        } else {
+          const index = templates.findIndex(t => t.id === template.id);
+          if (index > -1) templates.splice(index, 1);
+          this.templatesSubject.next([...templates]);
+        }
+        return throwError(() => error);
+      })
+    );
   }
 
   /**
@@ -63,11 +86,25 @@ export class TemplateStorageService {
    */
   deleteTemplate(id: string): Observable<boolean> {
     const templates = this.templatesSubject.value;
-    const filteredTemplates = templates.filter(t => t.id !== id);
+    const templateIndex = templates.findIndex(t => t.id === id);
 
-    if (filteredTemplates.length !== templates.length) {
-      this.updateTemplatesAndSave(filteredTemplates);
-      return of(true);
+    if (templateIndex > -1) {
+      const deletedTemplate = templates[templateIndex];
+      templates.splice(templateIndex, 1);
+
+      return this.indexedDbService.delete(this.indexedDbService.STORES.TEMPLATES, id).pipe(
+        tap(() => {
+          this.templatesSubject.next([...templates]);
+          console.log('✅ Template deleted from IndexedDB:', id);
+        }),
+        catchError(error => {
+          console.error('❌ Failed to delete template from IndexedDB:', error);
+          // Revert the local change if delete failed
+          templates.splice(templateIndex, 0, deletedTemplate);
+          this.templatesSubject.next([...templates]);
+          return of(false);
+        })
+      );
     }
 
     return of(false);
@@ -80,107 +117,155 @@ export class TemplateStorageService {
     const templates = this.templatesSubject.value;
     const templateIndex = templates.findIndex(t => t.id === id);
 
-    if (templateIndex >= 0) {
-      templates[templateIndex] = { ...templates[templateIndex], ...updates };
-      this.updateTemplatesAndSave(templates);
-      return of(templates[templateIndex]);
+    if (templateIndex > -1) {
+      const updatedTemplate = { ...templates[templateIndex], ...updates };
+      templates[templateIndex] = updatedTemplate;
+
+      return this.indexedDbService.save(
+        this.indexedDbService.STORES.TEMPLATES,
+        id,
+        updatedTemplate
+      ).pipe(
+        tap(() => {
+          this.templatesSubject.next([...templates]);
+          console.log('✅ Template updated in IndexedDB:', id);
+        }),
+        map(() => updatedTemplate),
+        catchError(error => {
+          console.error('❌ Failed to update template in IndexedDB:', error);
+          this.loadTemplatesFromStorage(); // Reload from storage
+          return throwError(() => error);
+        })
+      );
     }
 
     return of(null);
   }
 
   /**
-   * Get available form types
+   * Upload new template
    */
-  getAvailableFormTypes(): Observable<TemplateType[]> {
-    const templates = this.templatesSubject.value;
-    const formTypes = [...new Set(templates.map(t => t.formType))];
-    return of(formTypes.sort());
+  uploadTemplate(
+    file: File,
+    formType: TemplateType,
+    isUniversal: boolean = false
+  ): Observable<Template> {
+    return new Observable(observer => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const template: Template = {
+          id: this.generateTemplateId(),
+          name: file.name,
+          type: this.getTemplateType(file),
+          formType: formType,
+          content: reader.result as string,
+          placeholders: this.extractPlaceholders(reader.result as string),
+          size: file.size,
+          uploadedAt: new Date(),
+          isUniversal: isUniversal
+        };
+
+        this.saveTemplate(template).subscribe({
+          next: (savedTemplate) => {
+            observer.next(savedTemplate);
+            observer.complete();
+          },
+          error: (error) => observer.error(error)
+        });
+      };
+
+      reader.onerror = () => observer.error(reader.error);
+      reader.readAsText(file);
+    });
   }
 
   /**
    * Search templates
    */
-  searchTemplates(query: string): Observable<Template[]> {
+  searchTemplates(searchQuery: string): Observable<Template[]> {
+    const query = searchQuery.toLowerCase();
     const templates = this.templatesSubject.value;
-    const searchQuery = query.toLowerCase();
-
     const filtered = templates.filter(template =>
-      template.name.toLowerCase().includes(searchQuery) ||
-      template.formType.toLowerCase().includes(searchQuery) ||
-      template.placeholders.some(p => p.toLowerCase().includes(searchQuery))
+      template.name.toLowerCase().includes(query) ||
+      template.formType.toLowerCase().includes(query) ||
+      template.placeholders.some(p => p.toLowerCase().includes(query))
     );
 
     return of(filtered);
   }
 
+  /**
+   * Get available form types from existing templates
+   */
+  getAvailableFormTypes(): Observable<TemplateType[]> {
+    const templates = this.templatesSubject.value;
+    const formTypes = [...new Set(templates.map(template => template.formType))];
+    return of(formTypes);
+  }
+
   private loadTemplatesFromStorage(): void {
-    try {
-      const stored = localStorage.getItem(this.STORAGE_KEY);
-      if (stored) {
-        const templates = JSON.parse(stored).map((t: any) => {
-          const template = {
-            ...t,
-            uploadedAt: new Date(t.uploadedAt)
-          };
-
-          // Restore ArrayBuffer from base64 if present
-          if (t._binaryContentB64) {
-            try {
-              const binaryString = atob(t._binaryContentB64);
-              const bytes = new Uint8Array(binaryString.length);
-              for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-              }
-              // Ensure we create a proper ArrayBuffer
-              template.binaryContent = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
-              delete template._binaryContentB64;
-            } catch (error) {
-              console.warn('Failed to restore binary content for template:', t.id, error);
-            }
-          }
-
-          return template;
-        });
-        this.templatesSubject.next(templates);
+    // First try to migrate any existing localStorage data
+    this.indexedDbService.migrateFromLocalStorage(this.STORAGE_KEY, this.indexedDbService.STORES.TEMPLATES).subscribe({
+      next: () => {
+        // After migration (or if no migration needed), load from IndexedDB
+        this.loadFromIndexedDB();
+      },
+      error: (error) => {
+        console.error('❌ Template migration failed, loading from IndexedDB anyway:', error);
+        this.loadFromIndexedDB();
       }
-    } catch (error) {
-      console.error('Error loading templates from storage:', error);
-      this.templatesSubject.next([]);
+    });
+  }
+
+  private loadFromIndexedDB(): void {
+    this.indexedDbService.getAll<Template>(this.indexedDbService.STORES.TEMPLATES).subscribe({
+      next: (items) => {
+        const templates = items.map(item => ({
+          ...item.data,
+          uploadedAt: new Date(item.data.uploadedAt)
+        }));
+        this.templatesSubject.next(templates);
+        console.log('✅ Loaded templates from IndexedDB:', templates.length);
+      },
+      error: (error) => {
+        console.error('❌ Failed to load templates from IndexedDB:', error);
+        // Fallback: keep empty array
+        this.templatesSubject.next([]);
+      }
+    });
+  }
+
+  private generateTemplateId(): string {
+    return 'template_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+  }
+
+  private getTemplateType(file: File): DocumentType {
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    switch (extension) {
+      case 'docx':
+      case 'doc':
+        return 'word';
+      case 'gdoc':
+        return 'google-docs';
+      case 'odt':
+        return 'odt';
+      default:
+        return 'word'; // Default fallback
     }
   }
 
-  private updateTemplatesAndSave(templates: Template[]): void {
-    this.templatesSubject.next(templates);
-    this.saveTemplatesToStorage(templates);
-  }
+  private extractPlaceholders(content: string): string[] {
+    const placeholderRegex = /\{\{([^}]+)\}\}/g;
+    const placeholders: string[] = [];
+    let match;
 
-  private saveTemplatesToStorage(templates: Template[]): void {
-    try {
-      // Convert ArrayBuffers to base64 for JSON serialization
-      const templatesForStorage = templates.map(template => {
-        const templateCopy = { ...template };
-
-        if (template.binaryContent) {
-          try {
-            const bytes = new Uint8Array(template.binaryContent);
-            let binaryString = '';
-            for (let i = 0; i < bytes.length; i++) {
-              binaryString += String.fromCharCode(bytes[i]);
-            }
-            (templateCopy as any)._binaryContentB64 = btoa(binaryString);
-            delete templateCopy.binaryContent;
-          } catch (error) {
-            console.warn('Failed to serialize binary content for template:', template.id, error);
-          }
-        }
-
-        return templateCopy;
-      });
-
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(templatesForStorage));
-    } catch (error) {
-      console.error('Error saving templates to storage:', error);
+    while ((match = placeholderRegex.exec(content)) !== null) {
+      const placeholder = match[1].trim();
+      if (!placeholders.includes(placeholder)) {
+        placeholders.push(placeholder);
+      }
     }
+
+    return placeholders.sort();
   }
 }

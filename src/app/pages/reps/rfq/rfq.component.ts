@@ -1497,8 +1497,21 @@ export class RfqComponent implements OnInit {
               if (templates && templates.length > 0) {
                 const template = templates[0];
                 if (template.type === 'html') {
-                  // Use HTML template PDF generation
-                  this.pdfTemplateService.generatePdf(template.id, docxData, template.formType);
+                  // Get template from template management service first, then generate PDF
+                  this.templateManagementService.getTemplate(template.id).subscribe({
+                    next: (fullTemplate) => {
+                      if (fullTemplate) {
+                        console.log('✅ Template found for PDF generation:', fullTemplate.name);
+                        // Use the content from the template management service
+                        this.generatePdfDirectly(fullTemplate, docxData, template.formType);
+                      } else {
+                        console.error('❌ Template not found in template management service:', template.id);
+                      }
+                    },
+                    error: (error) => {
+                      console.error('❌ Error getting template:', error);
+                    }
+                  });
                 } else {
                   // Use DOCX template PDF generation
                   const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
@@ -1520,6 +1533,8 @@ export class RfqComponent implements OnInit {
                         // Trigger download
                         window.open(result.downloadUrl, '_blank');
                       }
+                      // Route to submissions page after successful PDF generation
+                      this.router.navigate(['/submissions']);
                     },
                     error: (err) => {
                       console.error('Error generating PDF:', err);
@@ -1715,6 +1730,176 @@ export class RfqComponent implements OnInit {
     });
 
     return processed;
+  }
+
+  private generatePdfDirectly(template: any, formData: any, formType: string): void {
+    // Create a simple HTML content from the template
+    let htmlContent = template.content || '<h1>PDF Document</h1><p>Generated from form data</p>';
+
+    // Extract form fields for replacement
+    const allFormFields = this.extractAllFormFields(formData);
+
+    // Replace placeholders in template
+    Object.keys(allFormFields).forEach(key => {
+      const placeholder = `{{${key}}}`;
+      let value = allFormFields[key];
+
+      if (typeof value === 'string' && value.startsWith('data:image/')) {
+        value = `<img src="${value}" alt="${key}" style="max-width: 400px; max-height: 200px; display: block; margin: 8px 0;" />`;
+      }
+
+      htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), value || 'N/A');
+    });
+
+    // Create printable HTML
+    const printableHtml = this.wrapInPrintableHtml(htmlContent, formType);
+
+    // Open print window
+    this.printToPdf(printableHtml, `${formType}-${formData.submissionId || 'document'}.pdf`);
+  }
+
+  private extractAllFormFields(data: any, prefix: string = ''): Record<string, any> {
+    const fields: Record<string, any> = {};
+
+    if (!data || typeof data !== 'object') {
+      return fields;
+    }
+
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      const fieldKey = prefix ? `${prefix}.${key}` : key;
+
+      if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+        // Recursively extract nested objects
+        const nestedFields = this.extractAllFormFields(value, fieldKey);
+        Object.assign(fields, nestedFields);
+      } else {
+        // Store primitive values, arrays, or dates
+        fields[fieldKey] = value;
+        fields[key] = value; // Also store without prefix for simple access
+      }
+    });
+
+    return fields;
+  }
+
+  private printToPdf(htmlContent: string, filename: string): void {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      console.error('Unable to open print window');
+      return;
+    }
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+
+    // Automatically trigger print dialog after a short delay
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  }
+
+  private wrapInPrintableHtml(content: string, formType: string): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${formType.toUpperCase()} Document</title>
+          <style>
+            @media print {
+              body { -webkit-print-color-adjust: exact; }
+            }
+
+            * {
+              box-sizing: border-box;
+            }
+
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 8.5in;
+              margin: 0 auto;
+              padding: 0.5in;
+              background: white;
+            }
+
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #333;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+
+            .header h1 {
+              margin: 0;
+              color: #2c3e50;
+              font-size: 24px;
+            }
+
+            .header p {
+              margin: 5px 0 0 0;
+              color: #7f8c8d;
+              font-size: 14px;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+              background: white;
+            }
+
+            th, td {
+              border: 1px solid #ddd;
+              padding: 12px;
+              text-align: left;
+              vertical-align: top;
+            }
+
+            th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+              color: #2c3e50;
+            }
+
+            .field-label {
+              background-color: #f8f9fa;
+              font-weight: bold;
+              width: 30%;
+              color: #495057;
+            }
+
+            .field-value {
+              width: 70%;
+              word-wrap: break-word;
+            }
+
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 10px;
+              color: #666;
+              border-top: 1px solid #ddd;
+              padding-top: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${formType.toUpperCase()} Document</h1>
+            <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+          </div>
+
+          ${content}
+
+          <div class="footer">
+            <p>This document was automatically generated from ${formType.toUpperCase()} form submission.</p>
+          </div>
+        </body>
+      </html>
+    `;
   }
 }
 

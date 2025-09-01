@@ -51,6 +51,7 @@ export interface PictureData {
         <div class="upload-controls">
           <button
             mat-raised-button
+            type="button"
             color="primary"
             [matMenuTriggerFor]="uploadMenu"
             [disabled]="disabled"
@@ -59,12 +60,12 @@ export interface PictureData {
             {{ placeholder || 'Add Picture' }}
           </button>
           <mat-menu #uploadMenu="matMenu">
-            <button mat-menu-item (click)="triggerFileUpload()">
+            <button mat-menu-item type="button" (click)="triggerFileUpload()">
               <mat-icon>upload</mat-icon>
               <span>Upload from Device</span>
             </button>
             @if (isCameraSupported) {
-              <button mat-menu-item (click)="startCamera()">
+              <button mat-menu-item type="button" (click)="startCamera()">
                 <mat-icon>camera_alt</mat-icon>
                 <span>Take Picture</span>
               </button>
@@ -72,7 +73,7 @@ export interface PictureData {
           </mat-menu>
         </div>
       }
-    
+
       <!-- Hidden File Input -->
       <input
         #fileInput
@@ -80,7 +81,7 @@ export interface PictureData {
         accept="image/*"
         (change)="onFileSelected($event)"
         style="display: none;">
-    
+
         <!-- Camera Container -->
         @if (isCapturing) {
           <div class="camera-container">
@@ -101,11 +102,11 @@ export interface PictureData {
                 </canvas>
               </mat-card-content>
               <mat-card-actions align="end">
-                <button mat-button (click)="stopCamera()" color="warn">
+                <button mat-button type="button" (click)="stopCamera()" color="warn">
                   <mat-icon>close</mat-icon>
                   Cancel
                 </button>
-                <button mat-raised-button (click)="capturePhoto()" color="primary">
+                <button mat-raised-button type="button" (click)="capturePhoto()" color="primary">
                   <mat-icon>camera</mat-icon>
                   Capture
                 </button>
@@ -113,7 +114,7 @@ export interface PictureData {
             </mat-card>
           </div>
         }
-    
+
         <!-- Picture Preview -->
         @if (pictureData && !isCapturing) {
           <div class="picture-preview">
@@ -130,21 +131,21 @@ export interface PictureData {
                 </mat-card-content>
                 @if (!disabled) {
                   <mat-card-actions align="end">
-                    <button mat-button (click)="removePicture()" color="warn">
+                    <button mat-button type="button" (click)="removePicture()" color="warn">
                       <mat-icon>delete</mat-icon>
                       Remove
                     </button>
-                    <button mat-button [matMenuTriggerFor]="replaceMenu" color="primary">
+                    <button mat-button type="button" [matMenuTriggerFor]="replaceMenu" color="primary">
                       <mat-icon>swap_horiz</mat-icon>
                       Replace
                     </button>
                     <mat-menu #replaceMenu="matMenu">
-                      <button mat-menu-item (click)="triggerFileUpload()">
+                      <button mat-menu-item type="button" (click)="triggerFileUpload()">
                         <mat-icon>upload</mat-icon>
                         <span>Upload Different</span>
                       </button>
                       @if (isCameraSupported) {
-                        <button mat-menu-item (click)="startCamera()">
+                        <button mat-menu-item type="button" (click)="startCamera()">
                           <mat-icon>camera_alt</mat-icon>
                           <span>Take New Picture</span>
                         </button>
@@ -155,7 +156,7 @@ export interface PictureData {
               </mat-card>
             </div>
           }
-    
+
           <!-- Loading Spinner -->
           @if (isProcessing) {
             <div class="loading-container">

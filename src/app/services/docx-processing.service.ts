@@ -210,7 +210,7 @@ export class DocxProcessingService {
         }
       }
 
-      if (template.originalFile) {
+      if (template.originalFile && template.originalFile instanceof Blob) {
         const reader = new FileReader();
         reader.onload = () => {
           const arrayBuffer = reader.result as ArrayBuffer;
