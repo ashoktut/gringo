@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Request for Quote - LCP Roofing</title>
+    <link rel="stylesheet" href="./pdf-styles.css" />
+  </head>
+  <body>
+    <!-- Print-specific headers and footers for every page -->
+    <div class="print-page-header">
+      <img src="assets/images/header.jpg" alt="LCP Roofing Logo" style="width: 100%; height: 60px; object-fit: cover;" />
+      <div style="padding: 8px 12px; background: rgba(255, 255, 255, 0.95); border-left: 3px solid #f59e0b; margin: 0;">
+        <h1 style="font-size: 12px; margin: 0; color: #1e293b; font-weight: 600;">Request for Quote: ROOF TRUSSES and COVERINGS</h1>
+        <span style="font-size: 8px; color: #64748b;">Professional RFQ Document | {{repName}} | {{createdAt}}</span>
+      </div>
+    </div>
+
+    <div class="print-page-footer">
+      <img src="assets/images/footer.png" alt="LCP Footer" style="width: 100%; height: 40px; object-fit: cover;" />
+      <div style="text-align: center; padding: 5px; font-size: 8px; color: #64748b; background: #f8fafc;">
+        LCP Roofing Professional Services | Submission ID: {{submissionId}}
+      </div>
+    </div>
+
+    <div class="pdf-page-margins">
+      <header class="lcp-header" role="banner">
+        <img src="assets/images/header.jpg" class="lcp-header-img" alt="LCP Roofing Logo" />
+        <div class="hero-message">
+          <h1 class="rfq-title">
+            Request for Quote:<br>
+            <span class="rfq-title-main">ROOF TRUSSES and COVERINGS</span>
+          </h1>
+          <p class="rfq-meta">
+            Submitted by: <strong>{{repName}}</strong> &nbsp; | &nbsp; Submission timestamp: <strong>{{createdAt}}</strong> &nbsp; | &nbsp; Submission ID: <strong>{{submissionId}}</strong>
+          </p>
+        </div>
+      </header>
+
+      <main role="main">
+        <aside class="rfq-section office-use" aria-label="Office Use">
+          <span>Office use:</span> Emailed <span class="pdf-checkbox-square"></span>
+        </aside>
+
+        <section class="rfq-row rfq-row-grid" aria-label="Admin Details">
+          <div>Drawn on <span class="rfq-rect"></span></div>
+          <div>Drawn By <span class="rfq-rect"></span></div>
+          <div>Customer no <span class="rfq-rect"></span></div>
+          <div>Quoted on <span class="rfq-rect"></span></div>
+          <div>Estimator <span class="rfq-rect"></span></div>
+          <div>Quote no <span class="rfq-rect"></span></div>
+          <div>Rate check <span class="rfq-rect"></span></div>
+        </section>
+
+        <section class="rfq-section rfq-section-3col rfq-grid-section" aria-label="Quote Details">
+          <div class="rfq-3col-grid">
+            <div class="rfq-label-value"><span class="rfq-label">Date quote requested:</span> <span class="rfq-value">{{dateSubmitted}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Requested by:</span> <span class="rfq-value">{{repName}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">ABK:</span> <span class="rfq-value">{{abk}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Date required by:</span> <span class="rfq-value">{{dateDue}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Other:</span> <span class="rfq-value"></span></div>
+            <div class="rfq-label-value"><span class="rfq-label">P&G2:</span> <span class="rfq-value">{{pg2}}</span></div>
+          </div>
+        </section>
+
+        <section class="rfq-section rfq-section-2col rfq-grid-section" aria-label="Project Information">
+          <div class="rfq-2col-header">
+            <h2 class="section-title">PROJECT INFORMATION</h2>
+            <h2 class="section-title">Roof Required in: <span class="rfq-value">{{roofTimeline}}</span></h2>
+          </div>
+          <div class="rfq-2col-grid">
+            <div class="rfq-label-value"><span class="rfq-label">Stand # or address:</span> <span class="rfq-value">{{standNum}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Company:</span> <span class="rfq-value">{{companyName}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Client Name & Surname:</span> <span class="rfq-value">{{clientName}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Client email:</span> <span class="rfq-value">{{clientEmail}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Contact No:</span> <span class="rfq-value">{{clientPhone}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Copy email:</span> <span class="rfq-value">{{ccMail}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Building type:</span> <span class="rfq-value">{{buildingType}}</span></div>
+            <div class="rfq-label-value"><span class="rfq-label">Municipality:</span> <span class="rfq-value">{{municipality}}</span></div>
+          </div>
+        </section>
+
+        <section class="rfq-section" aria-label="Project Design Information">
+          <h2 class="section-title">PROJECT DESIGN INFORMATION</h2>
+          <ul class="rfq-info-list">
+            <li>Gate Access Payment: <span>{{gateAccess}}</span></li>
+            <li>Structure for / Type: <span>{{structureType}}</span></li>
+            <li>Maximum truss spacing: <span>{{maxTrussSpacing}}</span></li>
+            <li>Roof Pitch: <span>{{mainPitch}}</span></li>
+            <li>2nd Pitch: <span>{{pitch2}}</span></li>
+            <li>Roofing Service Req: <span>{{serviceType}}</span></li>
+            <li>Eaves Overhang: <span>{{eavesOH}}</span></li>
+            <li>Gable Overhang: <span>{{gableOH}}</span></li>
+            <li>Apex Overhang: <span>{{apexOH}}</span></li>
+            <li>Membrane Type: <span>{{membraneType}}</span></li>
+            <li>Ceiling Type: <span>{{ceilingType}}</span></li>
+            <li>Wall Corbelling Size: <span>{{wallCorbel}}</span></li>
+            <li>Solar Loadings: <span>{{solarLoad}}</span></li>
+            <li>Solar Locations: <span>{{solarAreaDisplay}}</span></li>
+            <li>Geyser Loadings: <span>{{geyserLoad}}</span></li>
+            <li>Geyser Locations: <span>{{geyserAreaDisplay}}</span></li>
+            <li>Exposed Trusses Req: <span>{{exposedTruss}}</span></li>
+            <li>If Yes: <span>{{trussTypeDisplay}}</span></li>
+            <li>Exposed Truss Type: <span>{{trussType2Display}}</span></li>
+            <li>Exposed Locations: <span>{{trussAreaDisplay}}</span></li>
+            <li>Truss Sundries Req: <span>{{trussSundry}}</span></li>
+            <li>General Truss Notes: <span>{{trussNotes}}</span></li>
+            <li>Optional P&G1: <span>{{optionalPG1}}</span></li>
+            <li>Description: <span>{{pg1DescDisplay}}</span></li>
+          </ul>
+        </section>
+
+        <section class="rfq-section" aria-label="Roof Covering Information">
+          <h2 class="section-title">ROOF COVERING INFORMATION</h2>
+          <ul class="rfq-info-list">
+            <li>Quote Cover: <span>{{coverReq}}</span></li>
+            <li>Covering Type: <span>{{coverType}}</span></li>
+            <li>Tile Profile: <span>{{tileProfile}}</span></li>
+            <li>Tile Colour: <span>{{tileColour}}</span></li>
+            <li>Tile Nailing: <span>{{tileNailing}}</span></li>
+            <li>Sheet Profile: <span>{{sheetProfile}}</span></li>
+            <li>Sheet Colour: <span>{{sheetColour}}</span></li>
+          </ul>
+          <div class="rfq-notes">
+            <strong>General Cover Notes:</strong>
+            <p>{{coverNotes}}</p>
+          </div>
+        </section>
+
+        <section class="rfq-section" aria-label="Drawing Details & Revisions">
+          <h2 class="section-title">DRAWING DETAILS & REVISIONS</h2>
+          <ul class="rfq-info-list">
+            <li>Drawing 1: <span>{{drawings1}} {{dwg1No}}</span></li>
+            <li>Drawing 2: <span>{{drawings2}} {{dwg2No}}</span></li>
+            <li>Drawing 3: <span>{{drawings3}} {{dwg3No}}</span></li>
+            <li>Drawing 4: <span>{{drawings4}} {{dwg4No}}</span></li>
+            <li>Drawing 5: <span>{{drawings5}} {{dwg5No}}</span></li>
+          </ul>
+        </section>
+
+        <section class="rfq-section" aria-label="Images Taken of Drawings / Site">
+          <h2 class="section-title">IMAGES TAKEN OF DRAWINGS / SITE</h2>
+          <div class="image-container">
+            <figure>
+              <figcaption>Notes & Drawings</figcaption>
+              {{drawingPhoto1}}
+            </figure>
+            <figure>
+              <figcaption>Site Plans</figcaption>
+              {{drawingPhoto2}}
+            </figure>
+            <figure>
+              <figcaption>Architecture Plans</figcaption>
+              {{drawingPhoto3}}
+            </figure>
+            <figure>
+              <figcaption>Extra Image</figcaption>
+              {{drawingPhoto4}}
+            </figure>
+            <figure>
+              <figcaption>Extra Image 2</figcaption>
+              {{drawingPhoto5}}
+            </figure>
+          </div>
+        </section>
+
+        <section class="rfq-section" aria-label="General Notes">
+          <h2 class="section-title">GENERAL NOTES</h2>
+          <div><p>{{generalNotes}}</p></div>
+          <div class="important-info">IMPORTANT INFO</div>
+          <article class="important-info-section">
+            <h3 class="important-info-title">Notes and Comments for Consideration When Requesting a Quote</h3>
+            <ol class="important-info-list">
+              <li>Manufacture &amp; delivery dates are dependent on workload at time of deposit payment.</li>
+              <li>Manufacture is dependent on availability of material not normally included in a standard roof design.</li>
+              <li>Laminated beams can take up to 3 or 4 weeks to procure.</li>
+              <li>Decorative and purpose made plated trusses will take an additional 3 weeks to the normal truss dates.</li>
+              <li>No manufacture will commence until the deposit is paid and signed terms &amp; conditions are forwarded to the LCP Roofing head office.</li>
+              <li>Inaccurate information, changes to the design &amp; building not according to plan will delay the manufacture and erection process.</li>
+              <li>Final design is ONLY done when the terms and conditions are signed and the deposit is paid.</li>
+              <li>It could happen that certain design elements can change which affect the layout of the roof. The client will be requested to sign this off if such a change occurs. LCP Roofing will do everything possible to ensure the original quote is correct and accurate.</li>
+              <li>Overhangs are standard 50mm or 1 tile (350mm), 1.5 tile (500mm) or 2 tile (650mm) on SLOPE. Deviations from this will result in an unnecessary additional cost.</li>
+              <li>Roof sheeting can take up to 4 weeks to procure from site measure and colour confirmation; and up to 12 weeks in Nov &amp; Dec.</li>
+              <li>Take special note to discuss Roof Wire or Hoop Iron holding down details and note the National Building Regulations in this regard. Ask your representative to advise you in the placement of holding down details.</li>
+              <li>LCP quotes to complete a roof and guarantees the quoted price if we supply the complete service. Should LCP Roofing not do the erection, any materials shortages will be charged for. No refunds are given for excess materials left over on site.</li>
+            </ol>
+          </article>
+
+          <div class="signature-block">
+            <div class="signature-label">Rep Signature: {{repSign}}</div>
+            <div class="signature-line"></div>
+          </div>
+
+          <section class="lcp-assurance-section">
+            <h3 class="lcp-assurance-title">Your Confidence, Our Commitment</h3>
+            <p class="lcp-assurance-contact">
+              <strong>Please direct all queries to your LCP Roofing representative.</strong>
+            </p>
+            <div class="lcp-accreditation">
+              <span class="lcp-accreditation-badge">SANS1900 (SATAS) Quality Accredited Fabricator</span>
+            </div>
+            <ul class="lcp-assurance-list">
+              <li>
+                <strong>Did you know?</strong> About <b>50% of fabricators in South Africa are not registered</b> with the industry professional body.<br>
+                <span class="lcp-assurance-highlight">Choose wisely—work with an accredited fabricator you can trust.</span>
+              </li>
+              <li>
+                Less than <b>20% of designers are professionally registered</b>.<br>
+                <span class="lcp-assurance-highlight">LCP Roofing employs professionally designated designers for your peace of mind.</span>
+              </li>
+            </ul>
+            <p class="lcp-assurance-summary">
+              This report is generated by LCP Roofing Online and reflects your requirements, all details noted on drawings or as revised, site conditions, and any particular limitations pertaining thereto.<br>
+              <strong>We are committed to delivering quality, compliance, and complete transparency—so you can build with confidence.</strong>
+            </p>
+          </section>
+        </section>
+      </main>
+
+      <footer class="lcp-footer" role="contentinfo">
+        <img src="assets/images/footer.png" class="lcp-footer-img" alt="footer" />
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,114 +1,5 @@
 /* ================= MODERN PROFESSIONAL PDF TEMPLATE STYLES ================= */
 
-/* ================= PRINT AND PAGE BREAK STYLES ================= */
-/* Print-specific styles for headers and footers on every page */
-.print-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 80px;
-  z-index: 1000;
-  background: #FFFFFF;
-  border-bottom: 1px solid #E0E0E0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.print-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 60px;
-  z-index: 1000;
-  background: #FFFFFF;
-  border-top: 1px solid #E0E0E0;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.print-content {
-  margin-top: 100px;
-  margin-bottom: 80px;
-  padding: 0;
-}
-
-/* Page break controls for content organization */
-.page-break-before {
-  page-break-before: always;
-  break-before: page;
-}
-
-.page-break-after {
-  page-break-after: always;
-  break-after: page;
-}
-
-.no-page-break {
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-/* Section-level page break prevention */
-.rfq-section {
-  page-break-inside: avoid;
-  break-inside: avoid;
-  margin-bottom: 12px;
-}
-
-/* Large sections that can break */
-.rfq-section.allow-break {
-  page-break-inside: auto;
-  break-inside: auto;
-}
-
-/* Hide print elements on screen */
-@media screen {
-  .print-header,
-  .print-footer {
-    display: none;
-  }
-  
-  .print-content {
-    margin-top: 0;
-    margin-bottom: 0;
-  }
-}
-
-/* Print-specific styles */
-@media print {
-  body {
-    margin: 0;
-    padding: 0;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  .print-header,
-  .print-footer {
-    display: block;
-  }
-  
-  /* Ensure content doesn't overlap with fixed headers */
-  .print-content {
-    margin-top: 100px;
-    margin-bottom: 80px;
-  }
-  
-  /* Page numbering */
-  .page-number:after {
-    content: counter(page);
-  }
-  
-  /* Optimize content for print */
-  .lcp-header {
-    page-break-inside: avoid;
-  }
-  
-  .lcp-footer {
-    page-break-inside: avoid;
-  }
-}
-
 /* CSS Variables for Color Scheme */
 :root {
   --primary-blue: #1565C0;
@@ -163,22 +54,6 @@ body {
   box-shadow: var(--shadow);
   position: relative;
   overflow: hidden;
-}
-
-/* Print-specific header positioning */
-@media print {
-  .lcp-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    margin: 0;
-    border-radius: 0;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%) !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
 }
 
 .lcp-header::before {
@@ -733,22 +608,6 @@ body {
   box-shadow: var(--shadow);
 }
 
-/* Print-specific footer positioning */
-@media print {
-  .lcp-footer {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    margin: 0;
-    border-radius: 0;
-    box-shadow: none;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-}
-
 .lcp-footer-img {
   width: 100%;
   height: auto;
@@ -825,204 +684,23 @@ body {
   font-style: italic;
 }
 
-/* ================= PRINT PAGE HEADERS AND FOOTERS ================= */
-/* Create repeating header for each page */
-.print-page-header {
-  display: none;
-}
-
-.print-page-footer {
-  display: none;
-}
-
-@media print {
-  .print-page-header {
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
-    z-index: 1000;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  .print-page-footer {
-    display: block;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 50px;
-    background: var(--neutral-gray);
-    z-index: 1000;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Alternative: Use CSS Page Rules */
-  @page {
-    margin: 100px 20mm 70px 20mm;
-
-    @top-center {
-      content: "LCP Roofing - Request for Quote";
-      font-family: 'Segoe UI', sans-serif;
-      font-size: 12px;
-      color: white;
-      background: var(--primary-blue);
-      padding: 10px;
-      width: 100%;
-      text-align: center;
-    }
-
-    @bottom-center {
-      content: "Page " counter(page) " of " counter(pages);
-      font-family: 'Segoe UI', sans-serif;
-      font-size: 10px;
-      color: var(--text-light);
-    }
-  }
-}
-
 /* ================= RESPONSIVE ADJUSTMENTS ================= */
-/* Print styles for header/footer on every page */
 @media print {
-  /* Primary method: Fixed positioning */
-  .lcp-header {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 9999 !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%) !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .lcp-footer {
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 9999 !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    box-shadow: none !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Secondary method: Print-specific elements */
-  .print-page-header {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: 80px !important;
-    z-index: 10000 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  .print-page-footer {
-    display: block !important;
-    position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    height: 50px !important;
-    z-index: 10000 !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Page setup */
-  @page {
-    margin: 90px 15mm 60px 15mm;
-    size: A4;
-
-    /* CSS Generated Content for headers/footers */
-    @top-left {
-      content: element(running-header);
-      width: 100%;
-    }
-
-    @bottom-center {
-      content: "Page " counter(page);
-      font-family: 'Segoe UI', sans-serif;
-      font-size: 10px;
-      color: var(--text-dark);
-    }
-  }
-
-  /* Running elements */
-  .lcp-header {
-    position: running(running-header);
-  }
-
-  .lcp-footer {
-    position: running(running-footer);
-  }
-
-  /* Adjust content for fixed headers/footers */
   .pdf-page-margins {
-    margin: 0 !important;
-    padding: 90px 15mm 60px 15mm !important;
+    margin: 10mm 8mm;
   }
 
-  body {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  main {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-  }
-
-  /* Ensure sections don't break awkwardly */
   .rfq-section {
     page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  .rfq-section-3col,
-  .rfq-section-2col,
-  .lcp-assurance-section,
-  .important-info-section {
-    page-break-inside: avoid;
-    break-inside: avoid;
   }
 
   .image-container {
     grid-template-columns: repeat(2, 1fr);
-    page-break-inside: avoid;
   }
 
-  /* Force color printing */
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
-
-  /* Remove shadows and effects for print */
   :root {
     --shadow: none;
     --shadow-hover: none;
-  }
-
-  /* Ensure proper page breaks */
-  .page-break {
-    page-break-before: always;
-  }
-
-  .avoid-break {
-    page-break-inside: avoid;
   }
 }
 
