@@ -1,0 +1,4 @@
+{
+  "editor.maxTokenizationLineLength": 200000,
+  "editor.stopRenderingLineAfter": 200000,
+}

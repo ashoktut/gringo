@@ -6,17 +6,24 @@
     <style>
       /* Print-specific styles for headers and footers on every page */
       @media print {
-        .print-header {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 80px;
-          z-index: 1000;
-          background: #fff;
-          border-bottom: 1px solid #ddd;
+        @page {
+          margin: 0;
+          size: A4;
         }
-        
+
+        .print-header {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 210mm;
+            max-width: 100vw;
+            height: 50px;
+            z-index: 1000;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+        }
+
         .print-footer {
           position: fixed;
           bottom: 0;
@@ -27,43 +34,113 @@
           background: #fff;
           border-top: 1px solid #ddd;
         }
-        
+
         .print-content {
-          margin-top: 100px;
-          margin-bottom: 80px;
+          margin-top: 0px;
+          margin-bottom: 70px;
+          padding: 65px 12px 0 12px;
           page-break-inside: avoid;
+          max-width: 210mm;
+          margin-left: auto;
+          margin-right: auto;
+          box-sizing: border-box;
         }
-        
+
         /* Page break controls */
         .page-break-before {
           page-break-before: always;
         }
-        
+
         .page-break-after {
           page-break-after: always;
         }
-        
+
         .no-page-break {
           page-break-inside: avoid;
         }
-        
-        /* Ensure content flows properly */
+
+        /* Better section breaks */
+        section {
+          page-break-inside: avoid;
+          margin-bottom: 16px;
+          padding-top: 5px;
+        }
+
+        /* Prevent blank first page */
         body {
           margin: 0;
           padding: 0;
+        }
+
+        /* Ensure sections don't hide under header */
+        .print-content section:first-child {
+          padding-top: 10px;
+        }
+
+        /* Ensure specific sections don't hide under header */
+        section[aria-label="Roof Covering Information"] {
+          padding-top: 10px;
+        }
+
+        section[aria-label="General Notes"] {
+          padding-top: 10px;
+        }
+
+        /* Image container fixes */
+        .image-container {
+          page-break-inside: avoid;
+          margin: 10px 0;
+        }
+
+        .image-container img {
+          max-width: 100% !important;
+          max-height: 180px !important;
+          width: auto !important;
+          height: auto !important;
+          object-fit: contain !important;
+          display: block !important;
+        }
+
+        /* Signature image styling */
+        .signature-container img {
+          max-width: 200px !important;
+          max-height: 35px !important;
+          width: auto !important;
+          height: auto !important;
+          object-fit: contain !important;
+          display: block !important;
+        }
+
+        /* Force all images to display */
+        img {
+          display: block !important;
+          max-width: 100% !important;
+        }
+
+        /* Ensure content flows properly */
+        html, body {
+          margin: 0 !important;
+          padding: 0 !important;
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           line-height: 1.4;
           color: #333;
+          height: auto;
+        }
+
+        /* Force first content to start immediately */
+        .print-content > div:first-child {
+          margin-top: 0 !important;
+          padding-top: 0 !important;
         }
       }
-      
+
       /* Regular view styles */
       @media screen {
         .print-header,
         .print-footer {
           display: none;
         }
-        
+
         body {
           font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
           line-height: 1.4;
@@ -78,34 +155,35 @@
   <body>
     <!-- Fixed headers and footers for print -->
     <div class="print-header">
-      <img src="data:image/png;base64,{{headerImageBase64}}" alt="LCP Roofing Logo" style="width: 100%; height: 60px; object-fit: cover;" />
-      <div style="padding: 8px 12px; background: rgba(255, 255, 255, 0.95); border-left: 3px solid #f59e0b; margin: 0;">
-        <h1 style="font-size: 12px; margin: 0; color: #1e293b; font-weight: 600;">Request for Quote: ROOF TRUSSES and COVERINGS</h1>
-        <span style="font-size: 8px; color: #64748b;">Professional RFQ Document | {{repName}} | {{createdAt}}</span>
+      <img src="data:image/png;base64,{{headerImageBase64}}" alt="LCP Roofing Logo" style="width: 100%; height: 30px; object-fit: cover; background: #f8f9fa;" onerror="this.style.display='none'" />
+      <div style="padding: 3px 8px; background: rgba(255, 255, 255, 0.95); border-left: 3px solid #f59e0b; margin: 0;">
+        <h1 style="font-size: 9px; margin: 0; color: #1e293b; font-weight: 600;">Request for Quote: ROOF TRUSSES and COVERINGS</h1>
+        <span style="font-size: 7px; color: #64748b;">LCP Roofing RFQ Document | {{repName}} | {{createdAt}}</span>
       </div>
     </div>
 
     <div class="print-footer">
       <div style="text-align: center; padding: 5px; font-size: 8px; color: #64748b; background: #f8fafc; border-bottom: 1px solid #ddd;">
-        LCP Roofing Professional Services | Submission ID: {{submissionId}} | Page <span class="page-number"></span>
+        LCP Roofing | Submission ID: {{submissionId}} | Page <span class="page-number"></span>
       </div>
-      <img src="data:image/png;base64,{{footerImageBase64}}" alt="LCP Footer" style="width: 100%; height: 40px; object-fit: cover;" />
+      <img src="data:image/png;base64,{{footerImageBase64}}" alt="LCP Footer" style="width: 100%; height: 40px; object-fit: cover; background: #f8f9fa;" onerror="this.style.display='none'" />
     </div>
 
     <div class="print-content">
-      <div style="max-width: 210mm; margin: 0 auto; padding: 8mm; box-sizing: border-box;">
-      <header role="banner" style="background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%); border-radius: 12px; padding: 0; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); position: relative; overflow: hidden;">
-        <img src="data:image/png;base64,{{headerImageBase64}}" alt="LCP Roofing Logo" style="width: 100%; height: auto; max-height: 120px; object-fit: cover; border-radius: 12px 12px 0 0; display: block;" />
-        <div style="padding: 16px 20px; background: rgba(255, 255, 255, 0.95); margin: -8px 12px 12px 12px; border-radius: 8px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1); border-left: 4px solid #F57C00;">
-          <h1 style="font-size: 16px; font-weight: 700; color: #1565C0; margin: 0 0 8px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-            Request for Quote:<br>
-            <span style="font-size: 18px; color: #1976D2; display: block; font-weight: 800; margin-top: 4px;">ROOF TRUSSES and COVERINGS</span>
-          </h1>
-          <p style="font-size: 9px; color: #757575; margin: 0; padding: 8px 12px; background: #F5F5F5; border-radius: 4px; border: 1px solid #E0E0E0;">
-            Submitted by: <strong>{{repName}}</strong> &nbsp; | &nbsp; Submission timestamp: <strong>{{createdAt}}</strong> &nbsp; | &nbsp; Submission ID: <strong>{{submissionId}}</strong>
-          </p>
+      <section aria-label="Notes Section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
+        <div style="padding: 8px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;">
+          <h3 style="font-size: 10px; font-weight: 600; color: #1565C0; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">Estimator Notes</h3>
+          <div style="min-height: 40px; background: #fff; border: 1px solid #ddd; border-radius: 3px; padding: 6px;">
+            <!-- Space for estimator notes -->
+          </div>
         </div>
-      </header>
+        <div style="padding: 8px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;">
+          <h3 style="font-size: 10px; font-weight: 600; color: #1565C0; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">Admin Notes</h3>
+          <div style="min-height: 40px; background: #fff; border: 1px solid #ddd; border-radius: 3px; padding: 6px;">
+            <!-- Space for admin notes -->
+          </div>
+        </div>
+      </section>
 
       <main role="main">
         <aside aria-label="Office Use" style="background: linear-gradient(135deg, #D32F2F 0%, #E57373 100%); color: #FFFFFF; font-weight: 700; padding: 8px 16px; border-radius: 6px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); margin-bottom: 16px;">
@@ -115,7 +193,7 @@
         <section aria-label="Admin Details" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 16px;">
           <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Drawn on <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
           <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Drawn By <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Customer no <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
+          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Client no <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
           <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Quoted on <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
           <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Estimator <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
           <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Quote no <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
@@ -152,13 +230,13 @@
 
         <section aria-label="Project Design Information" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
           <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">PROJECT DESIGN INFORMATION</h2>
-          <ul style="list-style: none; padding: 0; margin: 0;">
+          <ul style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px;">
             <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Gate Access Payment: <span style="font-weight: 600; color: #1565C0;">{{gateAccess}}</span></li>
             <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Structure for / Type: <span style="font-weight: 600; color: #1565C0;">{{structureType}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Maximum truss spacing: <span style="font-weight: 600; color: #1565C0;">{{maxTrussSpacing}}</span></li>
+            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Max truss spacing: <span style="font-weight: 600; color: #1565C0;">{{maxTrussSpacing}}</span></li>
             <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Roof Pitch: <span style="font-weight: 600; color: #1565C0;">{{mainPitch}}</span></li>
             <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">2nd Pitch: <span style="font-weight: 600; color: #1565C0;">{{pitch2}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Roofing Service Req: <span style="font-weight: 600; color: #1565C0;">{{serviceType}}</span></li>
+            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Services Req: <span style="font-weight: 600; color: #1565C0;">{{serviceType}}</span></li>
             <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Eaves Overhang: <span style="font-weight: 600; color: #1565C0;">{{eavesOH}}</span></li>
             <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Gable Overhang: <span style="font-weight: 600; color: #1565C0;">{{gableOH}}</span></li>
             <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Apex Overhang: <span style="font-weight: 600; color: #1565C0;">{{apexOH}}</span></li>
@@ -210,27 +288,39 @@
 
         <section aria-label="Images Taken of Drawings / Site" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
           <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">IMAGES TAKEN OF DRAWINGS / SITE</h2>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 12px;">
-            <figure style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
-              <figcaption style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Notes & Drawings</figcaption>
-              {{drawingPhoto1}}
-            </figure>
-            <figure style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
-              <figcaption style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Site Plans</figcaption>
-              {{drawingPhoto2}}
-            </figure>
-            <figure style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
-              <figcaption style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Architecture Plans</figcaption>
-              {{drawingPhoto3}}
-            </figure>
-            <figure style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
-              <figcaption style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Extra Image</figcaption>
-              {{drawingPhoto4}}
-            </figure>
-            <figure style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center;">
-              <figcaption style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Extra Image 2</figcaption>
-              {{drawingPhoto5}}
-            </figure>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px;">
+            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
+              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Notes & Drawings</div>
+              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
+                {{drawingPhoto1}}
+              </div>
+            </div>
+            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
+              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Site Plans</div>
+              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
+                {{drawingPhoto2}}
+              </div>
+            </div>
+            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
+              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Architecture Plans</div>
+              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
+                {{drawingPhoto3}}
+              </div>
+            </div>
+            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
+              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Extra Image</div>
+              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
+                {{drawingPhoto4}}
+              </div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; max-width: 50%;">
+            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
+              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Extra Image 2</div>
+              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
+                {{drawingPhoto5}}
+              </div>
+            </div>
           </div>
         </section>
 
@@ -238,8 +328,8 @@
           <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">GENERAL NOTES</h2>
           <div><p>{{generalNotes}}</p></div>
           <div style="background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%); color: #fff; padding: 8px 16px; border-radius: 6px; font-weight: 700; text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px 0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">IMPORTANT INFO</div>
-          <article style="background: #fff5f0; border: 2px solid #FF6B35; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-            <h3 style="color: #FF6B35; font-size: 12px; font-weight: 700; margin: 0 0 10px 0; text-align: center;">Notes and Comments for Consideration When Requesting a Quote</h3>
+          <article class="no-page-break" style="background: #fff5f0; border: 2px solid #FF6B35; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+            <h3 style="color: #FF6B35; font-size: 12px; font-weight: 700; margin: 0 0 10px 0; text-align: center;">Notes and comments to consider when requesting a quote</h3>
             <ol style="font-size: 9px; line-height: 1.3; padding-left: 16px; margin: 0;">
               <li style="margin-bottom: 6px; color: #555;">Manufacture &amp; delivery dates are dependent on workload at time of deposit payment.</li>
               <li style="margin-bottom: 6px; color: #555;">Manufacture is dependent on availability of material not normally included in a standard roof design.</li>
@@ -256,30 +346,32 @@
             </ol>
           </article>
 
-          <div style="margin: 20px 0; padding: 12px; background: #f8f9fa; border-radius: 6px; border: 1px solid #dee2e6;">
-            <div style="font-size: 10px; font-weight: 600; color: #1565C0; margin-bottom: 8px;">Rep Signature: {{repSign}}</div>
-            <div style="height: 1px; background: #333; width: 200px;"></div>
+          <div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6; max-width: 300px;" class="signature-container">
+            <div style="font-size: 10px; font-weight: 600; color: #1565C0; margin-bottom: 6px;">Rep Signature:</div>
+            <div style="min-height: 50px; max-height: none; overflow: visible; background: #fff; border: 1px dashed #ccc; padding: 6px; border-radius: 3px; display: flex; align-items: center; justify-content: center;">
+              {{repSign}}
+            </div>
           </div>
 
-          <section style="background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%); color: #fff; padding: 16px; border-radius: 8px; margin-top: 20px;">
-            <h3 style="font-size: 14px; font-weight: 700; margin: 0 0 10px 0; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">Your Confidence, Our Commitment</h3>
-            <p style="text-align: center; font-size: 11px; margin-bottom: 12px; background: rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 4px;">
+          <section style="background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%); color: #fff; padding: 8px; border-radius: 6px; margin-top: 12px;">
+            <h3 style="font-size: 11px; font-weight: 700; margin: 0 0 6px 0; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">Your Confidence, Our Commitment</h3>
+            <p style="text-align: center; font-size: 9px; margin-bottom: 6px; background: rgba(255, 255, 255, 0.1); padding: 4px; border-radius: 3px;">
               <strong>Please direct all queries to your LCP Roofing representative.</strong>
             </p>
-            <div style="text-align: center; margin-bottom: 12px;">
-              <span style="background: #FF6B35; color: #fff; padding: 6px 12px; border-radius: 20px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SANS1900 (SATAS) Quality Accredited Fabricator</span>
+            <div style="text-align: center; margin-bottom: 6px;">
+              <span style="background: #FF6B35; color: #fff; padding: 3px 8px; border-radius: 15px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SANS1900 (SATAS) Quality Accredited Fabricator</span>
             </div>
-            <ul style="font-size: 10px; line-height: 1.4; margin: 12px 0; padding-left: 16px;">
-              <li style="margin-bottom: 8px;">
+            <ul style="font-size: 8px; line-height: 1.3; margin: 6px 0; padding-left: 12px;">
+              <li style="margin-bottom: 4px;">
                 <strong>Did you know?</strong> About <b>50% of fabricators in South Africa are not registered</b> with the industry professional body.<br>
                 <span style="color: #FFE0B3; font-weight: 600;">Choose wisely—work with an accredited fabricator you can trust.</span>
               </li>
-              <li style="margin-bottom: 8px;">
+              <li style="margin-bottom: 4px;">
                 Less than <b>20% of designers are professionally registered</b>.<br>
                 <span style="color: #FFE0B3; font-weight: 600;">LCP Roofing employs professionally designated designers for your peace of mind.</span>
               </li>
             </ul>
-            <p style="font-size: 9px; line-height: 1.4; text-align: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
+            <p style="font-size: 7px; line-height: 1.3; text-align: center; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
               This report is generated by LCP Roofing Online and reflects your requirements, all details noted on drawings or as revised, site conditions, and any particular limitations pertaining thereto.<br>
               <strong>We are committed to delivering quality, compliance, and complete transparency—so you can build with confidence.</strong>
             </p>
@@ -287,10 +379,9 @@
         </section>
       </main>
 
-      <footer role="contentinfo">
-        <img src="data:image/png;base64,{{footerImageBase64}}" alt="footer" />
+      <footer role="contentinfo" style="display: none;">
+        <!-- Footer content handled by print-footer for PDF generation -->
       </footer>
-      </div> <!-- Close pdf-page-margins -->
     </div> <!-- Close print-content -->
   </body>
 </html>
