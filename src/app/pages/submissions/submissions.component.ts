@@ -13,6 +13,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { FormSubmissionService, FormSubmission } from '../../services/form-submission.service';
 import { Template, TemplateType, TemplateGenerationRequest } from '../../models/template.models';
 import { TemplateManagementService } from '../../services/template-management.service';
+import { PdfGenerationService } from '../../services/pdf-generation.service';
 import { SearchComponent, SearchConfig } from '../../sharedComponents/search/search.component';
 
 @Component({
@@ -47,7 +48,7 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
           </button>
         </div>
       </div>
-    
+
       @if (isSearching && searchTerm) {
         <div class="search-results">
           <p class="search-info">
@@ -56,7 +57,7 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
           </p>
         </div>
       }
-    
+
       @if (displayedSubmissions.length > 0) {
         <div class="submissions-grid">
           @for (submission of displayedSubmissions; track submission) {
@@ -94,11 +95,18 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
               </button>
               <button mat-button
                 color="primary"
-                matTooltip="Generate PDF"
+                matTooltip="Generate Enhanced PDF"
+                (click)="generateEnhancedPDF(submission)">
+                <mat-icon>picture_as_pdf</mat-icon>
+                Enhanced PDF
+              </button>
+              <button mat-button
+                color="primary"
+                matTooltip="Generate PDF from Template"
                 [matMenuTriggerFor]="pdfMenu"
                 [disabled]="!hasTemplatesForForm(submission.formType)">
-                <mat-icon>picture_as_pdf</mat-icon>
-                PDF
+                <mat-icon>description</mat-icon>
+                Template PDF
               </button>
               <button mat-button
                 color="accent"
@@ -152,7 +160,7 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
         </button>
       </div>
     }
-    
+
     </div>
     `,
   styles: [`
@@ -307,6 +315,7 @@ export class SubmissionsComponent implements OnInit {
   constructor(
     private formSubmissionService: FormSubmissionService,
     private templateService: TemplateManagementService,
+    private pdfGenerationService: PdfGenerationService,
     private router: Router,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
@@ -441,6 +450,67 @@ export class SubmissionsComponent implements OnInit {
       case 'completed': return 'primary';
       default: return '';
     }
+  }
+
+  // Enhanced PDF Generation Method
+  generateEnhancedPDF(submission: FormSubmission) {
+    // Prepare comprehensive form data
+    const enhancedFormData = {
+      // Core submission data
+      ...submission.formData,
+      submissionId: submission.submissionId,
+      formTitle: submission.formTitle,
+      status: submission.status,
+      createdAt: submission.createdAt,
+
+      // Add any missing common fields with defaults
+      repName: submission.formData?.repName || 'Field Representative',
+      dateSubmitted: new Date(submission.createdAt).toLocaleDateString(),
+      dateDue: submission.formData?.dateDue || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+
+      // Display fields (formatted for better presentation)
+      solarAreaDisplay: Array.isArray(submission.formData?.solarArea) ?
+        submission.formData.solarArea.join(', ') : submission.formData?.solarArea || 'None',
+      geyserAreaDisplay: Array.isArray(submission.formData?.geyserArea) ?
+        submission.formData.geyserArea.join(', ') : submission.formData?.geyserArea || 'None',
+      trussAreaDisplay: Array.isArray(submission.formData?.trussArea) ?
+        submission.formData.trussArea.join(', ') : submission.formData?.trussArea || 'None',
+      trussTypeDisplay: Array.isArray(submission.formData?.trussType) ?
+        submission.formData.trussType.join(', ') : submission.formData?.trussType || 'Standard',
+      trussType2Display: Array.isArray(submission.formData?.trussType2) ?
+        submission.formData.trussType2.join(', ') : submission.formData?.trussType2 || 'Standard',
+      pg1DescDisplay: Array.isArray(submission.formData?.pg1Desc) ?
+        submission.formData.pg1Desc.join(', ') : submission.formData?.pg1Desc || '',
+
+      // System-generated fields
+      headerImage: 'assets/images/header.png',
+      footerImage: 'assets/images/footer.png'
+    };
+
+    // Generate the enhanced PDF
+    this.pdfGenerationService.generateEnhancedRFQ(enhancedFormData).subscribe({
+      next: () => {
+        this.snackBar.open(
+          '🎉 Enhanced PDF generated successfully!',
+          'Close',
+          {
+            duration: 4000,
+            panelClass: ['success-snackbar']
+          }
+        );
+      },
+      error: (error) => {
+        console.error('PDF generation error:', error);
+        this.snackBar.open(
+          '❌ Error generating PDF: ' + (error.message || 'Unknown error'),
+          'Close',
+          {
+            duration: 6000,
+            panelClass: ['error-snackbar']
+          }
+        );
+      }
+    });
   }
 
   // PDF Template Methods

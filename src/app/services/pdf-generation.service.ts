@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Template, TemplateGenerationRequest, PdfGenerationOptions } from '../models/template.models';
 import { DocxProcessingService } from './docx-processing.service';
+
+declare var html2pdf: any;
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +13,307 @@ import { DocxProcessingService } from './docx-processing.service';
 export class PdfGenerationService {
 
   constructor(
-    private docxProcessor: DocxProcessingService
+    private docxProcessor: DocxProcessingService,
+    private http: HttpClient
   ) {}
+
+  /**
+   * Generate enhanced RFQ PDF using the new template
+   */
+  generateEnhancedRFQ(formData: Record<string, any>, options?: PdfGenerationOptions): Observable<void> {
+    console.log('🎯 Starting enhanced PDF generation with data:', formData);
+
+    // Use the simplified template that's more compatible with html2pdf
+    return this.http.get('assets/pdf-template-simple.html', { responseType: 'text' }).pipe(
+      map(template => {
+        console.log('📄 Template loaded, length:', template.length);
+        const processedHtml = this.processEnhancedTemplate(template, formData);
+        console.log('✅ Template processed, length:', processedHtml.length);
+
+        // Debug: Log the first 500 characters of processed HTML
+        console.log('🔍 Processed HTML preview:', processedHtml.substring(0, 500));
+
+        const filename = options?.filename || this.generateRFQFilename(formData);
+        console.log('📁 Generating PDF with filename:', filename);
+
+        this.generatePdfWithHtml2Pdf(processedHtml, filename);
+      }),
+      catchError(error => {
+        console.error('❌ Enhanced PDF generation failed:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Debug method to test template loading and processing
+   */
+  debugTemplate(formData: Record<string, any>): Observable<string> {
+    return this.http.get('assets/pdf-template-simple.html', { responseType: 'text' }).pipe(
+      map(template => {
+        console.log('🔍 Debug - Template loaded successfully');
+        const processed = this.processEnhancedTemplate(template, formData);
+        console.log('🔍 Debug - Template processed');
+
+        // Open processed HTML in new window for debugging
+        const debugWindow = window.open('', '_blank');
+        if (debugWindow) {
+          debugWindow.document.write(processed);
+          debugWindow.document.close();
+        }
+
+        return processed;
+      })
+    );
+  }
+
+  /**
+   * Process the enhanced template with form data
+   */
+  private processEnhancedTemplate(template: string, data: Record<string, any>): string {
+    let processed = template;
+
+    // Add system-generated fields
+    const enhancedData: Record<string, any> = {
+      ...data,
+      createdAt: new Date().toLocaleString(),
+      submissionId: data['submissionId'] || this.generateSubmissionId(),
+      headerImage: data['headerImage'] || 'assets/images/header.png'
+    };
+
+    console.log('🔄 Processing template with enhanced data keys:', Object.keys(enhancedData));
+
+    // Replace all placeholders
+    let replacementCount = 0;
+    Object.keys(enhancedData).forEach(key => {
+      const placeholder = new RegExp(`\\{\\{${key}\\}\\}`, 'g');
+      const value = this.formatValue(enhancedData[key]);
+      const matches = processed.match(placeholder);
+      if (matches) {
+        console.log(`🔄 Replacing ${matches.length} instances of {{${key}}} with: ${value}`);
+        replacementCount += matches.length;
+      }
+      processed = processed.replace(placeholder, value);
+    });
+
+    console.log(`✅ Total replacements made: ${replacementCount}`);
+
+    // Remove any remaining empty placeholders
+    const remainingPlaceholders = processed.match(/\{\{[^}]+\}\}/g);
+    if (remainingPlaceholders) {
+      console.log('⚠️ Remaining unfilled placeholders:', remainingPlaceholders.slice(0, 10));
+      if (remainingPlaceholders.length > 10) {
+        console.log(`... and ${remainingPlaceholders.length - 10} more`);
+      }
+    }
+    processed = processed.replace(/\{\{[^}]+\}\}/g, '<span style="color:#ff0000;font-weight:bold;">[Missing Data]</span>');
+
+    // Handle empty images - remove img tags with empty src
+    processed = processed.replace(/<img[^>]*src=""[^>]*>/g, '');
+
+    // Validate HTML structure
+    if (!processed.includes('<body')) {
+      console.error('❌ Processed HTML missing body tag');
+    }
+    if (!processed.includes('DOCTYPE')) {
+      console.error('❌ Processed HTML missing DOCTYPE');
+    }
+
+    console.log('✅ Template processing complete. Final length:', processed.length);
+    return processed;
+  }
+
+  /**
+   * Generate PDF using html2pdf.js
+   */
+  private generatePdfWithHtml2Pdf(htmlContent: string, filename: string): void {
+    console.log('🎨 Starting html2pdf generation...');
+    console.log('📝 HTML content length:', htmlContent.length);
+    console.log('📝 First 500 chars of HTML:', htmlContent.substring(0, 500));
+
+    // First, let's test with a minimal HTML to see if html2pdf works at all
+    const testHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <title>Test</title>
+      </head>
+      <body>
+        <h1>TEST PDF GENERATION</h1>
+        <p>This is a test to see if html2pdf works.</p>
+        <p>Current time: ${new Date().toLocaleString()}</p>
+      </body>
+      </html>
+    `;
+
+    // Check if content seems valid
+    if (htmlContent.length < 1000) {
+      console.warn('⚠️ HTML content seems too short, might be missing data');
+    }
+
+    const options = {
+      margin: 0.5,
+      filename: filename,
+      image: {
+        type: 'jpeg',
+        quality: 0.98
+      },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: {
+        unit: 'in',
+        format: 'a4',
+        orientation: 'portrait'
+      }
+    };
+
+    if (typeof html2pdf !== 'undefined') {
+      console.log('✅ html2pdf library found, generating PDF...');
+
+      // First test: Try with simple HTML to verify html2pdf works
+      console.log('🧪 Testing html2pdf with simple HTML first...');
+      html2pdf().set({...options, filename: 'test-' + filename}).from(testHtml).save().then(() => {
+        console.log('✅ Simple test PDF generated successfully!');
+
+        // Now try with actual content
+        console.log('📄 Generating actual content PDF...');
+        return html2pdf().set(options).from(htmlContent).save();
+      }).then(() => {
+        console.log('✅ Full PDF saved successfully!');
+      }).catch((error: any) => {
+        console.error('❌ html2pdf error:', error);
+        console.log('🔧 Trying alternative approach...');
+
+        // Try creating element approach
+        const element = document.createElement('div');
+        element.innerHTML = htmlContent;
+        element.style.width = '210mm';
+        element.style.minHeight = '297mm';
+        element.style.padding = '20mm';
+        element.style.margin = '0 auto';
+        element.style.backgroundColor = '#ffffff';
+
+        document.body.appendChild(element);
+
+        html2pdf().set(options).from(element).save().then(() => {
+          console.log('✅ Alternative approach PDF saved successfully!');
+          document.body.removeChild(element);
+        }).catch((altError: any) => {
+          console.error('❌ Alternative approach also failed:', altError);
+          document.body.removeChild(element);
+
+          // Final fallback: browser print
+          console.log('🔄 Falling back to browser print...');
+          this.renderPdf(htmlContent, filename);
+        });
+      });
+    } else {
+      console.error('❌ html2pdf library not found. Falling back to browser print.');
+      this.renderPdf(htmlContent, filename);
+    }
+  }
+
+  /**
+   * Create a simplified version of the template for fallback
+   */
+  private createSimplifiedTemplate(originalHtml: string): string {
+    // Extract text content and create a simpler layout
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = originalHtml;
+
+    // Get all text content while preserving structure
+    const sections: string[] = [];
+
+    // Find all sections and extract their content
+    const sectionElements = tempDiv.querySelectorAll('div[style*="background"]');
+    sectionElements.forEach((section, index) => {
+      const heading = section.querySelector('div[style*="font-weight:700"]');
+      const content = section.textContent || '';
+
+      if (heading && content.trim()) {
+        sections.push(`
+          <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+            <h3 style="color: #1976d2; margin: 0 0 10px 0;">${heading.textContent}</h3>
+            <div style="line-height: 1.6;">${content.replace(heading.textContent || '', '').trim()}</div>
+          </div>
+        `);
+      }
+    });
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>LCP Roofing - RFQ Document</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 20px;
+              line-height: 1.6;
+              color: #333;
+            }
+            h1 {
+              color: #1976d2;
+              text-align: center;
+              border-bottom: 2px solid #1976d2;
+              padding-bottom: 10px;
+            }
+            .section {
+              margin-bottom: 20px;
+              padding: 15px;
+              border: 1px solid #ddd;
+              border-radius: 5px;
+            }
+            .section h3 {
+              color: #1976d2;
+              margin: 0 0 10px 0;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>LCP Roofing - Request for Quote</h1>
+          <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Generated on ${new Date().toLocaleString()}
+          </p>
+          ${sections.join('')}
+        </body>
+      </html>
+    `;
+  }
+
+  /**
+   * Generate RFQ filename
+   */
+  private generateRFQFilename(formData: Record<string, any>): string {
+    const clientName = formData['clientName'] || 'Client';
+    const date = new Date().toISOString().split('T')[0];
+    const cleanClientName = clientName.replace(/[^a-zA-Z0-9]/g, '_');
+    return `LCP_RFQ_${cleanClientName}_${date}.pdf`;
+  }
+
+  /**
+   * Generate unique submission ID
+   */
+  private generateSubmissionId(): string {
+    return 'RFQ-' + Date.now().toString(36).toUpperCase();
+  }
+
+  /**
+   * Format individual values for display
+   */
+  private formatValue(value: any): string {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
+    if (Array.isArray(value)) return value.join(', ');
+    if (value instanceof Date) return value.toLocaleDateString();
+    return String(value);
+  }
 
   /**
    * Generate PDF from template and form data with format preservation
@@ -163,17 +465,6 @@ export class PdfGenerationService {
     });
 
     return formatted;
-  }
-
-  /**
-   * Format individual values for display
-   */
-  private formatValue(value: any): string {
-    if (value === null || value === undefined) return 'N/A';
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    if (Array.isArray(value)) return value.join(', ');
-    if (value instanceof Date) return value.toLocaleDateString();
-    return String(value);
   }
 
   /**

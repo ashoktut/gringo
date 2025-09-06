@@ -1,387 +1,245 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <meta charset="utf-8" />
     <title>Request for Quote - LCP Roofing</title>
-    <style>
-      /* Print-specific styles for headers and footers on every page */
-      @media print {
-        @page {
-          margin: 0;
-          size: A4;
-        }
-
-        .print-header {
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 210mm;
-            max-width: 100vw;
-            height: 50px;
-            z-index: 1000;
-            background: #fff;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .print-footer {
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          height: 60px;
-          z-index: 1000;
-          background: #fff;
-          border-top: 1px solid #ddd;
-        }
-
-        .print-content {
-          margin-top: 0px;
-          margin-bottom: 70px;
-          padding: 65px 12px 0 12px;
-          page-break-inside: avoid;
-          max-width: 210mm;
-          margin-left: auto;
-          margin-right: auto;
-          box-sizing: border-box;
-        }
-
-        /* Page break controls */
-        .page-break-before {
-          page-break-before: always;
-        }
-
-        .page-break-after {
-          page-break-after: always;
-        }
-
-        .no-page-break {
-          page-break-inside: avoid;
-        }
-
-        /* Better section breaks */
-        section {
-          page-break-inside: avoid;
-          margin-bottom: 16px;
-          padding-top: 5px;
-        }
-
-        /* Prevent blank first page */
-        body {
-          margin: 0;
-          padding: 0;
-        }
-
-        /* Ensure sections don't hide under header */
-        .print-content section:first-child {
-          padding-top: 10px;
-        }
-
-        /* Ensure specific sections don't hide under header */
-        section[aria-label="Roof Covering Information"] {
-          padding-top: 10px;
-        }
-
-        section[aria-label="General Notes"] {
-          padding-top: 10px;
-        }
-
-        /* Image container fixes */
-        .image-container {
-          page-break-inside: avoid;
-          margin: 10px 0;
-        }
-
-        .image-container img {
-          max-width: 100% !important;
-          max-height: 180px !important;
-          width: auto !important;
-          height: auto !important;
-          object-fit: contain !important;
-          display: block !important;
-        }
-
-        /* Signature image styling */
-        .signature-container img {
-          max-width: 200px !important;
-          max-height: 35px !important;
-          width: auto !important;
-          height: auto !important;
-          object-fit: contain !important;
-          display: block !important;
-        }
-
-        /* Force all images to display */
-        img {
-          display: block !important;
-          max-width: 100% !important;
-        }
-
-        /* Ensure content flows properly */
-        html, body {
-          margin: 0 !important;
-          padding: 0 !important;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.4;
-          color: #333;
-          height: auto;
-        }
-
-        /* Force first content to start immediately */
-        .print-content > div:first-child {
-          margin-top: 0 !important;
-          padding-top: 0 !important;
-        }
-      }
-
-      /* Regular view styles */
-      @media screen {
-        .print-header,
-        .print-footer {
-          display: none;
-        }
-
-        body {
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          line-height: 1.4;
-          color: #333;
-          margin: 0;
-          padding: 0;
-          background: #fff;
-        }
-      }
-    </style>
   </head>
-  <body>
-    <!-- Fixed headers and footers for print -->
-    <div class="print-header">
-      <img src="data:image/png;base64,{{headerImageBase64}}" alt="LCP Roofing Logo" style="width: 100%; height: 30px; object-fit: cover; background: #f8f9fa;" onerror="this.style.display='none'" />
-      <div style="padding: 3px 8px; background: rgba(255, 255, 255, 0.95); border-left: 3px solid #f59e0b; margin: 0;">
-        <h1 style="font-size: 9px; margin: 0; color: #1e293b; font-weight: 600;">Request for Quote: ROOF TRUSSES and COVERINGS</h1>
-        <span style="font-size: 7px; color: #64748b;">LCP Roofing RFQ Document | {{repName}} | {{createdAt}}</span>
+  <body style="margin:0;padding:0;font-family:Arial,sans-serif;font-size:14px;line-height:1.4;color:#333;">
+    <div style="padding:20px 30px;max-width:1000px;margin:0 auto;">
+      <!-- Header: Branding & Trust Signals -->
+      <div style="width:100%;background:#fff;padding:16px 0 8px 0;border-bottom:4px solid #1976d2;display:flex;justify-content:center;align-items:center;page-break-inside:avoid;">
+        <img src="{{headerImage}}" alt="LCP Roofing Logo" style="height:60px;max-width:90%;object-fit:contain;" />
       </div>
-    </div>
 
-    <div class="print-footer">
-      <div style="text-align: center; padding: 5px; font-size: 8px; color: #64748b; background: #f8fafc; border-bottom: 1px solid #ddd;">
-        LCP Roofing | Submission ID: {{submissionId}} | Page <span class="page-number"></span>
+      <!-- Title & Meta -->
+      <div style="margin:24px 0 8px 0;text-align:center;page-break-inside:avoid;">
+        <span style="font-size:1.5em;font-weight:700;color:#1976d2;">Request for Quote:</span>
+        <span style="font-size:1.2em;color:#333;font-weight:600;">ROOF TRUSSES and COVERINGS</span>
       </div>
-      <img src="data:image/png;base64,{{footerImageBase64}}" alt="LCP Footer" style="width: 100%; height: 40px; object-fit: cover; background: #f8f9fa;" onerror="this.style.display='none'" />
-    </div>
+      <div style="background:#e3f2fd;padding:8px 16px;border-radius:8px;max-width:700px;margin:0 auto 16px auto;font-size:1em;color:#222;page-break-inside:avoid;">
+        Submitted by: <span style="font-weight:600;">{{repName}}</span> &nbsp; | &nbsp; Submission timestamp: <span style="font-weight:600;">{{createdAt}}</span> &nbsp; | &nbsp; Submission ID: <span style="font-weight:600;">{{submissionId}}</span>
+      </div>
 
-    <div class="print-content">
-      <section aria-label="Notes Section" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-        <div style="padding: 8px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;">
-          <h3 style="font-size: 10px; font-weight: 600; color: #1565C0; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">Estimator Notes</h3>
-          <div style="min-height: 40px; background: #fff; border: 1px solid #ddd; border-radius: 3px; padding: 6px;">
-            <!-- Space for estimator notes -->
+      <!-- Office Use -->
+      <div style="background:#fff3e0;padding:8px 16px;border-radius:8px;max-width:700px;margin:0 auto 16px auto;font-size:1em;color:#d84315;display:flex;align-items:center;justify-content:center;page-break-inside:avoid;">
+        <span style="font-weight:600;">Office use:</span> Emailed
+        <span style="display:inline-block;width:18px;height:18px;border:2px solid #d84315;margin-left:8px;border-radius:4px;"></span>
+      </div>
+
+      <!-- Quick Meta Grid -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;background:#f5f5f5;padding:8px 16px;border-radius:8px;max-width:900px;margin:0 auto 16px auto;font-size:0.98em;page-break-inside:avoid;">
+        <div>Drawn on <span style="display:inline-block;border-bottom:1px solid #bbb;min-width:60px;">{{drawnOn}}</span></div>
+        <div>Drawn By <span style="display:inline-block;border-bottom:1px solid #bbb;min-width:60px;">{{drawnBy}}</span></div>
+        <div>Customer no <span style="display:inline-block;border-bottom:1px solid #bbb;min-width:60px;">{{customerNo}}</span></div>
+        <div>Quoted on <span style="display:inline-block;border-bottom:1px solid #bbb;min-width:60px;">{{quotedOn}}</span></div>
+        <div>Estimator <span style="display:inline-block;border-bottom:1px solid #bbb;min-width:60px;">{{estimator}}</span></div>
+        <div>Quote no <span style="display:inline-block;border-bottom:1px solid #bbb;min-width:60px;">{{quoteNo}}</span></div>
+        <div>Rate check <span style="display:inline-block;border-bottom:1px solid #bbb;min-width:60px;">{{rateCheck}}</span></div>
+      </div>
+
+      <!-- RFQ Details Grid -->
+      <div style="background:#fff;padding:16px 24px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:0 auto 16px auto;page-break-inside:avoid;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div><span style="color:#1976d2;font-weight:600;">Date quote requested:</span> <span>{{dateSubmitted}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Requested by:</span> <span>{{repName}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">ABK:</span> <span>{{abk}}</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:8px;">
+          <div><span style="color:#1976d2;font-weight:600;">Date required by:</span> <span>{{dateDue}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Other:</span> <span>{{other}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">P&G2:</span> <span>{{pg2}}</span></div>
+        </div>
+      </div>
+
+      <!-- PROJECT INFORMATION (Enhanced) -->
+      <div style="background:#f0f7ff;padding:18px 28px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:0 auto 18px auto;page-break-inside:avoid;">
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:12px;">
+          <div style="font-size:1.15em;font-weight:700;color:#1976d2;letter-spacing:1px;">PROJECT INFORMATION</div>
+          <div><span style="color:#1976d2;font-weight:600;">Roof Required in:</span> <span>{{roofTimeline}}</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+          <div><span style="color:#1976d2;font-weight:600;">Stand # or address:</span> <span>{{standNum}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Company:</span> <span>{{companyName}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Client Name & Surname:</span> <span>{{clientName}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Client email:</span> <span>{{clientEmail}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Contact No:</span> <span>{{clientPhone}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Copy email:</span> <span>{{ccMail}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Building type:</span> <span>{{buildingType}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Municipality:</span> <span>{{municipality}}</span></div>
+        </div>
+      </div>
+
+      <!-- PROJECT DESIGN INFORMATION (Enhanced) -->
+      <div style="background:#f8fafd;padding:18px 28px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:0 auto 18px auto;page-break-inside:avoid;">
+        <div style="font-size:1.15em;font-weight:700;color:#1976d2;letter-spacing:1px;margin-bottom:12px;">PROJECT DESIGN INFORMATION</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+          <div><span style="color:#1976d2;font-weight:600;">Gate Access Payment:</span> <span>{{gateAccess}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Structure for / Type:</span> <span>{{structureType}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Maximum truss spacing:</span> <span>{{maxTrussSpacing}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Roof Pitch:</span> <span>{{mainPitch}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">2nd Pitch:</span> <span>{{pitch2}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Roofing Service Req:</span> <span>{{serviceType}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Eaves Overhang:</span> <span>{{eavesOH}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Gable Overhang:</span> <span>{{gableOH}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Apex Overhang:</span> <span>{{apexOH}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Membrane Type:</span> <span>{{membraneType}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Ceiling Type:</span> <span>{{ceilingType}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Wall Corbelling Size:</span> <span>{{wallCorbel}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Solar Loadings:</span> <span>{{solarLoad}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Solar Locations:</span> <span>{{solarAreaDisplay}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Geyser Loadings:</span> <span>{{geyserLoad}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Geyser Locations:</span> <span>{{geyserAreaDisplay}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Exposed Trusses Req:</span> <span>{{exposedTruss}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">If Yes:</span> <span>{{trussTypeDisplay}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Exposed Truss Type:</span> <span>{{trussType2Display}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Exposed Locations:</span> <span>{{trussAreaDisplay}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Truss Sundries Req:</span> <span>{{trussSundry}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">General Truss Notes:</span> <span>{{trussNotes}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Optional P&G1:</span> <span>{{optionalPG1}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Description:</span> <span>{{pg1DescDisplay}}</span></div>
+        </div>
+      </div>
+
+      <!-- ROOF COVERING INFORMATION (Enhanced) -->
+      <div style="background:#fafcf5;padding:18px 28px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:0 auto 18px auto;page-break-inside:avoid;">
+        <div style="font-size:1.15em;font-weight:700;color:#1976d2;letter-spacing:1px;margin-bottom:12px;">ROOF COVERING INFORMATION</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+          <div><span style="color:#1976d2;font-weight:600;">Quote Cover:</span> <span>{{coverReq}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Covering Type:</span> <span>{{coverType}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Tile Profile:</span> <span>{{tileProfile}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Tile Colour:</span> <span>{{tileColour}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Tile Nailing:</span> <span>{{tileNailing}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Sheet Profile:</span> <span>{{sheetProfile}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Sheet Colour:</span> <span>{{sheetColour}}</span></div>
+        </div>
+        <div style="margin-top:12px;">
+          <span style="color:#1976d2;font-weight:600;">General Cover Notes:</span>
+          <p style="margin:4px 0 0 0;">{{coverNotes}}</p>
+        </div>
+      </div>
+
+      <!-- DRAWING DETAILS & REVISIONS (Enhanced) -->
+      <div style="background:#f9f6fa;padding:18px 28px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:0 auto 18px auto;page-break-inside:avoid;">
+        <div style="font-size:1.15em;font-weight:700;color:#1976d2;letter-spacing:1px;margin-bottom:12px;">DRAWING DETAILS & REVISIONS</div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;">
+          <div><span style="color:#1976d2;font-weight:600;">Drawing 1:</span> <span>{{drawings1}} {{dwg1No}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Drawing 2:</span> <span>{{drawings2}} {{dwg2No}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Drawing 3:</span> <span>{{drawings3}} {{dwg3No}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Drawing 4:</span> <span>{{drawings4}} {{dwg4No}}</span></div>
+          <div><span style="color:#1976d2;font-weight:600;">Drawing 5:</span> <span>{{drawings5}} {{dwg5No}}</span></div>
+        </div>
+      </div>
+
+      <!-- IMAGES TAKEN OF DRAWINGS / SITE (Enhanced) -->
+      <div style="background:#faf9f8;padding:18px 28px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:0 auto 18px auto;page-break-inside:avoid;">
+        <div style="font-size:1.15em;font-weight:700;color:#1976d2;letter-spacing:1px;margin-bottom:12px;">IMAGES TAKEN OF DRAWINGS / SITE</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;">
+          <div style="text-align:center;">
+            <div style="color:#1976d2;font-weight:600;margin-bottom:8px;">Notes & Drawings</div>
+            <img src="{{drawingPhoto1}}" alt="drawingPhoto1" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);" />
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#1976d2;font-weight:600;margin-bottom:8px;">Drawing Photo 2</div>
+            <img src="{{drawingPhoto2}}" alt="drawingPhoto2" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);" />
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#1976d2;font-weight:600;margin-bottom:8px;">Drawing Photo 3</div>
+            <img src="{{drawingPhoto3}}" alt="drawingPhoto3" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);" />
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#1976d2;font-weight:600;margin-bottom:8px;">Drawing Photo 4</div>
+            <img src="{{drawingPhoto4}}" alt="drawingPhoto4" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);" />
+          </div>
+          <div style="text-align:center;">
+            <div style="color:#1976d2;font-weight:600;margin-bottom:8px;">Drawing Photo 5</div>
+            <img src="{{drawingPhoto5}}" alt="drawingPhoto5" style="max-width:100%;height:auto;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1);" />
           </div>
         </div>
-        <div style="padding: 8px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;">
-          <h3 style="font-size: 10px; font-weight: 600; color: #1565C0; margin: 0 0 6px 0; text-transform: uppercase; letter-spacing: 0.5px;">Admin Notes</h3>
-          <div style="min-height: 40px; background: #fff; border: 1px solid #ddd; border-radius: 3px; padding: 6px;">
-            <!-- Space for admin notes -->
+      </div>
+
+      <!-- GENERAL NOTES (Enhanced) -->
+      <div style="background:#f8f9ff;padding:18px 28px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:0 auto 18px auto;page-break-inside:avoid;">
+        <div style="font-size:1.15em;font-weight:700;color:#1976d2;letter-spacing:1px;margin-bottom:16px;">GENERAL NOTES</div>
+
+        <div style="background:#fff3cd;padding:12px;border-radius:6px;border:1px solid #ffc107;margin-bottom:16px;">
+          <div style="font-weight:600;color:#856404;font-size:13px;">
+            📋 Additional notes: {{generalNotes}}
           </div>
         </div>
-      </section>
 
-      <main role="main">
-        <aside aria-label="Office Use" style="background: linear-gradient(135deg, #D32F2F 0%, #E57373 100%); color: #FFFFFF; font-weight: 700; padding: 8px 16px; border-radius: 6px; text-align: center; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); margin-bottom: 16px;">
-          <span>Office use:</span> Emailed <span style="display: inline-block; width: 14px; height: 14px; border: 2px solid #FFFFFF; border-radius: 3px; background: rgba(255, 255, 255, 0.9); margin-left: 8px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);"></span>
-        </aside>
-
-        <section aria-label="Admin Details" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin-bottom: 16px;">
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Drawn on <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Drawn By <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Client no <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Quoted on <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Estimator <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Quote no <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-          <div style="padding: 6px 10px; background: #f5f5f5; border-radius: 4px; border: 1px solid #ddd; font-size: 9px; font-weight: 600; color: #1565C0;">Rate check <span style="display: inline-block; width: 60px; height: 14px; border: 1px solid #333; margin-left: 8px; background: #fff; border-radius: 2px;"></span></div>
-        </section>
-
-        <section aria-label="Quote Details" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px;">
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Date quote requested:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{dateSubmitted}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Requested by:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{repName}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">ABK:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{abk}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Date required by:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{dateDue}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Other:</span> <span style="font-weight: 500; color: #333; flex: 1;"></span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">P&G2:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{pg2}}</span></div>
+        <div style="background:#ffffff;padding:16px;border-radius:8px;border-left:4px solid #ff5722;margin-bottom:12px;">
+          <div style="color:#1976d2;font-weight:700;font-size:16px;margin-bottom:12px;">IMPORTANT INFO</div>
+          <div style="color:#333;line-height:1.6;font-size:14px;">
+            <strong style="color:#ff5722;">Notes and comments for consideration when requesting a quote:</strong>
           </div>
-        </section>
+        </div>
 
-        <section aria-label="Project Information" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 12px; align-items: center;">
-            <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">PROJECT INFORMATION</h2>
-            <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">Roof Required in: <span style="font-weight: 500; color: #333;">{{roofTimeline}}</span></h2>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Stand # or address:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{standNum}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Company:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{companyName}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Client Name & Surname:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{clientName}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Client email:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{clientEmail}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Contact No:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{clientPhone}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Copy email:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{ccMail}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Building type:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{buildingType}}</span></div>
-            <div style="display: flex; align-items: center; padding: 6px 8px; background: #fff; border-radius: 4px; border: 1px solid #ddd; font-size: 10px;"><span style="font-weight: 600; color: #1565C0; margin-right: 8px; min-width: 100px;">Municipality:</span> <span style="font-weight: 500; color: #333; flex: 1;">{{municipality}}</span></div>
-          </div>
-        </section>
-
-        <section aria-label="Project Design Information" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-          <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">PROJECT DESIGN INFORMATION</h2>
-          <ul style="list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 8px;">
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Gate Access Payment: <span style="font-weight: 600; color: #1565C0;">{{gateAccess}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Structure for / Type: <span style="font-weight: 600; color: #1565C0;">{{structureType}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Max truss spacing: <span style="font-weight: 600; color: #1565C0;">{{maxTrussSpacing}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Roof Pitch: <span style="font-weight: 600; color: #1565C0;">{{mainPitch}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">2nd Pitch: <span style="font-weight: 600; color: #1565C0;">{{pitch2}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Services Req: <span style="font-weight: 600; color: #1565C0;">{{serviceType}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Eaves Overhang: <span style="font-weight: 600; color: #1565C0;">{{eavesOH}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Gable Overhang: <span style="font-weight: 600; color: #1565C0;">{{gableOH}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Apex Overhang: <span style="font-weight: 600; color: #1565C0;">{{apexOH}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Membrane Type: <span style="font-weight: 600; color: #1565C0;">{{membraneType}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Ceiling Type: <span style="font-weight: 600; color: #1565C0;">{{ceilingType}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Wall Corbelling Size: <span style="font-weight: 600; color: #1565C0;">{{wallCorbel}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Solar Loadings: <span style="font-weight: 600; color: #1565C0;">{{solarLoad}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Solar Locations: <span style="font-weight: 600; color: #1565C0;">{{solarAreaDisplay}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Geyser Loadings: <span style="font-weight: 600; color: #1565C0;">{{geyserLoad}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Geyser Locations: <span style="font-weight: 600; color: #1565C0;">{{geyserAreaDisplay}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Exposed Trusses Req: <span style="font-weight: 600; color: #1565C0;">{{exposedTruss}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">If Yes: <span style="font-weight: 600; color: #1565C0;">{{trussTypeDisplay}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Exposed Truss Type: <span style="font-weight: 600; color: #1565C0;">{{trussType2Display}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Exposed Locations: <span style="font-weight: 600; color: #1565C0;">{{trussAreaDisplay}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Truss Sundries Req: <span style="font-weight: 600; color: #1565C0;">{{trussSundry}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">General Truss Notes: <span style="font-weight: 600; color: #1565C0;">{{trussNotes}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Optional P&G1: <span style="font-weight: 600; color: #1565C0;">{{optionalPG1}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Description: <span style="font-weight: 600; color: #1565C0;">{{pg1DescDisplay}}</span></li>
-          </ul>
-        </section>
-
-        <section aria-label="Roof Covering Information" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-          <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">ROOF COVERING INFORMATION</h2>
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Quote Cover: <span style="font-weight: 600; color: #1565C0;">{{coverReq}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Covering Type: <span style="font-weight: 600; color: #1565C0;">{{coverType}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Tile Profile: <span style="font-weight: 600; color: #1565C0;">{{tileProfile}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Tile Colour: <span style="font-weight: 600; color: #1565C0;">{{tileColour}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Tile Nailing: <span style="font-weight: 600; color: #1565C0;">{{tileNailing}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Sheet Profile: <span style="font-weight: 600; color: #1565C0;">{{sheetProfile}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Sheet Colour: <span style="font-weight: 600; color: #1565C0;">{{sheetColour}}</span></li>
-          </ul>
-          <div style="margin-top: 12px; padding: 10px; background: #fff; border-radius: 6px; border: 1px solid #ddd; font-size: 10px;">
-            <strong style="color: #1565C0; display: block; margin-bottom: 6px;">General Cover Notes:</strong>
-            <p style="margin: 0; line-height: 1.4; color: #555;">{{coverNotes}}</p>
-          </div>
-        </section>
-
-        <section aria-label="Drawing Details & Revisions" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-          <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">DRAWING DETAILS & REVISIONS</h2>
-          <ul style="list-style: none; padding: 0; margin: 0;">
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Drawing 1: <span style="font-weight: 600; color: #1565C0;">{{drawings1}} {{dwg1No}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Drawing 2: <span style="font-weight: 600; color: #1565C0;">{{drawings2}} {{dwg2No}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Drawing 3: <span style="font-weight: 600; color: #1565C0;">{{drawings3}} {{dwg3No}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Drawing 4: <span style="font-weight: 600; color: #1565C0;">{{drawings4}} {{dwg4No}}</span></li>
-            <li style="padding: 4px 8px; margin-bottom: 4px; background: #fff; border-radius: 4px; border-left: 3px solid #1976D2; font-size: 10px; display: flex; justify-content: space-between;">Drawing 5: <span style="font-weight: 600; color: #1565C0;">{{drawings5}} {{dwg5No}}</span></li>
-          </ul>
-        </section>
-
-        <section aria-label="Images Taken of Drawings / Site" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-          <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">IMAGES TAKEN OF DRAWINGS / SITE</h2>
-          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 12px;">
-            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
-              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Notes & Drawings</div>
-              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
-                {{drawingPhoto1}}
-              </div>
-            </div>
-            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
-              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Site Plans</div>
-              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
-                {{drawingPhoto2}}
-              </div>
-            </div>
-            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
-              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Architecture Plans</div>
-              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
-                {{drawingPhoto3}}
-              </div>
-            </div>
-            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
-              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Extra Image</div>
-              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
-                {{drawingPhoto4}}
-              </div>
-            </div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; max-width: 50%;">
-            <div class="image-container" style="margin: 0; padding: 8px; background: #fff; border: 1px solid #ddd; border-radius: 6px; text-align: center; page-break-inside: avoid;">
-              <div style="font-size: 9px; font-weight: 600; color: #1565C0; margin-bottom: 6px; text-transform: uppercase;">Extra Image 2</div>
-              <div style="min-height: 60px; max-height: none; overflow: visible; display: flex; align-items: center; justify-content: center; border: 1px dashed #ccc; background: #f9f9f9; padding: 4px;">
-                {{drawingPhoto5}}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section aria-label="General Notes" style="margin-bottom: 16px; padding: 12px; border-radius: 8px; background: #fafafa; border: 1px solid #e0e0e0;">
-          <h2 style="font-size: 14px; font-weight: 700; color: #1565C0; margin: 0 0 12px 0; padding-bottom: 6px; border-bottom: 2px solid #1976D2; text-transform: uppercase; letter-spacing: 0.5px;">GENERAL NOTES</h2>
-          <div><p>{{generalNotes}}</p></div>
-          <div style="background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%); color: #fff; padding: 8px 16px; border-radius: 6px; font-weight: 700; text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 16px 0 8px 0; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);">IMPORTANT INFO</div>
-          <article class="no-page-break" style="background: #fff5f0; border: 2px solid #FF6B35; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
-            <h3 style="color: #FF6B35; font-size: 12px; font-weight: 700; margin: 0 0 10px 0; text-align: center;">Notes and comments to consider when requesting a quote</h3>
-            <ol style="font-size: 9px; line-height: 1.3; padding-left: 16px; margin: 0;">
-              <li style="margin-bottom: 6px; color: #555;">Manufacture &amp; delivery dates are dependent on workload at time of deposit payment.</li>
-              <li style="margin-bottom: 6px; color: #555;">Manufacture is dependent on availability of material not normally included in a standard roof design.</li>
-              <li style="margin-bottom: 6px; color: #555;">Laminated beams can take up to 3 or 4 weeks to procure.</li>
-              <li style="margin-bottom: 6px; color: #555;">Decorative and purpose made plated trusses will take an additional 3 weeks to the normal truss dates.</li>
-              <li style="margin-bottom: 6px; color: #555;">No manufacture will commence until the deposit is paid and signed terms &amp; conditions are forwarded to the LCP Roofing head office.</li>
-              <li style="margin-bottom: 6px; color: #555;">Inaccurate information, changes to the design &amp; building not according to plan will delay the manufacture and erection process.</li>
-              <li style="margin-bottom: 6px; color: #555;">Final design is ONLY done when the terms and conditions are signed and the deposit is paid.</li>
-              <li style="margin-bottom: 6px; color: #555;">It could happen that certain design elements can change which affect the layout of the roof. The client will be requested to sign this off if such a change occurs. LCP Roofing will do everything possible to ensure the original quote is correct and accurate.</li>
-              <li style="margin-bottom: 6px; color: #555;">Overhangs are standard 50mm or 1 tile (350mm), 1.5 tile (500mm) or 2 tile (650mm) on SLOPE. Deviations from this will result in an unnecessary additional cost.</li>
-              <li style="margin-bottom: 6px; color: #555;">Roof sheeting can take up to 4 weeks to procure from site measure and colour confirmation; and up to 12 weeks in Nov &amp; Dec.</li>
-              <li style="margin-bottom: 6px; color: #555;">Take special note to discuss Roof Wire or Hoop Iron holding down details and note the National Building Regulations in this regard. Ask your representative to advise you in the placement of holding down details.</li>
-              <li style="margin-bottom: 6px; color: #555;">LCP quotes to complete a roof and guarantees the quoted price if we supply the complete service. Should LCP Roofing not do the erection, any materials shortages will be charged for. No refunds are given for excess materials left over on site.</li>
-            </ol>
-          </article>
-
-          <div style="margin: 8px 0; padding: 8px; background: #f8f9fa; border-radius: 4px; border: 1px solid #dee2e6; max-width: 300px;" class="signature-container">
-            <div style="font-size: 10px; font-weight: 600; color: #1565C0; margin-bottom: 6px;">Rep Signature:</div>
-            <div style="min-height: 50px; max-height: none; overflow: visible; background: #fff; border: 1px dashed #ccc; padding: 6px; border-radius: 3px; display: flex; align-items: center; justify-content: center;">
-              {{repSign}}
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
+          <div style="background:#ffffff;padding:14px;border-radius:8px;border-left:3px solid #4caf50;">
+            <div style="font-weight:600;color:#4caf50;margin-bottom:6px;">Manufacturing & Delivery</div>
+            <div style="color:#333;font-size:13px;line-height:1.5;">
+              1. Manufacture & delivery dates are dependent on workload at time of deposit payment<br>
+              2. Manufacture is dependent on availability of material not normally included in a standard roof design<br>
+              3. Laminated beams can take up to 3 or 4 weeks to procure
             </div>
           </div>
 
-          <section style="background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%); color: #fff; padding: 8px; border-radius: 6px; margin-top: 12px;">
-            <h3 style="font-size: 11px; font-weight: 700; margin: 0 0 6px 0; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">Your Confidence, Our Commitment</h3>
-            <p style="text-align: center; font-size: 9px; margin-bottom: 6px; background: rgba(255, 255, 255, 0.1); padding: 4px; border-radius: 3px;">
-              <strong>Please direct all queries to your LCP Roofing representative.</strong>
-            </p>
-            <div style="text-align: center; margin-bottom: 6px;">
-              <span style="background: #FF6B35; color: #fff; padding: 3px 8px; border-radius: 15px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SANS1900 (SATAS) Quality Accredited Fabricator</span>
+          <div style="background:#ffffff;padding:14px;border-radius:8px;border-left:3px solid #ff9800;">
+            <div style="font-weight:600;color:#ff9800;margin-bottom:6px;">Specialized Components</div>
+            <div style="color:#333;font-size:13px;line-height:1.5;">
+              4. Decorative and purpose made plated trusses will take an additional 3 weeks to the normal truss dates<br>
+              10. Roof sheeting can take up to 4 weeks to procure from site measure and colour confirmation; and up to 12 weeks in Nov & Dec
             </div>
-            <ul style="font-size: 8px; line-height: 1.3; margin: 6px 0; padding-left: 12px;">
-              <li style="margin-bottom: 4px;">
-                <strong>Did you know?</strong> About <b>50% of fabricators in South Africa are not registered</b> with the industry professional body.<br>
-                <span style="color: #FFE0B3; font-weight: 600;">Choose wisely—work with an accredited fabricator you can trust.</span>
-              </li>
-              <li style="margin-bottom: 4px;">
-                Less than <b>20% of designers are professionally registered</b>.<br>
-                <span style="color: #FFE0B3; font-weight: 600;">LCP Roofing employs professionally designated designers for your peace of mind.</span>
-              </li>
-            </ul>
-            <p style="font-size: 7px; line-height: 1.3; text-align: center; margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255, 255, 255, 0.2);">
-              This report is generated by LCP Roofing Online and reflects your requirements, all details noted on drawings or as revised, site conditions, and any particular limitations pertaining thereto.<br>
-              <strong>We are committed to delivering quality, compliance, and complete transparency—so you can build with confidence.</strong>
-            </p>
-          </section>
-        </section>
-      </main>
+          </div>
 
-      <footer role="contentinfo" style="display: none;">
-        <!-- Footer content handled by print-footer for PDF generation -->
-      </footer>
-    </div> <!-- Close print-content -->
+          <div style="background:#ffffff;padding:14px;border-radius:8px;border-left:3px solid #e91e63;">
+            <div style="font-weight:600;color:#e91e63;margin-bottom:6px;">Contract Requirements</div>
+            <div style="color:#333;font-size:13px;line-height:1.5;">
+              5. No manufacture will commence until the deposit is paid and signed terms & conditions are forwarded to the LCP Roofing head office<br>
+              7. Final design is ONLY done when the terms and conditions are signed and the deposit is paid
+            </div>
+          </div>
+
+          <div style="background:#ffffff;padding:14px;border-radius:8px;border-left:3px solid #9c27b0;">
+            <div style="font-weight:600;color:#9c27b0;margin-bottom:6px;">Design Changes</div>
+            <div style="color:#333;font-size:13px;line-height:1.5;">
+              6. Inaccurate information, changes to the design & building not according to plan will delay the manufacture and erection process<br>
+              8. It could happen that certain design elements can change which affect the layout of the roof. The client will be requested to sign this off if such a change occurs
+            </div>
+          </div>
+
+          <div style="background:#ffffff;padding:14px;border-radius:8px;border-left:3px solid #607d8b;">
+            <div style="font-weight:600;color:#607d8b;margin-bottom:6px;">Standard Specifications</div>
+            <div style="color:#333;font-size:13px;line-height:1.5;">
+              9. Overhangs are standard 50mm or 1 tile(350mm), 1.5 tile (500mm) or 2 tile (650mm) on SLOPE. Deviations from this will result in an unnecessary additional cost<br>
+              11. Take special note to discuss Roof Wire or Hoop Iron holding down details and note the National Building Regulations in this regard
+            </div>
+          </div>
+
+          <div style="background:#ffffff;padding:14px;border-radius:8px;border-left:3px solid #795548;">
+            <div style="font-weight:600;color:#795548;margin-bottom:6px;">Service Guarantee</div>
+            <div style="color:#333;font-size:13px;line-height:1.5;">
+              12. LCP quotes to complete a roof and guarantees the quoted price if we supply the complete service. Should LCP Roofing not do the erection, any materials shortages will be charged for. No refunds are given for excess materials left over on site
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIGNATURE SECTION -->
+      <div style="background:#fff;padding:20px 28px;border-radius:12px;box-shadow:0 2px 8px #e0e0e0;max-width:900px;margin:20px auto 18px auto;page-break-inside:avoid;">
+        <div style="font-size:1.1em;font-weight:600;color:#1976d2;margin-bottom:16px;">Signed:</div>
+        <div style="display:grid;grid-template-columns:1fr auto 1fr auto;gap:16px;align-items:end;">
+          <div style="color:#1976d2;font-weight:600;">Client Signature:</div>
+          <div style="border-bottom:2px solid #333;min-width:200px;height:20px;"></div>
+          <div style="color:#1976d2;font-weight:600;">Date:</div>
+          <div style="border-bottom:2px solid #333;min-width:120px;height:20px;"></div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="text-align:center;margin-top:30px;page-break-inside:avoid;">
+        <img src="assets/images/footer.png" alt="footer" style="max-width:100%;height:auto;" />
+      </div>
+    </div>
   </body>
 </html>
