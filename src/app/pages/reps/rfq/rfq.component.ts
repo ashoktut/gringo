@@ -1774,9 +1774,16 @@ export class RfqComponent implements OnInit {
         const nestedFields = this.extractAllFormFields(value, fieldKey);
         Object.assign(fields, nestedFields);
       } else {
-        // Store primitive values, arrays, or dates
-        fields[fieldKey] = value;
-        fields[key] = value; // Also store without prefix for simple access
+        // Format dateSubmitted and dateDue as DD-MM-YYYY
+        if ((key === 'dateSubmitted' || key === 'dateDue') && typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          const [year, month, day] = value.split('-');
+          const formatted = `${day}-${month}-${year}`;
+          fields[fieldKey] = formatted;
+          fields[key] = formatted;
+        } else {
+          fields[fieldKey] = value;
+          fields[key] = value; // Also store without prefix for simple access
+        }
       }
     });
 
