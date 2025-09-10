@@ -126,11 +126,11 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'bryan', label: 'Bryan Van Staden' },
-            { value: 'jeff', label: 'Jeff Nain' },
-            { value: 'roux', label: 'Roux Mahlerbe' },
-            { value: 'ruan', label: 'Ruan Schroder' },
-            { value: 'other', label: 'Other' },
+            { value: 'Bryan Van Staden', label: 'Bryan Van Staden' },
+            { value: 'Jeff Nain', label: 'Jeff Nain' },
+            { value: 'Roux Mahlerbe', label: 'Roux Mahlerbe' },
+            { value: 'Ruan Schroder', label: 'Ruan Schroder' },
+            { value: 'Other', label: 'Other' },
           ],
         },
 
@@ -143,13 +143,13 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'andri@roofing.com', label: 'Andri Pretorius' },
-            { value: 'bryan@roofing.com', label: 'Bryan Van Staden' },
-            { value: 'jeff@roofing.com', label: 'Jeff Nain' },
-            { value: 'roux@roofing.com', label: 'Roux Mahlerbe' },
-            { value: 'ruan@roofing.com', label: 'Ruan Schroder' },
-            { value: 'lyndsay@roofing.com', label: 'Lyndsay Cotton' },
-            { value: 'stacy@roofing.com', label: 'Stacy Burgess' },
+            { value: 'andri@lcproofing.co.za', label: 'Andri Pretorius' },
+            { value: 'bryan@lcproofing.co.za', label: 'Bryan Van Staden' },
+            { value: 'jeff@lcproofing.co.za', label: 'Jeff Nain' },
+            { value: 'roux@lcproofing.co.za', label: 'Roux Mahlerbe' },
+            { value: 'ruan@lcproofing.co.za', label: 'Ruan Schroder' },
+            { value: 'lyndsay@lcproofing.co.za', label: 'Lyndsay Cotton' },
+            { value: 'stacy@lcproofing.co.za', label: 'Stacy Burgess' },
           ],
         },
       ],
@@ -186,7 +186,7 @@ export class RfqComponent implements OnInit {
             { value: '2 months', label: '2 months' },
             { value: '3 months', label: '3 months' },
             { value: '6 months', label: '6 months' },
-            { value: 'above 6 months', label: '> 6 months' },
+            { value: 'above 6 months', label: 'More than 6 months' },
           ],
         },
 
@@ -270,8 +270,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'private', label: 'Private Client' },
-            { value: 'company', label: 'Company' },
+            { value: 'Private', label: 'Private Client' },
+            { value: 'Company', label: 'Company' },
           ],
         },
 
@@ -285,7 +285,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'Enter company name',
           conditional: {
             dependsOn: 'clientType',
-            showWhen: 'company',
+            showWhen: 'Company',
           },
         },
 
@@ -326,13 +326,13 @@ export class RfqComponent implements OnInit {
           required: false,
           clearable: true,
           options: [
-            { value: '0', label: 'Residential' },
-            { value: 'commercial', label: 'Commercial' },
-            { value: 'addLess', label: 'Addition less than 80m²' },
-            { value: 'addMore', label: 'Addition more than 80m²' },
-            { value: 'directMatch', label: 'Direct Match' },
-            { value: 'public', label: 'Public Building' },
-            { value: 'other', label: 'Other Building Type' },
+            { value: 'Residential', label: 'Residential' },
+            { value: 'Commercial', label: 'Commercial' },
+            { value: 'Addition less than 80m²', label: 'Addition less than 80m²' },
+            { value: 'Addition more than 80m²', label: 'Addition more than 80m²' },
+            { value: 'Direct Match', label: 'Direct Match' },
+            { value: 'Public Building', label: 'Public Building' },
+            { value: 'Other', label: 'Other Building Type' },
           ],
         },
 
@@ -384,9 +384,9 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'tiled', label: 'Tiled Roof' },
-            { value: 'sheeted', label: 'Sheeted Roof' },
-            { value: 'slated', label: 'Slated Roof' },
+            { value: 'Tiled Roof', label: 'Tiled Roof' },
+            { value: 'Sheeted Roof', label: 'Sheeted Roof' },
+            { value: 'Slated Roof', label: 'Slated Roof' },
           ],
         },
 
@@ -418,7 +418,7 @@ export class RfqComponent implements OnInit {
           required: false,
           clearable: true,
           placeholder: 'Decimal values accepted also',
-          validators: [Validators.min(1), Validators.max(100000)],
+          validators: [Validators.min(0), Validators.max(100000)],
         },
 
         // Roofing Services field
@@ -563,12 +563,12 @@ export class RfqComponent implements OnInit {
               value: 'Double sided sisalation',
               label: 'Double sided sisalation',
             },
-            { value: 'Bubblefoil', label: 'Bubblefoil or similar' },
+            { value: 'Bubblefoil or Similar', label: 'Bubblefoil or similar' },
             { value: 'Thick Insulation', label: 'Thick insulation' },
             { value: 'Isoboard', label: 'Isoboard or similar' },
-            { value: 'AluBubble', label: 'ALU bubble' },
+            { value: 'Alu Bubble', label: 'ALU bubble' },
             { value: 'Durafoil', label: 'Durafoil' },
-            { value: 'OtherIns', label: 'OtherIns' },
+            { value: 'Other Ins', label: 'Other Ins' },
           ],
           placeholder: 'Select Items',
           clearable: true,
@@ -584,7 +584,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'Other and alternative specifications',
           conditional: {
             dependsOn: 'ulaySpec',
-            showWhen: 'OtherIns',
+            showWhen: 'Other Ins',
           },
         },
 
@@ -597,8 +597,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -612,7 +612,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Above bedroom',
           conditional: {
             dependsOn: 'solarLoad',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -625,8 +625,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -640,7 +640,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
             dependsOn: 'geyserLoad',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -653,8 +653,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -666,12 +666,12 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'partially', label: 'Partially Exposed' },
-            { value: 'completely', label: 'Completely Exposed' },
+            { value: 'Partially Exposed', label: 'Partially Exposed' },
+            { value: 'Completely Exposed', label: 'Completely Exposed' },
           ],
           conditional: {
             dependsOn: 'exposedTruss',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -685,7 +685,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
             dependsOn: 'exposedTruss',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -699,7 +699,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
             dependsOn: 'exposedTruss',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -744,8 +744,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -759,7 +759,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'List all the items required in a short description',
           conditional: {
             dependsOn: 'optionalPG1',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
         //////////
@@ -772,13 +772,13 @@ export class RfqComponent implements OnInit {
           required: false,
           clearable: true,
           options: [
-            { value: '0', label: 'Residential' },
-            { value: 'commercial', label: 'Commercial' },
-            { value: 'addLess', label: 'Addition less than 80m²' },
-            { value: 'addMore', label: 'Addition more than 80m²' },
-            { value: 'directMatch', label: 'Direct Match' },
-            { value: 'public', label: 'Public Building' },
-            { value: 'other', label: 'Other Building Type' },
+            { value: 'Residential', label: 'Residential' },
+            { value: 'Commercial', label: 'Commercial' },
+            { value: 'Addition less than 80m²', label: 'Addition less than 80m²' },
+            { value: 'Addition more than 80m²', label: 'Addition more than 80m²' },
+            { value: 'Direct Match', label: 'Direct Match' },
+            { value: 'Public Building', label: 'Public Building' },
+            { value: 'Other', label: 'Other Building Type' },
           ],
         },
 
@@ -792,7 +792,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'Other Building Type',
           conditional: {
             dependsOn: 'buildingType',
-            showWhen: 'other',
+            showWhen: 'Other',
           },
         },
 
@@ -849,8 +849,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -862,13 +862,13 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'tiles', label: 'Tiles' },
-            { value: 'sheeting', label: 'Sheeting' },
-            { value: 'slate', label: 'Slate, but not by LCP' },
+            { value: 'Tiles', label: 'Tiles' },
+            { value: 'Sheeting', label: 'Sheeting' },
+            { value: 'Slate, but not by LCP', label: 'Slate, but not by LCP' },
           ],
           conditional: {
             dependsOn: 'coverReq',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -881,7 +881,7 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'tiles',
+            showWhen: 'Tiles',
           },
         },
 
@@ -894,7 +894,7 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'tiles',
+            showWhen: 'Tiles',
           },
         },
 
@@ -907,11 +907,11 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'tiles',
+            showWhen: 'Tiles',
           },
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -924,17 +924,17 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'sheeting',
+            showWhen: 'Sheeting',
           },
           options: [
             { value: 'Corrugated', label: 'Corrugated' },
-            { value: 'sheeting', label: 'Concealed Fix' },
-            { value: 'slate', label: 'IBR' },
-            { value: 'slate', label: 'Craftlock' },
-            { value: 'slate', label: 'Widespan' },
-            { value: 'slate', label: 'Brownbuilt' },
-            { value: 'slate', label: 'Rheinzink Double Standing' },
-            { value: 'slate', label: 'Newlok' },
+            { value: 'Concealed Fix', label: 'Concealed Fix' },
+            { value: 'IBR', label: 'IBR' },
+            { value: 'Craftlock', label: 'Craftlock' },
+            { value: 'Widespan', label: 'Widespan' },
+            { value: 'Brownbuilt', label: 'Brownbuilt' },
+            { value: 'Rheinzink Double Standing', label: 'Rheinzink Double Standing' },
+            { value: 'Newlok', label: 'Newlok' },
           ],
         },
 
@@ -947,7 +947,7 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'sheeting',
+            showWhen: 'Sheeting',
           },
         },
 
@@ -1267,8 +1267,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 

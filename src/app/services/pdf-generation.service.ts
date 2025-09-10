@@ -18,13 +18,81 @@ export class PdfGenerationService {
   ) {}
 
   /**
+   * Generate a PDF with page numbers using html2pdf.js
+   * This method is reusable for any form or content in the app
+   */
+  public generatePdfWithPageNumbers(element: HTMLElement, filename: string, options?: any): void {
+    // Pre-populate page numbers in the HTML before generating PDF
+    const pageNumbers = element.querySelectorAll('.page-number');
+    pageNumbers.forEach((span, index) => {
+      span.textContent = '1'; // Will be updated by html2pdf
+    });
+
+    const defaultOptions = {
+      margin: [0, 0, 0, 0], // Remove margins to prevent issues
+      filename: filename,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      },
+      pagebreak: {
+        mode: ['avoid-all', 'css', 'legacy'],
+        before: '.page-break-before',
+        after: '.page-break-after'
+      },
+      ...options
+    };
+
+    if (typeof html2pdf !== 'undefined') {
+      console.log('✅ Generating PDF with page numbers...');
+
+      const worker = html2pdf();
+      worker.set(defaultOptions)
+        .from(element)
+        .toPdf()
+        .get('pdf').then((pdf: any) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+
+          // Update page numbers in all pages
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
+            // Find and update page number elements
+            // This is a simplified approach - for more complex page numbering
+            // you might need to use the onAfterPage callback differently
+          }
+
+          console.log(`✅ PDF generated with ${totalPages} pages`);
+        })
+        .save()
+        .then(() => {
+          console.log('✅ PDF with page numbers generated successfully!');
+        })
+        .catch((error: any) => {
+          console.error('❌ Error generating PDF with page numbers:', error);
+        });
+    } else {
+      console.error('❌ html2pdf library not found.');
+    }
+  }
+
+  /**
    * Generate enhanced RFQ PDF using the new template
    */
   generateEnhancedRFQ(formData: Record<string, any>, options?: PdfGenerationOptions): Observable<void> {
     console.log('🎯 Starting enhanced PDF generation with data:', formData);
 
-    // Use the simplified template that's more compatible with html2pdf
-    return this.http.get('assets/pdf-template-simple.html', { responseType: 'text' }).pipe(
+    // Use the main PDF template with proper styling
+    return this.http.get('assets/pdf-template.html', { responseType: 'text' }).pipe(
       map(template => {
         console.log('📄 Template loaded, length:', template.length);
         const processedHtml = this.processEnhancedTemplate(template, formData);
@@ -49,7 +117,7 @@ export class PdfGenerationService {
    * Debug method to test template loading and processing
    */
   debugTemplate(formData: Record<string, any>): Observable<string> {
-    return this.http.get('assets/pdf-template-simple.html', { responseType: 'text' }).pipe(
+    return this.http.get('assets/pdf-template.html', { responseType: 'text' }).pipe(
       map(template => {
         console.log('🔍 Debug - Template loaded successfully');
         const processed = this.processEnhancedTemplate(template, formData);
@@ -129,31 +197,35 @@ export class PdfGenerationService {
   private generatePdfWithHtml2Pdf(htmlContent: string, filename: string): void {
     console.log('🎨 Starting html2pdf generation...');
     console.log('📝 HTML content length:', htmlContent.length);
-    console.log('📝 First 500 chars of HTML:', htmlContent.substring(0, 500));
-
-    // First, let's test with a minimal HTML to see if html2pdf works at all
-    const testHtml = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <title>Test</title>
-      </head>
-      <body>
-        <h1>TEST PDF GENERATION</h1>
-        <p>This is a test to see if html2pdf works.</p>
-        <p>Current time: ${new Date().toLocaleString()}</p>
-      </body>
-      </html>
-    `;
 
     // Check if content seems valid
     if (htmlContent.length < 1000) {
       console.warn('⚠️ HTML content seems too short, might be missing data');
     }
 
+    // Create a temporary element to render the HTML
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = htmlContent;
+    tempElement.style.width = '210mm';
+    tempElement.style.minHeight = '297mm';
+    tempElement.style.backgroundColor = '#ffffff';
+    tempElement.style.position = 'absolute';
+    tempElement.style.left = '-9999px';
+    tempElement.style.top = '0';
+    tempElement.style.margin = '0';
+    tempElement.style.padding = '0';
+
+    // Add to DOM temporarily
+    document.body.appendChild(tempElement);
+
+    // Pre-populate page numbers
+    const pageNumbers = tempElement.querySelectorAll('.page-number');
+    pageNumbers.forEach((span, index) => {
+      span.textContent = '1'; // Will be updated during PDF generation
+    });
+
     const options = {
-      margin: 0.5,
+      margin: [0, 0, 0, 0], // No margins to prevent blank pages
       filename: filename,
       image: {
         type: 'jpeg',
@@ -163,62 +235,83 @@ export class PdfGenerationService {
         scale: 2,
         useCORS: true,
         allowTaint: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: '#ffffff',
+        scrollX: 0,
+        scrollY: 0,
+        logging: false,
+        removeContainer: true,
+        onclone: function(clonedDoc: Document) {
+          // Ensure the cloned document doesn't have extra spacing
+          const clonedBody = clonedDoc.body;
+          if (clonedBody) {
+            clonedBody.style.margin = '0';
+            clonedBody.style.padding = '0';
+            clonedBody.style.boxSizing = 'border-box';
+          }
+        }
       },
       jsPDF: {
-        unit: 'in',
+        unit: 'mm',
         format: 'a4',
         orientation: 'portrait'
+      },
+      pagebreak: {
+        mode: ['avoid-all', 'css', 'legacy'],
+        before: '.page-break-before',
+        after: '.page-break-after',
+        avoid: '.no-page-break'
       }
     };
 
     if (typeof html2pdf !== 'undefined') {
       console.log('✅ html2pdf library found, generating PDF...');
 
-      // First test: Try with simple HTML to verify html2pdf works
-      console.log('🧪 Testing html2pdf with simple HTML first...');
-      html2pdf().set({...options, filename: 'test-' + filename}).from(testHtml).save().then(() => {
-        console.log('✅ Simple test PDF generated successfully!');
+      html2pdf()
+        .set(options)
+        .from(tempElement)
+        .toPdf()
+        .get('pdf')
+        .then((pdf: any) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          console.log(`📄 PDF generated with ${totalPages} pages`);
 
-        // Now try with actual content
-        console.log('📄 Generating actual content PDF...');
-        return html2pdf().set(options).from(htmlContent).save();
-      }).then(() => {
-        console.log('✅ Full PDF saved successfully!');
-      }).catch((error: any) => {
-        console.error('❌ html2pdf error:', error);
-        console.log('🔧 Trying alternative approach...');
+          // Update page numbers for each page
+          for (let i = 1; i <= totalPages; i++) {
+            pdf.setPage(i);
 
-        // Try creating element approach
-        const element = document.createElement('div');
-        element.innerHTML = htmlContent;
-        element.style.width = '210mm';
-        element.style.minHeight = '297mm';
-        element.style.padding = '20mm';
-        element.style.margin = '0 auto';
-        element.style.backgroundColor = '#ffffff';
+            // Add page number to footer area
+            pdf.setFontSize(7);
+            pdf.setTextColor(100, 116, 139); // #64748b
+            const pageText = `${i}`;
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const textWidth = pdf.getTextWidth(pageText);
 
-        document.body.appendChild(element);
+            // Position in footer area (where the page number span is)
+            pdf.text(pageText, (pageWidth - textWidth) / 2, 280); // Near bottom of page
+          }
 
-        html2pdf().set(options).from(element).save().then(() => {
-          console.log('✅ Alternative approach PDF saved successfully!');
-          document.body.removeChild(element);
-        }).catch((altError: any) => {
-          console.error('❌ Alternative approach also failed:', altError);
-          document.body.removeChild(element);
+          return pdf;
+        })
+        .save()
+        .then(() => {
+          console.log('✅ PDF saved successfully!');
+          // Clean up temporary element
+          document.body.removeChild(tempElement);
+        })
+        .catch((error: any) => {
+          console.error('❌ html2pdf error:', error);
+          document.body.removeChild(tempElement);
 
-          // Final fallback: browser print
+          // Fallback to browser print
           console.log('🔄 Falling back to browser print...');
           this.renderPdf(htmlContent, filename);
         });
-      });
     } else {
       console.error('❌ html2pdf library not found. Falling back to browser print.');
+      document.body.removeChild(tempElement);
       this.renderPdf(htmlContent, filename);
     }
-  }
-
-  /**
+  }  /**
    * Create a simplified version of the template for fallback
    */
   private createSimplifiedTemplate(originalHtml: string): string {

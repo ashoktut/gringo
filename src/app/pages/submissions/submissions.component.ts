@@ -93,7 +93,7 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
                 <mat-icon>visibility</mat-icon>
                 View
               </button>
-              <button mat-button
+              <!-- <button mat-button
                 color="primary"
                 matTooltip="Generate Enhanced PDF"
                 (click)="generateEnhancedPDF(submission)">
@@ -107,13 +107,13 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
                 [disabled]="!hasTemplatesForForm(submission.formType)">
                 <mat-icon>description</mat-icon>
                 Template PDF
-              </button>
+              </button> -->
               <button mat-button
                 color="accent"
                 matTooltip="Repeat RFQ"
                 (click)="repeatSubmission(submission.submissionId)">
                 <mat-icon>refresh</mat-icon>
-                Repeat
+                Repeat RFQ
               </button>
               <button mat-button
                 color="warn"
