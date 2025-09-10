@@ -1,0 +1,92 @@
+<div class="settings-container">
+  <mat-card class="settings-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>settings</mat-icon>
+        Settings & Configuration
+      </mat-card-title>
+      <mat-card-subtitle>
+        Manage your app configuration
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>RFQ Required Fields</mat-card-title>
+      <mat-card-subtitle>Configure which fields are mandatory for RFQ submissions</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-chip-listbox>
+        <mat-chip *ngFor="let field of config.rfqRequiredFields">{{ field }}</mat-chip>
+      </mat-chip-listbox>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>Supported Template Types</mat-card-title>
+      <mat-card-subtitle>Document template formats available for PDF generation</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-chip-listbox>
+        <mat-chip *ngFor="let type of config.templateTypes">{{ type }}</mat-chip>
+      </mat-chip-listbox>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>Company Information</mat-card-title>
+      <mat-card-subtitle>Update your company details and branding</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="company-info">
+        <div class="company-logo-placeholder">
+          <mat-icon>business</mat-icon>
+        </div>
+        <div class="company-details">
+          <mat-form-field appearance="outline">
+            <mat-label>Company Name</mat-label>
+            <input matInput [(ngModel)]="config.companyInfo.name">
+          </mat-form-field>
+        </div>
+      </div>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="updateConfig()">
+        <mat-icon>save</mat-icon>
+        Save Changes
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>Feature Toggles</mat-card-title>
+      <mat-card-subtitle>Enable or disable application features</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="feature-toggles">
+        <div class="toggle-item">
+          <span>Analytics Dashboard</span>
+          <mat-chip [class.mat-mdc-chip-selected]="config.features.enableAnalytics">
+            {{ config.features.enableAnalytics ? 'Enabled' : 'Disabled' }}
+          </mat-chip>
+        </div>
+        <div class="toggle-item">
+          <span>Email Notifications</span>
+          <mat-chip [class.mat-mdc-chip-selected]="config.features.enableNotifications">
+            {{ config.features.enableNotifications ? 'Enabled' : 'Disabled' }}
+          </mat-chip>
+        </div>
+        <div class="toggle-item">
+          <span>Dark Mode</span>
+          <mat-chip [class.mat-mdc-chip-selected]="config.features.enableDarkMode">
+            {{ config.features.enableDarkMode ? 'Enabled' : 'Disabled' }}
+          </mat-chip>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

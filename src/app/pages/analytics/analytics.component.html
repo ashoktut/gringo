@@ -1,0 +1,28 @@
+<div class="analytics-container">
+  <mat-card class="analytics-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>bar_chart</mat-icon>
+        Analytics & Reporting
+      </mat-card-title>
+      <mat-card-subtitle>
+        Visualize your data and activity
+      </mat-card-subtitle>
+    </mat-card-header>
+  </mat-card>
+
+  <div class="charts-grid">
+    <mat-card *ngFor="let chart of charts" class="chart-card">
+      <mat-card-header>
+        <mat-card-title>{{ chart.title }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- Placeholder for chart, integrate with chart library -->
+        <div class="chart-placeholder">
+          <mat-icon>{{ getChartIcon(chart.type) }}</mat-icon>
+          <p>{{ chart.type }} chart here</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

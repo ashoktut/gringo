@@ -1,0 +1,103 @@
+<div class="dashboard-container">
+  <!-- Loading overlay -->
+  <div *ngIf="isLoading" class="loading-overlay">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <!-- Dashboard header -->
+  <mat-card class="dashboard-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>dashboard</mat-icon>
+        Welcome to Gringo Dashboard
+      </mat-card-title>
+      <mat-card-subtitle>
+        Quick access to all major features
+        <span class="last-updated">Last updated: {{ lastUpdated | date:'medium' }}</span>
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-actions align="end">
+      <button mat-icon-button
+              matTooltip="Refresh dashboard data"
+              (click)="refreshDashboard()"
+              [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Stats grid -->
+  <div class="dashboard-grid">
+    <mat-card *ngFor="let stat of stats"
+              class="dashboard-card"
+              [class]="'card-' + (stat.color || 'primary')"
+              (click)="navigate(stat.link)"
+              matTooltip="{{ stat.description }}"
+              matTooltipPosition="above">
+      <mat-card-header>
+        <div class="card-icon-container">
+          <mat-icon [class]="'icon-' + (stat.color || 'primary')">{{ stat.icon }}</mat-icon>
+          <div *ngIf="stat.trend" class="trend-indicator">
+            <mat-icon [class]="'trend-' + getTrendColor(stat.trend)">
+              {{ getTrendIcon(stat.trend) }}
+            </mat-icon>
+            <span class="trend-text">{{ stat.trend.percentage }}%</span>
+          </div>
+        </div>
+        <div class="card-content">
+          <div class="stat-label">{{ stat.label }}</div>
+          <div class="stat-value">{{ stat.value }}</div>
+        </div>
+      </mat-card-header>
+    </mat-card>
+  </div>
+
+  <!-- Quick actions section -->
+  <mat-card class="quick-actions-section">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>bolt</mat-icon>
+        Quick Actions
+      </mat-card-title>
+      <mat-card-subtitle>
+        Common tasks and shortcuts
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="quick-actions-grid">
+        <button *ngFor="let action of quickActions"
+                mat-raised-button
+                [color]="action.color"
+                class="quick-action-button"
+                (click)="navigateToQuickAction(action)"
+                matTooltip="{{ action.description }}">
+          <mat-icon>{{ action.icon }}</mat-icon>
+          <span>{{ action.title }}</span>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Recent activity placeholder -->
+  <mat-card class="recent-activity-section">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>history</mat-icon>
+        Recent Activity
+      </mat-card-title>
+      <mat-card-subtitle>
+        Latest system activity and updates
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="activity-placeholder">
+        <mat-icon>info</mat-icon>
+        <p>Recent activity tracking will be implemented with backend integration.</p>
+        <button mat-button color="primary" (click)="navigate('/submissions')">
+          View All Submissions
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -9,12 +9,38 @@
 <div class="page-container">
   <div class="form-header">
     <h1>
-      {{ isRepeatMode ? 'Repeat Request For Quote (RFQ)' : 'Request For Quote (RFQ)' }}
+      @if (isEditMode) {
+        Edit Request For Quote (RFQ)
+      } @else if (isDuplicateMode) {
+        Duplicate Request For Quote (RFQ)
+      } @else if (isRepeatMode) {
+        Repeat Request For Quote (RFQ)
+      } @else {
+        Request For Quote (RFQ)
+      }
     </h1>
-    @if (!isRepeatMode) {
+    @if (!isEditMode && !isDuplicateMode && !isRepeatMode) {
       <p>
         Complete the form section by section. Click on a section header to expand it - only one section can be open at a time.
       </p>
+    }
+    @if (isEditMode) {
+      <div class="edit-notice">
+        <mat-icon>edit</mat-icon>
+        <p>
+          Editing submission #{{ originalSubmissionId?.split('-')?.[1] || originalSubmissionId }}.
+          Changes will update the existing submission.
+        </p>
+      </div>
+    }
+    @if (isDuplicateMode) {
+      <div class="duplicate-notice">
+        <mat-icon>content_copy</mat-icon>
+        <p>
+          Creating duplicate RFQ based on submission #{{ originalSubmissionId?.split('-')?.[1] || originalSubmissionId }}.
+          This will create a new submission with the same data.
+        </p>
+      </div>
     }
     @if (isRepeatMode) {
       <div class="repeat-notice">
@@ -30,9 +56,9 @@
   <app-reusable-form
     [sections]="rfqSections"
     [multi]="false"
-    [formTitle]="isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
-    [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
-    [initialData]="isRepeatMode ? repeatedSubmissionData : initialFormData"
+    [formTitle]="isEditMode ? 'Edit RFQ Form' : isDuplicateMode ? 'Duplicate RFQ Form' : isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
+    [submitButtonText]="isEditMode ? 'Update RFQ' : isDuplicateMode ? 'Submit Duplicate RFQ' : isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
+    [initialData]="initialFormData"
     (formSubmit)="onFormSubmit($event)"
     (formValueChange)="onFormValueChange($event)"
     >

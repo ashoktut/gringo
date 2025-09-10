@@ -88,6 +88,38 @@ export class EmailService {
     return this.sendEmail(emailRequest);
   }
 
+  /**
+   * Send RFQ email - compatibility method for FormSubmissionService
+   */
+  sendRfqEmail(submissionId: string, formData: any, formStructure: any[]): Observable<any> {
+    const ccMailAddresses = this.extractCcMailAddresses(formData);
+    const clientEmail = formData.clientEmail || '';
+
+    if (!clientEmail && ccMailAddresses.length === 0) {
+      return of({
+        success: false,
+        error: 'No email recipients provided'
+      });
+    }
+
+    return this.sendRfqSubmissionEmailStructured(
+      formData,
+      ccMailAddresses,
+      clientEmail
+    );
+  }  /**
+   * Extract CC mail addresses from form data
+   */
+  private extractCcMailAddresses(formData: any): string[] {
+    const ccMail = formData.ccMail;
+    if (Array.isArray(ccMail)) {
+      return ccMail;
+    } else if (typeof ccMail === 'string') {
+      return [ccMail];
+    }
+    return [];
+  }
+
   private buildEmailRequest(
     submissionData: any,
     ccMailAddresses: string[],

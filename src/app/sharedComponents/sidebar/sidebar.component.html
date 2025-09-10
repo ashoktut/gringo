@@ -1,0 +1,17 @@
+<mat-sidenav-container class="sidebar-container">
+  <mat-sidenav mode="side" opened class="sidebar">
+    <div class="sidebar-header">
+      <mat-icon>menu</mat-icon>
+      <span class="sidebar-title">Gringo</span>
+    </div>
+    <nav>
+      <a *ngFor="let link of navLinks" [routerLink]="link.link" class="sidebar-link" matTooltip="{{ link.label }}">
+        <mat-icon>{{ link.icon }}</mat-icon>
+        <span>{{ link.label }}</span>
+      </a>
+    </nav>
+  </mat-sidenav>
+  <mat-sidenav-content>
+    <ng-content></ng-content>
+  </mat-sidenav-content>
+</mat-sidenav-container>

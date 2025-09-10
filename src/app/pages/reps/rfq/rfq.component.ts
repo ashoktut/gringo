@@ -26,10 +26,12 @@ import { TemplateManagementService } from '../../../services/template-management
   styleUrl: './rfq.component.css',
 })
 export class RfqComponent implements OnInit {
-  // Repeat functionality properties
+  // Mode properties
   isRepeatMode = false;
+  isEditMode = false;
+  isDuplicateMode = false;
   originalSubmissionId: string | null = null;
-  repeatedSubmissionData: any = null;
+  currentSubmissionData: any = null;
 
   // Add a property to hold initial form data
   initialFormData: any = {};
@@ -44,16 +46,25 @@ export class RfqComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Check if this is a repeat RFQ from query parameters
+    // Check query parameters for different modes
     this.route.queryParams.subscribe((params) => {
-      if (params['repeat'] && params['submissionId']) {
+      if (params['edit'] && params['submissionId']) {
+        this.isEditMode = true;
+        this.originalSubmissionId = params['submissionId'];
+        this.loadSubmissionForEdit(params['submissionId']);
+      } else if (params['duplicate'] && params['submissionId']) {
+        this.isDuplicateMode = true;
+        this.originalSubmissionId = params['submissionId'];
+        this.loadSubmissionForDuplicate(params['submissionId']);
+      } else if (params['repeat'] && params['submissionId']) {
         this.isRepeatMode = true;
         this.originalSubmissionId = params['submissionId'];
         this.loadSubmissionForRepeat(params['submissionId']);
       }
     });
-    // Set default dateSubmitted if not in repeat mode
-    if (!this.isRepeatMode) {
+
+    // Set default dateSubmitted if not in any special mode
+    if (!this.isEditMode && !this.isDuplicateMode && !this.isRepeatMode) {
       const today = new Date();
       this.initialFormData.dateSubmitted = today.toISOString().split('T')[0];
     }
@@ -1463,14 +1474,59 @@ export class RfqComponent implements OnInit {
   onFormSubmit(event: any) {
     console.log('Form submitted successfully!', event);
 
-    // Add metadata for repeated submissions
+    // Determine the submission mode and prepare data accordingly
+    if (this.isEditMode) {
+      // Edit mode: Update existing submission
+      this.updateExistingSubmission(event);
+    } else {
+      // Create new submission (includes duplicate and repeat modes)
+      this.createNewSubmission(event);
+    }
+  }
+
+  private updateExistingSubmission(formData: any) {
+    if (!this.originalSubmissionId) {
+      alert('Error: No submission ID found for editing.');
+      return;
+    }
+
+    // Prepare data for update
+    const updateData = {
+      ...formData,
+      submissionId: this.originalSubmissionId, // Keep original ID
+      updatedAt: new Date(),
+      isEditedSubmission: true
+    };
+
+    // Use update method instead of create
+    this.formSubmissionService.updateSubmission(this.originalSubmissionId, updateData, this.rfqSections).subscribe({
+      next: (response) => {
+        console.log('Submission updated successfully:', response);
+        alert(`Submission updated successfully! ID: ${response.submissionId}`);
+
+        // Generate PDF with updated data
+        this.generatePdfForSubmission(response, updateData);
+
+        // Navigate back to submissions
+        this.router.navigate(['/submissions']);
+      },
+      error: (error) => {
+        console.error('Error updating submission:', error);
+        alert('Error updating submission. Please try again.');
+      }
+    });
+  }
+
+  private createNewSubmission(formData: any) {
+    // Add metadata for special submission types
     const submissionData = {
-      ...event,
+      ...formData,
       isRepeatedSubmission: this.isRepeatMode,
+      isDuplicatedSubmission: this.isDuplicateMode,
       originalSubmissionId: this.originalSubmissionId,
     };
 
-    // Save submission using the service
+    // Create new submission
     this.formSubmissionService
       .createSubmission(
         'RFQ',
@@ -1480,88 +1536,93 @@ export class RfqComponent implements OnInit {
       )
       .subscribe({
         next: (response) => {
-          // Merge metadata into form data for DOCX
-          const docxDataRaw = {
-            ...submissionData,
-            submissionId: response.submissionId,
-            createdAt: response.createdAt,
-            updatedAt: response.updatedAt,
-            status: response.status,
-          };
-          // Process all fields for PDF output (labels always shown, values empty if not filled)
-  const docxData = this.processFieldsForPdf(docxDataRaw, this.rfqSections);
+          console.log('New submission created successfully:', response);
 
-          // Fetch the first available RFQ template and generate PDF
-          this.templateManagementService.getTemplatesForForm('rfq').subscribe({
-            next: (templates) => {
-              if (templates && templates.length > 0) {
-                const template = templates[0];
-                if (template.type === 'html') {
-                  // Get template from template management service first, then generate PDF
-                  this.templateManagementService.getTemplate(template.id).subscribe({
-                    next: (fullTemplate) => {
-                      if (fullTemplate) {
-                        console.log('✅ Template found for PDF generation:', fullTemplate.name);
-                        // Use the content from the template management service
-                        this.generatePdfDirectly(fullTemplate, docxData, template.formType);
-                      } else {
-                        console.error('❌ Template not found in template management service:', template.id);
-                      }
-                    },
-                    error: (error) => {
-                      console.error('❌ Error getting template:', error);
-                    }
-                  });
-                } else {
-                  // Use DOCX template PDF generation
-                  const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
-                  const clientEmail = docxData.clientEmail || '';
-                  this.docxProcessingService.processRfqSubmission(
-                    template,
-                    docxData,
-                    recipients,
-                    clientEmail,
-                    {
-                      preserveStyles: true,
-                      preserveImages: true,
-                      preserveTables: true,
-                      outputFormat: 'pdf',
-                    }
-                  ).subscribe({
-                    next: (result) => {
-                      if (result && result.downloadUrl) {
-                        // Trigger download
-                        window.open(result.downloadUrl, '_blank');
-                      }
-                      // Route to submissions page after successful PDF generation
-                      this.router.navigate(['/submissions']);
-                    },
-                    error: (err) => {
-                      console.error('Error generating PDF:', err);
-                    },
-                  });
-                }
-              } else {
-                alert('No RFQ template found. Please upload a template first.');
-              }
-            },
-            error: (err) => {
-              console.error('Error fetching templates:', err);
-            },
-          });
+          const actionType = this.isRepeatMode ? 'repeated' : this.isDuplicateMode ? 'duplicated' : 'submitted';
+          alert(`RFQ ${actionType} successfully! ID: ${response.submissionId}`);
 
-          console.log('RFQ submitted successfully:', response);
-          alert(
-            `RFQ ${
-              this.isRepeatMode ? 'repeated' : 'submitted'
-            } successfully! ID: ${response.submissionId}`
-          );
+          // Generate PDF
+          this.generatePdfForSubmission(response, submissionData);
+
+          // Navigate back to submissions
+          this.router.navigate(['/submissions']);
         },
         error: (error) => {
-          console.error('Error submitting RFQ:', error);
+          console.error('Error creating submission:', error);
           alert('Error submitting RFQ. Please try again.');
-        },
+        }
       });
+  }
+
+  private generatePdfForSubmission(response: any, submissionData: any) {
+    // Merge metadata into form data for DOCX
+    const docxDataRaw = {
+      ...submissionData,
+      submissionId: response.submissionId,
+      createdAt: response.createdAt,
+      updatedAt: response.updatedAt,
+      status: response.status,
+    };
+
+    // Process all fields for PDF output
+    const docxData = this.processFieldsForPdf(docxDataRaw, this.rfqSections);
+
+    // Fetch the first available RFQ template and generate PDF
+    this.templateManagementService.getTemplatesForForm('rfq').subscribe({
+      next: (templates) => {
+        if (templates && templates.length > 0) {
+          const template = templates[0];
+          if (template.type === 'html') {
+            // Get template from template management service first, then generate PDF
+            this.templateManagementService.getTemplate(template.id).subscribe({
+              next: (fullTemplate) => {
+                if (fullTemplate) {
+                  console.log('✅ Template found for PDF generation:', fullTemplate.name);
+                  // Use the content from the template management service
+                  this.generatePdfDirectly(fullTemplate, docxData, template.formType);
+                } else {
+                  console.error('❌ Template not found in template management service:', template.id);
+                }
+              },
+              error: (error) => {
+                console.error('❌ Error getting template:', error);
+              }
+            });
+          } else {
+            // Use DOCX template PDF generation
+            const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
+            const clientEmail = docxData.clientEmail || '';
+            this.docxProcessingService.processRfqSubmission(
+              template,
+              docxData,
+              recipients,
+              clientEmail,
+              {
+                preserveStyles: true,
+                preserveImages: true,
+                preserveTables: true,
+                outputFormat: 'pdf',
+              }
+            ).subscribe({
+              next: (result) => {
+                if (result && result.downloadUrl) {
+                  // Trigger download
+                  window.open(result.downloadUrl, '_blank');
+                }
+              },
+              error: (err) => {
+                console.error('Error generating PDF:', err);
+              },
+            });
+          }
+        } else {
+          alert('No RFQ template found. Please upload a template first.');
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching templates:', err);
+      },
+    });
   }
 
   // Load original submission data for repeating
@@ -1569,17 +1630,48 @@ export class RfqComponent implements OnInit {
     this.formSubmissionService.getSubmission(submissionId).subscribe({
       next: (submission) => {
         if (submission) {
-          this.repeatedSubmissionData = this.prepareDataForRepeat(
-            submission.formData
-          );
-          console.log(
-            'Loaded submission for repeat:',
-            this.repeatedSubmissionData
-          );
+          this.currentSubmissionData = this.prepareDataForRepeat(submission.formData);
+          this.initialFormData = { ...this.currentSubmissionData };
+          console.log('Loaded submission for repeat:', this.currentSubmissionData);
         }
       },
       error: (error) => {
         console.error('Error loading submission for repeat:', error);
+        alert('Error loading submission data. Please try again.');
+      },
+    });
+  }
+
+  // Load submission data for editing (preserves original submission ID)
+  private loadSubmissionForEdit(submissionId: string) {
+    this.formSubmissionService.getSubmission(submissionId).subscribe({
+      next: (submission) => {
+        if (submission) {
+          this.currentSubmissionData = { ...submission.formData };
+          this.initialFormData = { ...submission.formData };
+          console.log('Loaded submission for edit:', this.currentSubmissionData);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading submission for edit:', error);
+        alert('Error loading submission data. Please try again.');
+      },
+    });
+  }
+
+  // Load submission data for duplicating (creates new submission ID)
+  private loadSubmissionForDuplicate(submissionId: string) {
+    this.formSubmissionService.getSubmission(submissionId).subscribe({
+      next: (submission) => {
+        if (submission) {
+          this.currentSubmissionData = this.prepareDataForDuplicate(submission.formData);
+          this.initialFormData = { ...this.currentSubmissionData };
+          console.log('Loaded submission for duplicate:', this.currentSubmissionData);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading submission for duplicate:', error);
+        alert('Error loading submission data. Please try again.');
       },
     });
   }
@@ -1607,6 +1699,32 @@ export class RfqComponent implements OnInit {
     dataToRepeat.dateSubmitted = today.toISOString().split('T')[0];
 
     return dataToRepeat;
+  }
+
+  // Prepare data for duplicate (similar to repeat but different workflow)
+  private prepareDataForDuplicate(originalData: any): any {
+    const dataToDuplicate = { ...originalData };
+
+    // Remove fields that shouldn't be duplicated
+    delete dataToDuplicate.submissionId;
+    delete dataToDuplicate.status;
+    delete dataToDuplicate.createdAt;
+    delete dataToDuplicate.updatedAt;
+    delete dataToDuplicate.isRepeatedSubmission;
+    delete dataToDuplicate.originalSubmissionId;
+
+    // Update dates
+    const today = new Date();
+    dataToDuplicate.dateSubmitted = today.toISOString().split('T')[0];
+
+    // Keep the original due date or set to next week if not present
+    if (!dataToDuplicate.dateDue) {
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      dataToDuplicate.dateDue = nextWeek.toISOString().split('T')[0];
+    }
+
+    return dataToDuplicate;
   }
 
   onFormValueChange(event: any) {

@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -10,17 +11,41 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { FormSubmissionService, FormSubmission } from '../../services/form-submission.service';
 import { Template, TemplateType, TemplateGenerationRequest } from '../../models/template.models';
 import { TemplateManagementService } from '../../services/template-management.service';
 import { PdfGenerationService } from '../../services/pdf-generation.service';
-import { SearchComponent, SearchConfig } from '../../sharedComponents/search/search.component';
+
+interface SubmissionStats {
+  total: number;
+  pending: number;
+  approved: number;
+  rejected: number;
+}
+
+// Extended interface for UI display
+interface SubmissionDisplay extends FormSubmission {
+  reference: string;
+  companyName: string;
+  contactEmail: string;
+  templateName: string;
+  submittedDate: Date;
+  priority: string;
+  type: string;
+}
 
 @Component({
   selector: 'app-submissions',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -30,286 +55,34 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
     MatMenuModule,
     MatDialogModule,
     MatDividerModule,
-    SearchComponent
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule
   ],
-  template: `
-    <div class="submissions-container">
-      <div class="header">
-        <h1>RFQ Submissions</h1>
-        <div class="header-actions">
-          <app-search
-            [config]="searchConfig"
-            (searchChange)="onSearchChange($event)"
-            (searchClear)="onSearchClear()">
-          </app-search>
-          <button mat-raised-button color="primary" (click)="createNewRFQ()">
-            <mat-icon>add</mat-icon>
-            New RFQ
-          </button>
-        </div>
-      </div>
-
-      @if (isSearching && searchTerm) {
-        <div class="search-results">
-          <p class="search-info">
-            <mat-icon>search</mat-icon>
-            Found {{ filteredSubmissions.length }} result(s) for "{{ searchTerm }}"
-          </p>
-        </div>
-      }
-
-      @if (displayedSubmissions.length > 0) {
-        <div class="submissions-grid">
-          @for (submission of displayedSubmissions; track submission) {
-            <mat-card class="submission-card">
-              <mat-card-header>
-                <mat-card-title>{{ submission.formTitle }}</mat-card-title>
-                <mat-card-subtitle>
-                  ID: {{ submission.submissionId }}
-                </mat-card-subtitle>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="submission-details">
-                  <p><strong>Client:</strong> {{ submission.formData?.clientName || 'N/A' }}</p>
-                  <p><strong>Address:</strong> {{ submission.formData?.standNum || 'N/A' }}</p>
-                  <p><strong>Status:</strong>
-                  <mat-chip [color]="getStatusColor(submission.status)">
-                    {{ submission.status }}
-                  </mat-chip>
-                </p>
-                <p><strong>Created:</strong> {{ submission.createdAt | date:'short' }}</p>
-                @if (submission.isRepeatedSubmission) {
-                  <p>
-                    <mat-icon class="repeat-icon">refresh</mat-icon>
-                    <em>Repeated from {{ submission.originalSubmissionId }}</em>
-                  </p>
-                }
-              </div>
-            </mat-card-content>
-            <mat-card-actions>
-              <button mat-button
-                matTooltip="View Details"
-                (click)="viewSubmission(submission.submissionId)">
-                <mat-icon>visibility</mat-icon>
-                View
-              </button>
-              <button mat-button
-                color="primary"
-                matTooltip="Generate Enhanced PDF"
-                (click)="generateEnhancedPDF(submission)">
-                <mat-icon>picture_as_pdf</mat-icon>
-                Enhanced PDF
-              </button>
-              <button mat-button
-                color="primary"
-                matTooltip="Generate PDF from Template"
-                [matMenuTriggerFor]="pdfMenu"
-                [disabled]="!hasTemplatesForForm(submission.formType)">
-                <mat-icon>description</mat-icon>
-                Template PDF
-              </button>
-              <button mat-button
-                color="accent"
-                matTooltip="Repeat RFQ"
-                (click)="repeatSubmission(submission.submissionId)">
-                <mat-icon>refresh</mat-icon>
-                Repeat
-              </button>
-              <button mat-button
-                color="warn"
-                matTooltip="Delete Submission"
-                (click)="deleteSubmission(submission.submissionId)">
-                <mat-icon>delete</mat-icon>
-                Delete
-              </button>
-              <!-- PDF Template Menu -->
-              <mat-menu #pdfMenu="matMenu">
-                @for (template of getTemplatesForSubmission(submission); track template) {
-                  <button mat-menu-item (click)="generatePdfFromTemplate(submission, template)">
-                    <mat-icon>{{ getTemplateIcon(template.type) }}</mat-icon>
-                    <span>{{ template.name }}</span>
-                    @if (template.isUniversal) {
-                      <mat-chip class="universal-chip">Universal</mat-chip>
-                    }
-                  </button>
-                }
-                @if (getTemplatesForSubmission(submission).length > 0) {
-                  <mat-divider></mat-divider>
-                }
-                <button mat-menu-item (click)="navigateToTemplates(submission.formType)">
-                  <mat-icon>add</mat-icon>
-                  <span>Manage Templates</span>
-                </button>
-              </mat-menu>
-            </mat-card-actions>
-          </mat-card>
-        }
-      </div>
-    } @else {
-      <div class="no-submissions">
-        <mat-icon>description</mat-icon>
-        <h3>{{ isSearching ? 'No results found' : 'No submissions found' }}</h3>
-        @if (!isSearching) {
-          <p>Start by creating your first RFQ submission.</p>
-        }
-        @if (isSearching) {
-          <p>Try adjusting your search terms or clear the search to see all submissions.</p>
-        }
-        <button mat-raised-button color="primary" (click)="createNewRFQ()">
-          Create {{ isSearching ? 'New' : 'First' }} RFQ
-        </button>
-      </div>
-    }
-
-    </div>
-    `,
-  styles: [`
-    .submissions-container {
-      padding: 24px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 32px;
-      gap: 24px;
-    }
-
-    .header h1 {
-      color: #1976d2;
-      margin: 0;
-      flex-shrink: 0;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex: 1;
-      justify-content: flex-end;
-    }
-
-    .search-results {
-      margin-bottom: 24px;
-    }
-
-    .search-info {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #666;
-      font-size: 14px;
-      margin: 0;
-    }
-
-    .search-info mat-icon {
-      font-size: 18px;
-      width: 18px;
-      height: 18px;
-    }
-
-    .submissions-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-      gap: 24px;
-    }
-
-    .submission-card {
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .submission-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.12);
-    }
-
-    .submission-details p {
-      margin: 8px 0;
-      font-size: 14px;
-    }
-
-    .repeat-icon {
-      font-size: 16px;
-      vertical-align: middle;
-      margin-right: 4px;
-      color: #2196f3;
-    }
-
-    .no-submissions {
-      text-align: center;
-      padding: 48px 24px;
-      color: #666;
-    }
-
-    .no-submissions mat-icon {
-      font-size: 64px;
-      width: 64px;
-      height: 64px;
-      color: #ccc;
-      margin-bottom: 16px;
-    }
-
-    .no-submissions h3 {
-      margin: 16px 0;
-      color: #333;
-    }
-
-    .universal-chip {
-      background-color: #fff3e0 !important;
-      color: #f57c00 !important;
-      font-size: 10px !important;
-      height: 18px !important;
-      margin-left: 8px !important;
-    }
-
-    mat-menu .mat-menu-item {
-      display: flex !important;
-      align-items: center !important;
-      gap: 8px !important;
-    }
-
-    @media (max-width: 768px) {
-      .submissions-container {
-        padding: 16px;
-      }
-
-      .header {
-        flex-direction: column;
-        gap: 16px;
-        align-items: stretch;
-      }
-
-      .header-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .submissions-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .submission-card mat-card-actions {
-        justify-content: space-around;
-      }
-    }
-  `]
+  templateUrl: './submissions.component.html',
+  styleUrls: ['./submissions.component.css']
 })
 export class SubmissionsComponent implements OnInit {
-  submissions: FormSubmission[] = [];
-  filteredSubmissions: FormSubmission[] = [];
-  displayedSubmissions: FormSubmission[] = [];
-  searchTerm: string = '';
-  isSearching: boolean = false;
+  submissions: SubmissionDisplay[] = [];
+  filteredSubmissions: SubmissionDisplay[] = [];
 
-  // Search configuration
-  searchConfig: SearchConfig = {
-    placeholder: 'Search by ID, client name, status...',
-    debounceTime: 300,
-    minLength: 1,
-    showClearButton: true
+  // UI State
+  searchQuery: string = '';
+  statusFilter: string = '';
+  dateFilter: string = '';
+
+  // Table configuration
+  displayedColumns: string[] = ['reference', 'company', 'template', 'date', 'status', 'priority', 'actions'];
+
+  // Stats
+  stats: SubmissionStats = {
+    total: 0,
+    pending: 0,
+    approved: 0,
+    rejected: 0
   };
 
   constructor(
@@ -328,258 +101,365 @@ export class SubmissionsComponent implements OnInit {
   loadSubmissions() {
     this.formSubmissionService.getAllSubmissions().subscribe({
       next: (submissions) => {
-        this.submissions = submissions.sort((a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        this.submissions = submissions.map(sub => ({
+          ...sub,
+          reference: sub.submissionId || `RFQ-${Date.now()}`,
+          companyName: sub.formData?.clientName || 'Unknown Company',
+          contactEmail: sub.formData?.email || 'No email',
+          templateName: sub.formTitle || 'Default Template',
+          submittedDate: sub.createdAt,
+          priority: this.getPriority(sub),
+          type: sub.formType || 'RFQ'
+        })).sort((a, b) =>
+          new Date(b.submittedDate).getTime() - new Date(a.submittedDate).getTime()
         );
-        this.updateDisplayedSubmissions();
+        this.updateStats();
+        this.applyFilters();
       },
       error: (error) => {
         console.error('Error loading submissions:', error);
+        this.showError('Failed to load submissions');
       }
     });
   }
 
-  // Search functionality
-  onSearchChange(searchTerm: string) {
-    this.searchTerm = searchTerm;
-    this.isSearching = searchTerm.length > 0;
-    this.performSearch();
+  private getPriority(submission: FormSubmission): string {
+    // Logic to determine priority based on submission data
+    const age = Date.now() - new Date(submission.createdAt).getTime();
+    const dayAge = age / (1000 * 60 * 60 * 24);
+
+    if (dayAge > 7) return 'high';
+    if (dayAge > 3) return 'medium';
+    return 'low';
   }
 
-  onSearchClear() {
-    this.searchTerm = '';
-    this.isSearching = false;
-    this.updateDisplayedSubmissions();
+  private updateStats() {
+    this.stats = {
+      total: this.submissions.length,
+      pending: this.submissions.filter(s => s.status === 'draft' || s.status === 'submitted').length,
+      approved: this.submissions.filter(s => s.status === 'completed').length,
+      rejected: this.submissions.filter(s => s.status === 'submitted' && s.priority === 'rejected').length // Placeholder logic
+    };
   }
 
-  private performSearch() {
-    if (!this.searchTerm) {
-      this.filteredSubmissions = [];
-      this.updateDisplayedSubmissions();
-      return;
+  applyFilters() {
+    let filtered = [...this.submissions];
+
+    // Apply search filter
+    if (this.searchQuery) {
+      const query = this.searchQuery.toLowerCase();
+      filtered = filtered.filter(submission =>
+        submission.reference.toLowerCase().includes(query) ||
+        submission.companyName.toLowerCase().includes(query) ||
+        submission.contactEmail.toLowerCase().includes(query) ||
+        submission.templateName.toLowerCase().includes(query) ||
+        submission.status.toLowerCase().includes(query)
+      );
     }
 
-    const searchLower = this.searchTerm.toLowerCase();
+    // Apply status filter
+    if (this.statusFilter) {
+      filtered = filtered.filter(submission =>
+        submission.status === this.statusFilter
+      );
+    }
 
-    this.filteredSubmissions = this.submissions.filter(submission => {
-      // Search in submission ID
-      if (submission.submissionId.toLowerCase().includes(searchLower)) {
-        return true;
+    // Apply date filter
+    if (this.dateFilter) {
+      const now = new Date();
+      const cutoffDate = new Date();
+
+      switch (this.dateFilter) {
+        case 'today':
+          cutoffDate.setHours(0, 0, 0, 0);
+          break;
+        case 'week':
+          cutoffDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          cutoffDate.setMonth(now.getMonth() - 1);
+          break;
+        case 'quarter':
+          cutoffDate.setMonth(now.getMonth() - 3);
+          break;
       }
 
-      // Search in client name
-      if (submission.formData?.clientName?.toLowerCase().includes(searchLower)) {
-        return true;
+      if (this.dateFilter !== '') {
+        filtered = filtered.filter(submission =>
+          new Date(submission.submittedDate) >= cutoffDate
+        );
       }
+    }
 
-      // Search in status
-      if (submission.status.toLowerCase().includes(searchLower)) {
-        return true;
-      }
+    this.filteredSubmissions = filtered;
+  }
 
-      // Search in form title
-      if (submission.formTitle.toLowerCase().includes(searchLower)) {
-        return true;
-      }
+  clearFilters() {
+    this.searchQuery = '';
+    this.statusFilter = '';
+    this.dateFilter = '';
+    this.applyFilters();
+  }
 
-      // Search in form type
-      if (submission.formType.toLowerCase().includes(searchLower)) {
-        return true;
-      }
+  // Utility methods
+  getTimeAgo(date: string): string {
+    const now = new Date();
+    const submittedDate = new Date(date);
+    const diffMs = now.getTime() - submittedDate.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-      // Search in rep name if available
-      if (submission.formData?.repName?.toLowerCase().includes(searchLower)) {
-        return true;
-      }
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return `${Math.floor(diffDays / 30)} months ago`;
+  }
 
-      // Search in stand number/address
-      if (submission.formData?.standNum?.toLowerCase().includes(searchLower)) {
-        return true;
-      }
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'pending':
+      case 'draft':
+        return 'pending_actions';
+      case 'completed':
+      case 'approved':
+        return 'check_circle';
+      case 'rejected':
+        return 'cancel';
+      case 'in-review':
+        return 'rate_review';
+      default:
+        return 'help';
+    }
+  }
 
-      return false;
+  getStatusLabel(status: string): string {
+    switch (status) {
+      case 'draft': return 'Draft';
+      case 'pending': return 'Pending';
+      case 'completed': return 'Completed';
+      case 'approved': return 'Approved';
+      case 'rejected': return 'Rejected';
+      case 'in-review': return 'In Review';
+      default: return status;
+    }
+  }
+
+  // Action methods
+  viewSubmission(submission: SubmissionDisplay) {
+    // Navigate to detail view or open modal
+    console.log('Viewing submission:', submission);
+    this.showSuccess('Opening submission details...');
+  }
+
+  editSubmission(submission: SubmissionDisplay) {
+    this.router.navigate(['/reps/rfq'], {
+      queryParams: { edit: true, submissionId: submission.submissionId }
     });
-
-    this.updateDisplayedSubmissions();
   }
 
-  private updateDisplayedSubmissions() {
-    this.displayedSubmissions = this.isSearching ? this.filteredSubmissions : this.submissions;
+  approveSubmission(submission: SubmissionDisplay) {
+    // Update submission status
+    this.updateSubmissionStatus(submission, 'completed');
   }
 
-  createNewRFQ() {
-    this.router.navigate(['/rfq']);
+  rejectSubmission(submission: SubmissionDisplay) {
+    // Update submission status - using priority field as placeholder for rejected status
+    submission.priority = 'rejected';
+    this.showSuccess('Submission rejected successfully');
+    this.updateStats();
+    this.applyFilters();
   }
 
-  viewSubmission(submissionId: string) {
-    // For now, just log the submission details
-    this.formSubmissionService.getSubmission(submissionId).subscribe(submission => {
-      if (submission) {
-        console.log('Submission details:', submission);
-        alert('Submission details logged to console');
-      }
+  duplicateSubmission(submission: SubmissionDisplay) {
+    this.router.navigate(['/reps/rfq'], {
+      queryParams: { duplicate: true, submissionId: submission.submissionId }
     });
   }
 
-  repeatSubmission(submissionId: string) {
-    this.router.navigate(['/rfq'], {
-      queryParams: {
-        repeat: true,
-        submissionId: submissionId
-      }
-    });
+  downloadSubmission(submission: SubmissionDisplay) {
+    this.generateEnhancedPDF(submission);
   }
 
-  deleteSubmission(submissionId: string) {
-    if (confirm('Are you sure you want to delete this submission?')) {
-      this.formSubmissionService.deleteSubmission(submissionId).subscribe({
+  emailSubmission(submission: SubmissionDisplay) {
+    if (submission && submission.contactEmail) {
+      // In a real app, this would integrate with email service
+      const subject = `RFQ Submission ${submission.reference}`;
+      const body = `Dear ${submission.companyName},\n\nPlease find your RFQ submission details attached.\n\nReference: ${submission.reference}\nStatus: ${submission.status}\n\nBest regards,\nGringo Team`;
+
+      // For now, open default email client
+      window.location.href = `mailto:${submission.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      this.showSuccess('Email client opened');
+    } else {
+      this.showError('No email address available for this submission');
+    }
+  }
+
+  deleteSubmission(submission: SubmissionDisplay) {
+    if (confirm('Are you sure you want to delete this submission? This action cannot be undone.')) {
+      this.formSubmissionService.deleteSubmission(submission.submissionId).subscribe({
         next: () => {
-          this.loadSubmissions(); // Reload and update search results
+          this.showSuccess('Submission deleted successfully');
+          this.loadSubmissions();
         },
         error: (error) => {
           console.error('Error deleting submission:', error);
+          this.showError('Failed to delete submission');
         }
       });
     }
   }
 
-  getStatusColor(status: string): string {
-    switch (status) {
-      case 'draft': return 'accent';
-      case 'submitted': return 'primary';
-      case 'completed': return 'primary';
-      default: return '';
-    }
+  private updateSubmissionStatus(submission: SubmissionDisplay, status: 'draft' | 'submitted' | 'completed') {
+    // This would typically call a service method to update the status
+    submission.status = status;
+    this.showSuccess(`Submission ${status} successfully`);
+    this.updateStats();
+    this.applyFilters();
   }
 
-  // Enhanced PDF Generation Method
-  generateEnhancedPDF(submission: FormSubmission) {
-    // Prepare comprehensive form data
+  // Quick actions
+  createNewSubmission() {
+    this.router.navigate(['/reps/rfq']);
+  }
+
+  importSubmissions() {
+    // Create a hidden file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,.json';
+    input.onchange = (event: any) => {
+      const file = event.target.files[0];
+      if (file) {
+        this.processImportFile(file);
+      }
+    };
+    input.click();
+  }
+
+  exportSubmissions() {
+    if (this.filteredSubmissions.length === 0) {
+      this.showInfo('No submissions to export');
+      return;
+    }
+
+    // Prepare data for export
+    const exportData = this.filteredSubmissions.map(sub => ({
+      Reference: sub.reference,
+      Company: sub.companyName,
+      Email: sub.contactEmail,
+      Template: sub.templateName,
+      Status: sub.status,
+      Priority: sub.priority,
+      'Submitted Date': new Date(sub.submittedDate).toLocaleDateString(),
+      'Days Old': Math.floor((Date.now() - new Date(sub.submittedDate).getTime()) / (1000 * 60 * 60 * 24))
+    }));
+
+    // Convert to CSV
+    const csvContent = this.convertToCSV(exportData);
+    this.downloadCSV(csvContent, 'submissions-export.csv');
+    this.showSuccess(`Exported ${exportData.length} submissions to CSV`);
+  }
+
+  // Enhanced PDF Generation
+  generateEnhancedPDF(submission: SubmissionDisplay) {
     const enhancedFormData = {
-      // Core submission data
       ...submission.formData,
-      submissionId: submission.submissionId,
-      formTitle: submission.formTitle,
+      submissionId: submission.submissionId || submission.reference,
+      formTitle: submission.formTitle || submission.templateName,
       status: submission.status,
-      createdAt: submission.createdAt,
-
-      // Add any missing common fields with defaults
+      createdAt: submission.createdAt || submission.submittedDate,
       repName: submission.formData?.repName || 'Field Representative',
-      dateSubmitted: new Date(submission.createdAt).toLocaleDateString(),
-      dateDue: submission.formData?.dateDue || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-
-      // Display fields (formatted for better presentation)
-      solarAreaDisplay: Array.isArray(submission.formData?.solarArea) ?
-        submission.formData.solarArea.join(', ') : submission.formData?.solarArea || 'None',
-      geyserAreaDisplay: Array.isArray(submission.formData?.geyserArea) ?
-        submission.formData.geyserArea.join(', ') : submission.formData?.geyserArea || 'None',
-      trussAreaDisplay: Array.isArray(submission.formData?.trussArea) ?
-        submission.formData.trussArea.join(', ') : submission.formData?.trussArea || 'None',
-      trussTypeDisplay: Array.isArray(submission.formData?.trussType) ?
-        submission.formData.trussType.join(', ') : submission.formData?.trussType || 'Standard',
-      trussType2Display: Array.isArray(submission.formData?.trussType2) ?
-        submission.formData.trussType2.join(', ') : submission.formData?.trussType2 || 'Standard',
-      pg1DescDisplay: Array.isArray(submission.formData?.pg1Desc) ?
-        submission.formData.pg1Desc.join(', ') : submission.formData?.pg1Desc || '',
-
-      // System-generated fields
+      dateSubmitted: new Date(submission.submittedDate).toLocaleDateString(),
       headerImage: 'assets/images/header.png',
       footerImage: 'assets/images/footer.png'
     };
 
-    // Generate the enhanced PDF
     this.pdfGenerationService.generateEnhancedRFQ(enhancedFormData).subscribe({
       next: () => {
-        this.snackBar.open(
-          '🎉 Enhanced PDF generated successfully!',
-          'Close',
-          {
-            duration: 4000,
-            panelClass: ['success-snackbar']
-          }
-        );
+        this.showSuccess('PDF generated successfully!');
       },
       error: (error) => {
         console.error('PDF generation error:', error);
-        this.snackBar.open(
-          '❌ Error generating PDF: ' + (error.message || 'Unknown error'),
-          'Close',
-          {
-            duration: 6000,
-            panelClass: ['error-snackbar']
-          }
-        );
+        this.showError('Error generating PDF: ' + (error.message || 'Unknown error'));
       }
     });
   }
 
-  // PDF Template Methods
-  hasTemplatesForForm(formType: string): boolean {
-    // For now, we'll return true and handle the actual check in the template
-    // In a real implementation, you might want to cache templates or use a synchronous check
-    return true;
+  private convertToCSV(data: any[]): string {
+    if (data.length === 0) return '';
+
+    const headers = Object.keys(data[0]);
+    const csvRows = [
+      headers.join(','), // Header row
+      ...data.map(row =>
+        headers.map(header => {
+          const value = row[header];
+          // Escape commas and quotes in values
+          return typeof value === 'string' && (value.includes(',') || value.includes('"'))
+            ? `"${value.replace(/"/g, '""')}"`
+            : value;
+        }).join(',')
+      )
+    ];
+
+    return csvRows.join('\n');
   }
 
-  getTemplatesForSubmission(submission: FormSubmission): Template[] {
-    // This should be updated to return an Observable or use async pipe in template
-    // For now, returning empty array - should be refactored to use observables
-    return [];
-  }
+  private downloadCSV(csvContent: string, filename: string) {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
 
-  generatePdfFromTemplate(submission: FormSubmission, template: Template) {
-    const formType = submission.formType || 'rfq';
-
-    // Enhance form data with submission metadata
-    const enhancedFormData = {
-      ...submission.formData,
-      submissionId: submission.submissionId,
-      formTitle: submission.formTitle,
-      status: submission.status,
-      createdAt: submission.createdAt,
-      updatedAt: submission.updatedAt,
-      formType: formType
-    };
-
-    const request = {
-      templateId: template.id,
-      formData: enhancedFormData,
-      formType: formType
-    };
-
-    this.templateService.generatePdf(request).subscribe({
-      next: () => {
-        this.snackBar.open(
-          `PDF generated successfully using "${template.name}"!`,
-          'Close',
-          {
-            duration: 4000,
-            panelClass: ['success-snackbar']
-          }
-        );
-      },
-      error: (error) => {
-        this.snackBar.open(
-          'Error generating PDF: ' + error.message,
-          'Close',
-          {
-            duration: 5000,
-            panelClass: ['error-snackbar']
-          }
-        );
-      }
-    });
-  }
-
-  navigateToTemplates(formType: string) {
-    this.router.navigate(['/templates', formType || 'rfq']);
-  }
-
-  getTemplateIcon(type: string): string {
-    switch (type) {
-      case 'word': return 'description';
-      case 'google-docs': return 'article';
-      case 'odt': return 'text_snippet';
-      default: return 'insert_drive_file';
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
+  }
+
+  private processImportFile(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      try {
+        const content = e.target.result;
+        if (file.name.endsWith('.json')) {
+          const data = JSON.parse(content);
+          this.showInfo(`JSON import detected: ${data.length || 0} records found`);
+        } else if (file.name.endsWith('.csv')) {
+          const lines = content.split('\n').filter((line: string) => line.trim());
+          this.showInfo(`CSV import detected: ${lines.length - 1} records found (excluding header)`);
+        }
+        // In a real application, this would process and validate the data
+        this.showSuccess('Import functionality will be fully implemented soon');
+      } catch (error) {
+        this.showError('Error processing import file: ' + error);
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Utility notification methods
+  private showSuccess(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['success-snackbar']
+    });
+  }
+
+  private showError(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 6000,
+      panelClass: ['error-snackbar']
+    });
+  }
+
+  private showInfo(message: string) {
+    this.snackBar.open(message, 'Close', {
+      duration: 4000,
+      panelClass: ['info-snackbar']
+    });
   }
 }

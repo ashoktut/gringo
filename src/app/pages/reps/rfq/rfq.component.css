@@ -181,7 +181,53 @@
   }
 }
 
-/* Repeat RFQ styling */
+/* Edit, Duplicate, and Repeat RFQ styling */
+.edit-notice {
+  background: #fff3e0;
+  border: 1px solid #ff9800;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f57c00;
+}
+
+.edit-notice mat-icon {
+  color: #ff9800;
+  font-size: 20px;
+}
+
+.edit-notice p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.duplicate-notice {
+  background: #f3e5f5;
+  border: 1px solid #9c27b0;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #7b1fa2;
+}
+
+.duplicate-notice mat-icon {
+  color: #9c27b0;
+  font-size: 20px;
+}
+
+.duplicate-notice p {
+  margin: 0;
+  font-weight: 500;
+  font-size: 14px;
+}
+
 .repeat-notice {
   background: #e3f2fd;
   border: 1px solid #2196f3;

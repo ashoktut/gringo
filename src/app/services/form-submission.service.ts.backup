@@ -5,6 +5,7 @@ import { FormSection } from '../sharedComponents/reusable-form/reusable-form.com
 import { TemplateManagementService } from './template-management.service';
 import { DocxProcessingService } from './docx-processing.service';
 import { IndexedDbService } from './indexed-db.service';
+
 import { EmailService } from './email.service';
 
 export interface EmailStatus {
@@ -89,18 +90,19 @@ export class FormSubmissionService {
       this.sendRfqEmail(submission.submissionId, formData, formStructure).subscribe({
         next: (emailResult) => {
           submission.emailStatus = emailResult;
-          this.updateSubmissionInternally(submission);
+          this.updateSubmissionDirect(submission);
         },
         error: (error) => {
           submission.emailStatus = {
             status: 'failed',
             error: error.message
           };
-          this.updateSubmissionInternally(submission);
+          this.updateSubmissionDirect(submission);
         }
       });
 
-      // Enhanced RFQ processing with PDF generation and distribution
+      // ✅ Enhanced RFQ processing with PDF generation and distribution
+      // Use original formData for processing
       this.processRfqWithDocx(formData).subscribe({
         next: (result: any) => {
           console.log('📄 RFQ processed successfully:', {
@@ -127,28 +129,64 @@ export class FormSubmissionService {
     formData: any,
     formStructure: FormSection[]
   ): Observable<EmailStatus> {
-    console.log('📧 Sending RFQ email for submission:', submissionId);
 
-    const recipients = this.extractCcMailAddresses(formData);
-    const clientEmail = formData.clientEmail || '';
+    // Extract email addresses
+    const ccMailAddresses = this.extractCcMailAddresses(formData);
+    const clientEmail = formData.clientEmail;
 
-    if (!clientEmail && recipients.length === 0) {
-      console.warn('⚠️ No email recipients found, skipping email');
+    if (!clientEmail) {
       return of({
-        status: 'failed' as const,
-        error: 'No email recipients provided'
+        status: 'failed',
+        error: 'No client email address provided'
       });
     }
 
-    // Enhanced error handling and retry logic
-    return this.emailService.sendRfqEmail(submissionId, formData, formStructure).pipe(
-      map(result => ({
-        status: 'sent' as const,
-        sentAt: new Date(),
-        recipients: [...recipients, clientEmail].filter(Boolean)
-      })),
+    if (!ccMailAddresses || ccMailAddresses.length === 0) {
+      return of({
+        status: 'failed',
+        error: 'No CC email addresses provided'
+      });
+    }
+
+    console.log('📧 Sending RFQ email to:', {
+      client: clientEmail,
+      cc: ccMailAddresses,
+      submissionId: submissionId
+    });
+
+    // Enhanced email sending with docx support
+    return this.emailService.sendRfqSubmissionEmailStructured(
+      {
+        ...formData,
+        submissionId: submissionId,
+        formTitle: 'Request for Quote'
+      },
+      ccMailAddresses,
+      clientEmail
+    ).pipe(
+      switchMap(emailResponse => {
+        if (emailResponse && typeof emailResponse === 'object' && 'success' in emailResponse) {
+          const typedResponse = emailResponse as { success: boolean; error?: string };
+          if (typedResponse.success) {
+            return of({
+              status: 'sent' as const,
+              sentAt: new Date(),
+              recipients: [clientEmail, ...ccMailAddresses]
+            });
+          } else {
+            return of({
+              status: 'failed' as const,
+              error: typedResponse.error || 'Email sending failed'
+            });
+          }
+        } else {
+          return of({
+            status: 'failed' as const,
+            error: 'Invalid email response'
+          });
+        }
+      }),
       catchError(error => {
-        console.error('❌ Email sending failed:', error);
         return of({
           status: 'failed' as const,
           error: error.message
@@ -180,13 +218,22 @@ export class FormSubmissionService {
         }
 
         const template = templates[0]; // Use first available template
+        console.log('📋 Using RFQ template:', template.name);
+
+        // Check if this is an HTML template or a DOCX template
+        if (template.name.includes('.html') || template.type === 'html') {
+          console.log('🌐 HTML template detected, skipping DOCX processing');
+          return of({
+            pdfBlob: null,
+            emailStatus: { sent: false, recipients: [], note: 'HTML template used - PDF generation handled elsewhere' }
+          });
+        }
+
+        // Extract recipients
         const recipients = this.extractCcMailAddresses(formData);
-        const clientEmail = formData.clientEmail || '';
+        const clientEmail = formData['clientEmail'];
 
-        console.log('🔧 Processing RFQ with template:', template.name);
-        console.log('📮 Email recipients:', { clientEmail, recipients });
-
-        // Process DOCX template
+        // Process with enhanced docx service
         return this.docxService.processRfqSubmission(
           template,
           formData,
@@ -240,7 +287,7 @@ export class FormSubmissionService {
     return of(false);
   }
 
-  // Update existing submission (PUBLIC METHOD)
+  // Update existing submission
   updateSubmission(submissionId: string, formData: any, formStructure: FormSection[]): Observable<FormSubmission> {
     const index = this.submissions.findIndex(s => s.submissionId === submissionId);
     if (index === -1) {
@@ -253,7 +300,7 @@ export class FormSubmissionService {
       formData: formData,
       formStructure: formStructure,
       updatedAt: new Date(),
-      status: 'submitted'
+      status: 'submitted' // Update status as needed
     };
 
     // Update in memory
@@ -285,9 +332,9 @@ export class FormSubmissionService {
   }
 
   /**
-   * Update existing submission internally (for internal use only)
+   * Update existing submission directly (for internal use)
    */
-  private updateSubmissionInternally(updatedSubmission: FormSubmission): void {
+  private updateSubmissionDirect(updatedSubmission: FormSubmission): void {
     const index = this.submissions.findIndex(s => s.submissionId === updatedSubmission.submissionId);
     if (index !== -1) {
       updatedSubmission.updatedAt = new Date();
@@ -380,50 +427,83 @@ export class FormSubmissionService {
           delete sanitizedField.validators;
         }
 
+        // Remove any other function properties
+        Object.keys(sanitizedField).forEach(key => {
+          if (typeof (sanitizedField as any)[key] === 'function') {
+            delete (sanitizedField as any)[key];
+          }
+        });
+
         return sanitizedField;
       }) || []
     }));
   }
 
   /**
-   * Fallback method for sanitizing complex objects
+   * Fallback deep sanitization for complex objects
    */
   private deepSanitize(obj: any): any {
-    if (obj === null || typeof obj !== 'object') {
+    if (obj === null || obj === undefined) {
       return obj;
     }
 
-    if (Array.isArray(obj)) {
-      return obj.map(item => this.deepSanitize(item));
+    if (typeof obj === 'function') {
+      return undefined; // Remove functions
     }
 
-    const sanitized: any = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        const value = obj[key];
-        // Skip functions and undefined values
-        if (typeof value !== 'function' && value !== undefined) {
-          sanitized[key] = this.deepSanitize(value);
+    if (obj instanceof Date) {
+      return obj; // Keep dates as-is
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.deepSanitize(item)).filter(item => item !== undefined);
+    }
+
+    if (typeof obj === 'object') {
+      const sanitized: any = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          const sanitizedValue = this.deepSanitize(obj[key]);
+          if (sanitizedValue !== undefined) {
+            sanitized[key] = sanitizedValue;
+          }
         }
       }
+      return sanitized;
     }
 
-    return sanitized;
+    return obj; // Primitive values
   }
 
   private loadSubmissionsFromStorage(): void {
-    this.indexedDbService.getAll(this.indexedDbService.STORES.SUBMISSIONS).subscribe({
-      next: (data) => {
-        if (data && data.length > 0) {
-          this.submissions = data.map(item => item.data as FormSubmission);
-          this.submissionsSubject.next([...this.submissions]);
-          console.log('✅ Submissions loaded from IndexedDB:', this.submissions.length);
-        } else {
-          console.log('ℹ️ No submissions found in IndexedDB');
-        }
+    // First try to migrate any existing localStorage data
+    this.indexedDbService.migrateFromLocalStorage('gringo_submissions', this.indexedDbService.STORES.SUBMISSIONS).subscribe({
+      next: () => {
+        // After migration (or if no migration needed), load from IndexedDB
+        this.loadFromIndexedDB();
+      },
+      error: (error) => {
+        console.error('❌ Migration failed, loading from IndexedDB anyway:', error);
+        this.loadFromIndexedDB();
+      }
+    });
+  }
+
+  private loadFromIndexedDB(): void {
+    this.indexedDbService.getAll<FormSubmission>(this.indexedDbService.STORES.SUBMISSIONS).subscribe({
+      next: (items) => {
+        this.submissions = items.map(item => ({
+          ...item.data,
+          createdAt: new Date(item.data.createdAt),
+          updatedAt: new Date(item.data.updatedAt)
+        }));
+        this.submissionsSubject.next([...this.submissions]);
+        console.log('✅ Loaded submissions from IndexedDB:', this.submissions.length);
       },
       error: (error) => {
         console.error('❌ Failed to load submissions from IndexedDB:', error);
+        // Fallback: keep empty array
+        this.submissions = [];
         this.submissionsSubject.next([]);
       }
     });

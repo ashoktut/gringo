@@ -7,18 +7,55 @@
     <mat-toolbar class="sidenav-header">
       <mat-icon class="app-icon">business</mat-icon>
       <span class="app-title">Gringo</span>
+      <button mat-icon-button
+              matTooltip="Application help and documentation"
+              matTooltipPosition="right"
+              (click)="openHelp()"
+              class="help-button">
+        <mat-icon>help_outline</mat-icon>
+      </button>
     </mat-toolbar>
     <mat-nav-list>
       @for (item of navItems; track item) {
         <a mat-list-item
           [routerLink]="item.route"
           [class.active-nav-item]="isActiveRoute(item.route)"
+          [matTooltip]="item.description"
+          matTooltipPosition="right"
+          matTooltipShowDelay="500"
           (click)="isHandset$ ? drawer.close() : null">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.name }}</span>
+          @if (item.badge) {
+            <mat-chip class="nav-badge" [ngClass]="'badge-' + item.badge.type">
+              {{ item.badge.count }}
+            </mat-chip>
+          }
         </a>
       }
     </mat-nav-list>
+
+    <!-- Quick Actions Section -->
+    <mat-divider></mat-divider>
+    <div class="quick-actions">
+      <h4 class="quick-actions-title">Quick Actions</h4>
+      <button mat-stroked-button
+              class="quick-action-btn"
+              [routerLink]="['/rfq']"
+              matTooltip="Create a new RFQ submission quickly"
+              matTooltipPosition="right">
+        <mat-icon>add</mat-icon>
+        New RFQ
+      </button>
+      <button mat-stroked-button
+              class="quick-action-btn"
+              [routerLink]="['/templates']"
+              matTooltip="Manage document templates"
+              matTooltipPosition="right">
+        <mat-icon>description</mat-icon>
+        Templates
+      </button>
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
@@ -28,17 +65,62 @@
         aria-label="Toggle sidenav"
         mat-icon-button
         (click)="drawer.toggle()"
+        matTooltip="Toggle navigation menu"
         style="margin-right: 8px;">
         <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
       </button>
       <span class="toolbar-title">{{ title }}</span>
       <span class="toolbar-spacer"></span>
-      <button mat-icon-button aria-label="Settings">
+
+      <!-- Search Button -->
+      <button mat-icon-button
+              aria-label="Global Search"
+              (click)="openGlobalSearch()"
+              matTooltip="Search across all data">
+        <mat-icon>search</mat-icon>
+      </button>
+
+      <!-- Notifications -->
+      <button mat-icon-button
+              aria-label="Notifications"
+              (click)="openNotifications()"
+              matTooltip="View notifications and alerts"
+              [matBadge]="notificationCount"
+              [matBadgeHidden]="notificationCount === 0"
+              matBadgeColor="warn">
+        <mat-icon>notifications</mat-icon>
+      </button>
+
+      <!-- Settings -->
+      <button mat-icon-button
+              aria-label="Settings"
+              matTooltip="Application settings and preferences"
+              [routerLink]="['/settings']">
         <mat-icon>settings</mat-icon>
       </button>
-      <button mat-icon-button aria-label="Account">
+
+      <!-- Account Menu -->
+      <button mat-icon-button
+              aria-label="Account"
+              matTooltip="User account and profile"
+              [matMenuTriggerFor]="accountMenu">
         <mat-icon>account_circle</mat-icon>
       </button>
+      <mat-menu #accountMenu="matMenu">
+        <button mat-menu-item>
+          <mat-icon>person</mat-icon>
+          <span>Profile</span>
+        </button>
+        <button mat-menu-item>
+          <mat-icon>security</mat-icon>
+          <span>Security</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item>
+          <mat-icon>logout</mat-icon>
+          <span>Sign Out</span>
+        </button>
+      </mat-menu>
     </mat-toolbar>
 
     <div class="main-content">
