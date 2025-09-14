@@ -41,7 +41,9 @@ export class AppComponent {
     { name: 'RFQ Form', route: '/rfq', icon: 'request_quote' },
     { name: 'RQR Form', route: '/rqr', icon: 'refresh' },
     { name: 'Submissions', route: '/submissions', icon: 'folder' },
-    { name: 'Templates', route: '/templates', icon: 'description' }
+    { name: 'Templates', route: '/templates', icon: 'description' },
+    { name: 'Form Builder', route: '/form-builder', icon: 'build' },
+    { name: 'Configuration Management', route: '/config-management', icon: 'settings' }
   ];
 
   constructor(

@@ -3,6 +3,77 @@
     <h2 class="form-title">{{ formTitle }}</h2>
   }
 
+  <!-- Enterprise Features Header -->
+  @if (enableCompanySelector || showFormProgress || autoSaveStatus() !== 'idle') {
+    <div class="enterprise-header">
+      <!-- Company Selector -->
+      @if (enableCompanySelector && availableCompanies.length > 0) {
+        <mat-form-field appearance="outline" class="company-selector">
+          <mat-label>Select Company</mat-label>
+          <mat-select
+            [value]="currentCompanyId()"
+            (selectionChange)="onCompanyChange($event.value)"
+            [disabled]="isLoading()">
+            @for (company of availableCompanies; track company.id) {
+              <mat-option [value]="company.id">{{ company.name }}</mat-option>
+            }
+          </mat-select>
+          <mat-icon matPrefix>business</mat-icon>
+          @if (enableFieldHints) {
+            <mat-hint>Choose the company for this form submission</mat-hint>
+          }
+        </mat-form-field>
+      }
+
+      <!-- Form Progress -->
+      @if (showFormProgress) {
+        <div class="form-progress">
+          <div class="progress-header">
+            <span class="progress-text">
+              Progress: {{ formProgress().completed }} / {{ formProgress().total }} fields
+            </span>
+            <mat-icon [color]="formProgress().completed === formProgress().total ? 'primary' : 'accent'">
+              {{ formProgress().completed === formProgress().total ? 'check_circle' : 'progress_activity' }}
+            </mat-icon>
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              [style.width.%]="(formProgress().completed / formProgress().total) * 100">
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Auto-Save Status -->
+      @if (enableAutoSave && autoSaveStatus() !== 'idle') {
+        <div class="auto-save-status" [ngClass]="'status-' + autoSaveStatus()">
+          <mat-icon>
+            @if (autoSaveStatus() === 'saving') {
+              cloud_upload
+            } @else if (autoSaveStatus() === 'saved') {
+              cloud_done
+            } @else {
+              cloud_off
+            }
+          </mat-icon>
+          <span>{{ autoSaveStatusText() }}</span>
+        </div>
+      }
+
+      <!-- Validation Errors Summary -->
+      @if (enableValidationFeedback && validationErrors().length > 0) {
+        <div class="validation-summary">
+          <mat-icon color="warn">warning</mat-icon>
+          <span>{{ validationErrors().length }} validation error(s)</span>
+          <button mat-button color="warn" (click)="validateAllFields()">
+            Review Errors
+          </button>
+        </div>
+      }
+    </div>
+  }
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="dynamic-form">
     <!-- NEW: Grouped mode with sections -->
     @if (sections?.length) {
@@ -39,29 +110,95 @@
       }
     }
 
-    <!-- UPDATED: Flat mode (backward compatible) -->
-
+    <!-- Enhanced Form Actions -->
     <div class="form-actions">
+      <!-- Draft Actions -->
+      @if (enableDraftMode) {
+        <div class="draft-actions">
+          <button
+            mat-button
+            color="accent"
+            type="button"
+            (click)="saveDraft()"
+            [disabled]="!isDirty() || isLoading()">
+            <mat-icon>save</mat-icon>
+            Save Draft
+          </button>
+        </div>
+      }
+
+      <!-- Primary Submit -->
       <button
         mat-raised-button
         color="primary"
         type="submit"
-        [disabled]="!isFormValid()"
-        class="submit-button"
-        >
+        [disabled]="!isFormValid() || isLoading()"
+        class="submit-button">
+        @if (isLoading()) {
+          <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
+        }
         {{ submitButtonText }}
       </button>
 
-      <!-- ✅ ADD: Debug info (remove in production) -->
-      <div
-        class="debug-info"
-        style="margin-top: 10px; font-size: 12px; color: #666"
-        >
-        Form Valid (Angular): {{ form.valid }}<br />
-        Form Valid (Custom): {{ isFormValid() }}<br />
-        Form Touched: {{ form.touched }}<br />
-        Form Dirty: {{ form.dirty }}
+      <!-- Reset Button -->
+      <button
+        mat-button
+        color="warn"
+        type="button"
+        (click)="resetForm()"
+        [disabled]="!isDirty() || isLoading()">
+        <mat-icon>refresh</mat-icon>
+        Reset
+      </button>
+
+      <!-- PDF Generation Buttons -->
+      <div class="pdf-actions" style="margin-left: 16px; display: flex; gap: 8px;">
+        <!-- Generate PDF from HTML -->
+        <button
+          mat-stroked-button
+          color="accent"
+          type="button"
+          (click)="generatePdfFromHtml()"
+          [disabled]="!isFormValid() || isLoading()"
+          matTooltip="Generate PDF using HTML template">
+          <mat-icon>picture_as_pdf</mat-icon>
+          PDF (HTML)
+        </button>
+
+        <!-- Generate PDF from DOCX - needs file input -->
+        <input
+          #docxFileInput
+          type="file"
+          accept=".docx"
+          style="display: none;"
+          (change)="onDocxFileSelected($event)">
+
+        <button
+          mat-stroked-button
+          color="accent"
+          type="button"
+          (click)="docxFileInput.click()"
+          [disabled]="!isFormValid() || isLoading()"
+          matTooltip="Generate PDF from DOCX template">
+          <mat-icon>description</mat-icon>
+          PDF (DOCX)
+        </button>
       </div>
+
+      <!-- Debug info (only in development) -->
+      @if (enableValidationFeedback) {
+        <div class="debug-info" style="margin-top: 10px; font-size: 12px; color: #666;">
+          <details>
+            <summary>Form Debug Info</summary>
+            Form Valid (Signal): {{ isFormValid() }}<br />
+            Form Valid (Angular): {{ form.valid }}<br />
+            Form Dirty: {{ isDirty() }}<br />
+            Auto-Save: {{ autoSaveStatus() }}<br />
+            Company: {{ currentCompanyId() || 'None' }}<br />
+            Validation Errors: {{ validationErrors().length }}
+          </details>
+        </div>
+      }
     </div>
   </form>
 </div>

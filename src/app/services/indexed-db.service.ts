@@ -14,14 +14,15 @@ export interface StorageItem<T = any> {
 })
 export class IndexedDbService {
   private readonly DB_NAME = 'GringoAppDB';
-  private readonly DB_VERSION = 1;
+  private readonly DB_VERSION = 2;
   private db: IDBDatabase | null = null;
 
   // Store names for different data types
   public readonly STORES = {
     SUBMISSIONS: 'submissions',
     TEMPLATES: 'templates',
-    PDF_TEMPLATES: 'pdf_templates'
+    PDF_TEMPLATES: 'pdf_templates',
+    FORM_CONFIGS: 'form_configs'
   } as const;
 
   constructor() {
@@ -74,6 +75,15 @@ export class IndexedDbService {
         if (!db.objectStoreNames.contains(this.STORES.PDF_TEMPLATES)) {
           const pdfTemplatesStore = db.createObjectStore(this.STORES.PDF_TEMPLATES, { keyPath: 'id' });
           pdfTemplatesStore.createIndex('formType', 'formType', { unique: false });
+        }
+
+        // Create form configurations store
+        if (!db.objectStoreNames.contains(this.STORES.FORM_CONFIGS)) {
+          const formConfigsStore = db.createObjectStore(this.STORES.FORM_CONFIGS, { keyPath: 'id' });
+          formConfigsStore.createIndex('formType', 'formType', { unique: false });
+          formConfigsStore.createIndex('companyId', 'companyId', { unique: false });
+          formConfigsStore.createIndex('isDefault', 'isDefault', { unique: false });
+          formConfigsStore.createIndex('isActive', 'isActive', { unique: false });
         }
       };
     });

@@ -6,13 +6,52 @@ import { IndexedDbService } from './indexed-db.service';
 export interface Template {
   id: string;
   name: string;
-  type: 'word' | 'google-docs' | 'odt';
+  type: 'word' | 'google-docs' | 'odt' | 'html' | 'custom';
   formType: string;
   content: string;
   placeholders: string[];
   size: number;
   uploadedAt: Date;
   isUniversal: boolean;
+  // NEW: Enterprise features
+  companyId?: string;
+  version: string;
+  description?: string;
+  previewUrl?: string;
+  metadata: {
+    createdBy: string;
+    lastModified: Date;
+    downloadCount: number;
+    isActive: boolean;
+  };
+  // NEW: Support for new form structure
+  sectionMappings?: SectionMapping[];
+  fieldMappings?: FieldMapping[];
+  pdfOptions?: PDFGenerationOptions;
+}
+
+export interface SectionMapping {
+  sectionId: string;
+  templateSection: string;
+  includeInPDF: boolean;
+  pageBreakBefore?: boolean;
+}
+
+export interface FieldMapping {
+  fieldName: string;
+  templatePlaceholder: string;
+  fieldType: string;
+  formatOptions?: any;
+}
+
+export interface PDFGenerationOptions {
+  orientation: 'portrait' | 'landscape';
+  format: 'a4' | 'letter' | 'legal';
+  margins: { top: number; right: number; bottom: number; left: number; };
+  includeSignatures: boolean;
+  includePictures: boolean;
+  includeMapSnapshots: boolean;
+  watermark?: string;
 }
 
 export interface FormField {
@@ -78,7 +117,14 @@ export class PdfTemplateService {
             placeholders: this.extractPlaceholders(content),
             size: file.size,
             uploadedAt: new Date(),
-            isUniversal: isUniversal
+            isUniversal: isUniversal,
+            version: '1.0.0',
+            metadata: {
+              createdBy: 'system',
+              lastModified: new Date(),
+              downloadCount: 0,
+              isActive: true
+            }
           };
 
           this.templates.push(template);
@@ -128,21 +174,12 @@ export class PdfTemplateService {
         Object.assign(fields, this.extractAllFormFields(value, fieldKey));
       } else {
         // Store the field value
-        fields[fieldKey] = this.formatFieldValue(value);
-        fields[key] = this.formatFieldValue(value); // Also store without prefix for simple access
+        fields[fieldKey] = this.formatFieldValue({ type: 'text' }, value);
+        fields[key] = this.formatFieldValue({ type: 'text' }, value); // Also store without prefix for simple access
       }
     });
 
     return fields;
-  }
-
-  // Format field values for display
-  private formatFieldValue(value: any): string {
-    if (value === null || value === undefined) return 'N/A';
-    if (typeof value === 'boolean') return value ? 'Yes' : 'No';
-    if (Array.isArray(value)) return value.join(', ');
-    if (value instanceof Date) return value.toLocaleDateString();
-    return String(value);
   }
 
   // Create HTML from template with all form data
@@ -430,5 +467,159 @@ export class PdfTemplateService {
         </body>
       </html>
     `;
+  }
+
+  // NEW: Enterprise methods for new architecture
+
+  /**
+   * Get templates for specific company and form type
+   */
+  getTemplatesForCompany(companyId: string, formType?: string): Template[] {
+    return this.templates.filter(template =>
+      (template.companyId === companyId || template.isUniversal) &&
+      (!formType || template.formType === formType || template.isUniversal)
+    );
+  }
+
+  /**
+   * Generate PDF from new FormConfiguration structure
+   */
+  async generateFromFormConfiguration(
+    templateId: string,
+    formData: any,
+    formConfig: any,
+    options?: PDFGenerationOptions
+  ): Promise<Blob> {
+    const template = this.templates.find(t => t.id === templateId);
+    if (!template) {
+      throw new Error('Template not found');
+    }
+
+    // Process sections-based form data
+    const processedData = this.processFormSections(formData, formConfig, template);
+
+    // Use existing PDF generation with enhanced data
+    return this.generatePdfBlob(template, processedData, options);
+  }
+
+  /**
+   * Process sections-based form data for PDF generation
+   */
+  private processFormSections(formData: any, formConfig: any, template: Template): any {
+    const processedData: any = { ...formData };
+
+    // Add section-specific data
+    if (formConfig.sections) {
+      formConfig.sections.forEach((section: any) => {
+        const sectionData: any = {};
+
+        section.fields.forEach((field: any) => {
+          const fieldValue = formData[field.name];
+
+          // Handle special field types for PDF
+          switch (field.type) {
+            case 'signature':
+              sectionData[field.name] = fieldValue ? '[Digital Signature]' : '[Not Signed]';
+              if (fieldValue?.dataUrl) {
+                sectionData[field.name + '_image'] = fieldValue.dataUrl;
+              }
+              break;
+
+            case 'picture':
+              sectionData[field.name] = fieldValue ? '[Image Attached]' : '[No Image]';
+              if (fieldValue?.dataUrl) {
+                sectionData[field.name + '_image'] = fieldValue.dataUrl;
+              }
+              break;
+
+            case 'map':
+              if (fieldValue?.lat && fieldValue?.lng) {
+                sectionData[field.name] = `Lat: ${fieldValue.lat}, Lng: ${fieldValue.lng}`;
+                sectionData[field.name + '_coordinates'] = fieldValue;
+              } else {
+                sectionData[field.name] = '[Location Not Selected]';
+              }
+              break;
+
+            default:
+              sectionData[field.name] = this.formatFieldValue(field, fieldValue);
+          }
+        });
+
+        processedData[section.id + '_section'] = sectionData;
+        processedData[section.id + '_title'] = section.title;
+      });
+    }
+
+    return processedData;
+  }
+
+  /**
+   * Format field values for PDF display
+   */
+  private formatFieldValue(field: any, value: any): string {
+    if (value === null || value === undefined) return '';
+
+    switch (field.type) {
+      case 'date':
+        return value ? new Date(value).toLocaleDateString() : '';
+      case 'email':
+        return value || '';
+      case 'number':
+        return value ? value.toString() : '';
+      case 'select':
+      case 'radio':
+        return value || '';
+      case 'checkbox':
+        return value ? 'Yes' : 'No';
+      default:
+        return value?.toString() || '';
+    }
+  }
+
+  /**
+   * Generate PDF blob (enhanced version of existing method)
+   */
+  private async generatePdfBlob(
+    template: Template,
+    data: any,
+    options?: PDFGenerationOptions
+  ): Promise<Blob> {
+    // Use your existing PDF generation logic but with enhanced data
+    const processedContent = this.createHtmlFromTemplate(template, data, template.formType);
+
+    // Convert to PDF using your existing PdfGenerationService
+    const pdfBlob = await this.convertToPdf(processedContent, options || template.pdfOptions);
+
+    // Update template metadata
+    this.updateTemplateUsage(template.id);
+
+    return pdfBlob;
+  }
+
+  /**
+   * Update template usage statistics
+   */
+  private updateTemplateUsage(templateId: string): void {
+    const template = this.templates.find(t => t.id === templateId);
+    if (template && template.metadata) {
+      template.metadata.downloadCount = (template.metadata.downloadCount || 0) + 1;
+      template.metadata.lastModified = new Date();
+      this.saveTemplates();
+    }
+  }
+
+  /**
+   * Convert processed content to PDF (integrate with existing services)
+   */
+  private async convertToPdf(content: string, options?: PDFGenerationOptions): Promise<Blob> {
+    // This would integrate with your existing PdfGenerationService
+    // For now, return a placeholder - you'd inject PdfGenerationService here
+    return new Promise((resolve) => {
+      // Use your existing html2pdf integration from PdfGenerationService
+      setTimeout(() => {
+        resolve(new Blob(['PDF content'], { type: 'application/pdf' }));
+      }, 1000);
+    });
   }
 }

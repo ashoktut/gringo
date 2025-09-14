@@ -1,0 +1,271 @@
+<div class="dynamic-form-container">
+  <!-- Header Section -->
+  @if (showHeader()) {
+    <div class="form-header">
+      <div class="header-content">
+        <div class="header-info">
+          <mat-icon class="form-type-icon">{{ getFormTypeIcon() }}</mat-icon>
+          <div class="header-text">
+            <h1 class="form-title">
+              {{ formTitle() }}
+              @if (isRepeatMode()) {
+                <mat-chip class="repeat-chip" color="accent">
+                  <mat-icon matChipAvatar>refresh</mat-icon>
+                  Repeat
+                </mat-chip>
+              }
+            </h1>
+            @if (currentConfiguration()) {
+              <p class="form-subtitle">
+                <span class="config-name">{{ currentConfiguration()!.name }}</span>
+                @if (selectedCompanyId()) {
+                  <mat-chip class="company-chip" color="primary">
+                    <mat-icon matChipAvatar>business</mat-icon>
+                    {{ getCompanyDisplayName(selectedCompanyId()) }}
+                  </mat-chip>
+                }
+                @if (isDirty()) {
+                  <mat-chip class="draft-chip" color="warn">
+                    <mat-icon matChipAvatar>edit</mat-icon>
+                    Unsaved
+                  </mat-chip>
+                }
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Header Actions -->
+        <div class="header-actions">
+          @if (validationErrors().length > 0) {
+            <button
+              mat-icon-button
+              color="warn"
+              [matTooltip]="validationErrors().length + ' validation error(s)'">
+              <mat-icon>error_outline</mat-icon>
+            </button>
+          }
+
+          @if (enableDrafts) {
+            <button
+              mat-icon-button
+              matTooltip="Save Draft"
+              (click)="autoSaveForm(formSections())">
+              <mat-icon>save</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Company Selection -->
+  @if (showCompanySelector()) {
+    <mat-card class="company-selector-card elevation-2">
+      <mat-card-content>
+        <div class="company-selection">
+          <div class="selector-header">
+            <mat-icon class="selector-icon">business</mat-icon>
+            <span class="selector-title">Company Configuration</span>
+          </div>
+
+          <mat-form-field appearance="outline" class="company-select">
+            <mat-label>Select Configuration</mat-label>
+            <mat-select
+              [value]="selectedCompanyId()"
+              (selectionChange)="onCompanySelectionChange($event.value)">
+              <mat-option value="">
+                <div class="option-content">
+                  <mat-icon class="option-icon">public</mat-icon>
+                  <div class="option-text">
+                    <span class="option-label">Default {{ formTitle() }}</span>
+                    <span class="option-description">Global configuration</span>
+                  </div>
+                </div>
+              </mat-option>
+              @for (company of availableCompanies$ | async; track company) {
+                <mat-option [value]="company">
+                  <div class="option-content">
+                    <mat-icon class="option-icon">domain</mat-icon>
+                    <div class="option-text">
+                      <span class="option-label">{{ company }}</span>
+                      <span class="option-description">Company-specific configuration</span>
+                    </div>
+                  </div>
+                </mat-option>
+              }
+            </mat-select>
+            <mat-icon matSuffix>keyboard_arrow_down</mat-icon>
+          </mat-form-field>
+
+          @if (currentConfiguration()) {
+            <div class="config-info">
+              <div class="config-details">
+                <mat-chip-set>
+                  <mat-chip [color]="currentConfiguration()!.isDefault ? 'accent' : 'primary'">
+                    <ng-container>
+                      @if (currentConfiguration()!.isDefault) {
+                        <mat-icon matChipAvatar>star</mat-icon>
+                        Default
+                      } @else {
+                        <mat-icon matChipAvatar>settings</mat-icon>
+                        Custom
+                      }
+                    </ng-container>
+                  </mat-chip>
+
+                  <mat-chip color="primary">
+                    <mat-icon matChipAvatar>layers</mat-icon>
+                    {{ currentConfiguration()!.sections.length }} sections
+                  </mat-chip>
+
+                  <mat-chip color="primary">
+                    <mat-icon matChipAvatar>input</mat-icon>
+                    {{ fieldCount() }} fields
+                  </mat-chip>
+
+                  <mat-chip color="primary">
+                    <mat-icon matChipAvatar>schedule</mat-icon>
+                    v{{ currentConfiguration()!.version }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+
+              @if (currentConfiguration()!.metadata.description) {
+                <p class="config-description">
+                  {{ currentConfiguration()!.metadata.description }}
+                </p>
+              }
+            </div>
+          }
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Validation Errors -->
+  @if (validationErrors().length > 0) {
+    <mat-card class="validation-card error-card">
+      <mat-card-content>
+        <div class="validation-content">
+          <mat-icon class="validation-icon">error_outline</mat-icon>
+          <div class="validation-text">
+            <h4>Please fix the following issues:</h4>
+            <ul class="validation-list">
+              @for (error of validationErrors(); track error) {
+                <li>{{ error }}</li>
+              }
+            </ul>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <mat-card class="loading-card elevation-2">
+      <mat-card-content>
+        <div class="loading-content">
+          <mat-spinner diameter="40" color="primary"></mat-spinner>
+          <h3>Loading Configuration</h3>
+          <p>Loading {{ formTitle() }} configuration...</p>
+          <div class="loading-details">
+            <span class="loading-step">Connecting to service...</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Error State -->
+  @if (configLoadError() && !isLoading()) {
+    <mat-card class="error-card elevation-2">
+      <mat-card-content>
+        <div class="error-content">
+          <mat-icon class="error-icon">error_outline</mat-icon>
+          <div class="error-text">
+            <h3>Configuration Load Error</h3>
+            <p>Unable to load the {{ formTitle() }} configuration.</p>
+            <p class="error-details">Please check your connection and try again.</p>
+          </div>
+          <div class="error-actions">
+            <button mat-raised-button color="primary" (click)="retryConfiguration()">
+              <mat-icon>refresh</mat-icon>
+              Retry
+            </button>
+            <button mat-button color="accent">
+              <mat-icon>help_outline</mat-icon>
+              Get Help
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Dynamic Form Content -->
+  @if (!isLoading() && !configLoadError() && formSections().length > 0) {
+    <div class="form-content">
+      <app-reusable-form
+        [sections]="formSections()"
+        [formTitle]="formTitle()"
+        [submitButtonText]="submitButtonText()"
+        [initialData]="initialData"
+        [multi]="false"
+        (formSubmit)="onFormSubmit($event)"
+        (formValueChange)="onFormValueChange($event)"
+        class="dynamic-form elevation-1">
+      </app-reusable-form>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && !configLoadError() && formSections().length === 0) {
+    <mat-card class="empty-card elevation-2">
+      <mat-card-content>
+        <div class="empty-content">
+          <mat-icon class="empty-icon">description</mat-icon>
+          <h3>No Form Configuration</h3>
+          <p>No {{ formTitle() }} configuration is available.</p>
+          <div class="empty-details">
+            @if (selectedCompanyId()) {
+              <p>No configuration found for <strong>{{ selectedCompanyId() }}</strong></p>
+              <p>Try selecting the default configuration or contact your administrator.</p>
+            } @else {
+              <p>Please contact your administrator to set up a form configuration.</p>
+            }
+          </div>
+          <div class="empty-actions">
+            <button mat-raised-button color="primary" routerLink="/config-management">
+              <mat-icon>settings</mat-icon>
+              Manage Configurations
+            </button>
+            @if (selectedCompanyId()) {
+              <button mat-button (click)="onCompanySelectionChange('')">
+                <mat-icon>public</mat-icon>
+                Use Default
+              </button>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Floating Action Button for Mobile -->
+  @if (!isLoading() && !configLoadError() && formSections().length > 0) {
+    <div class="fab-container hide-desktop">
+      @if (isDirty() && enableDrafts) {
+        <button
+          mat-mini-fab
+          color="accent"
+          matTooltip="Save Draft"
+          (click)="autoSaveForm(formSections())"
+          class="save-fab">
+          <mat-icon>save</mat-icon>
+        </button>
+      }
+    </div>
+  }
+</div>

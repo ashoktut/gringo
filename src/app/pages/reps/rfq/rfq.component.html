@@ -1,11 +1,3 @@
-<!-- <app-reusable-form [fields]="[{
-  name: 'dateSubmittedField',
-  label: 'Date Submitted',
-  type: 'date',
-  required: true,
-  placeholder: 'Date Submitted'
-}]" (formSubmit)="onFormSubmit($event)"></app-reusable-form> -->
-
 <div class="page-container">
   <div class="form-header">
     <h1>
@@ -25,49 +17,93 @@
         </p>
       </div>
     }
+
+    <!-- Company Selection -->
+    @if (availableCompanies.length > 0) {
+      <mat-card class="company-selector-card">
+        <mat-card-content>
+          <div class="company-selector">
+            <mat-icon>business</mat-icon>
+            <mat-form-field appearance="outline" class="company-field">
+              <mat-label>Select Company Configuration</mat-label>
+              <mat-select
+                [value]="selectedCompanyId"
+                (selectionChange)="onCompanyChange($event.value)"
+                placeholder="Default Configuration">
+                <mat-option [value]="null">Default Configuration</mat-option>
+                @for (company of availableCompanies; track company) {
+                  <mat-option [value]="company">{{ company }}</mat-option>
+                }
+              </mat-select>
+              <mat-hint>Choose company-specific form configuration</mat-hint>
+            </mat-form-field>
+            @if (currentFormConfig) {
+              <div class="config-info">
+                <mat-chip-set>
+                  <mat-chip [disabled]="true">
+                    <mat-icon matChipAvatar>settings</mat-icon>
+                    {{ currentFormConfig.name }}
+                  </mat-chip>
+                  @if (currentFormConfig.companyId) {
+                    <mat-chip [disabled]="true" color="primary">
+                      <mat-icon matChipAvatar>business</mat-icon>
+                      {{ currentFormConfig.companyId }}
+                    </mat-chip>
+                  }
+                  @if (currentFormConfig.isDefault) {
+                    <mat-chip [disabled]="true" color="accent">
+                      <mat-icon matChipAvatar>star</mat-icon>
+                      Default
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
   </div>
 
-  <app-reusable-form
-    [sections]="rfqSections"
-    [multi]="false"
-    [formTitle]="isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
-    [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
-    [initialData]="isRepeatMode ? repeatedSubmissionData : initialFormData"
-    (formSubmit)="onFormSubmit($event)"
-    (formValueChange)="onFormValueChange($event)"
-    >
-  </app-reusable-form>
+  <!-- Loading State -->
+  @if (isLoadingConfig) {
+    <mat-card class="loading-card">
+      <mat-card-content>
+        <div class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Loading form configuration...</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
 
-  <!-- <div class="form-info">
-    <h3>Form Features:</h3>
-    <ul>
-      <li>✅ Text Input with minimum length validation</li>
-      <li>✅ Email Input with email format validation</li>
-      <li>✅ Password Input with minimum length (8 chars)</li>
-      <li>✅ Number Input with min/max age validation</li>
-      <li>✅ Telephone Input with pattern validation</li>
-      <li>✅ Date Picker with Material Design</li>
-      <li>✅ Single Select Dropdown</li>
-      <li>✅ Multiple Select Dropdown</li>
-      <li>✅ Textarea with character limit</li>
-      <li>✅ Radio Button Group</li>
-      <li>✅ Checkbox Inputs (optional & required)</li>
-      <li>✅ Real-time validation and error messages</li>
-      <li>✅ Responsive design</li>
-      <li>✅ Proper Separation of Concerns - Code organized in separate files</li>
-      <li>✅ Angular Material Design - Uses Mat Card, Buttons, Icons, Tooltips</li>
-      <li>✅ Responsive - Automatically adapts to mobile devices</li>
-      <li>✅ Touch & Mouse Support - Works on all devices</li>
-      <li>✅ Undo Functionality - Users can undo last signature stroke</li>
-      <li>✅ Form Integration - Seamlessly works with reactive forms</li>
-      <li>✅ Validation - Required field validation with custom error messages</li>
-      <li>✅ Customizable - Canvas size, colors, stroke width</li>
-      <li>✅ Clear & Undo - Users can clear signature or undo strokes</li>
-      <li>✅ Visual Feedback - Shows completion status with Material icons</li>
-      <li>✅ Base64 Output - Signature saved as base64 image</li>
-      <li>✅ Conditional Display - Can show/hide based on other form fields</li>
-      <li>✅ Accessibility - Keyboard navigation, ARIA labels, screen reader support</li>
-      <li>✅ Mobile Optimized - Adjusts canvas size and layout for mobile devices</li>
-    </ul>
-  </div> -->
+  <!-- Error State -->
+  @if (configLoadError && !isLoadingConfig) {
+    <mat-card class="error-card">
+      <mat-card-content>
+        <div class="error-container">
+          <mat-icon color="warn">error</mat-icon>
+          <h3>Configuration Error</h3>
+          <p>Unable to load form configuration. Using default configuration.</p>
+          <button mat-raised-button color="primary" (click)="loadFormConfiguration()">
+            <mat-icon>refresh</mat-icon>
+            Retry
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Form Content -->
+  @if (!isLoadingConfig && rfqSections.length > 0) {
+    <app-reusable-form
+      [sections]="rfqSections"
+      [multi]="false"
+      [formTitle]="isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
+      [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
+      [initialData]="isRepeatMode ? repeatedSubmissionData : initialFormData"
+      (formSubmit)="onFormSubmit($event)"
+      (formValueChange)="onFormValueChange($event)">
+    </app-reusable-form>
+  }
 </div>

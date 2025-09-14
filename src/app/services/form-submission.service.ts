@@ -27,6 +27,11 @@ export interface FormSubmission {
   isRepeatedSubmission?: boolean;
   originalSubmissionId?: string;
   emailStatus?: EmailStatus;
+  // Enhanced configuration tracking
+  configurationId?: string;
+  configurationName?: string;
+  companyId?: string;
+  configurationVersion?: string;
 }
 
 @Injectable({
@@ -53,6 +58,9 @@ export class FormSubmissionService {
     formData: any,
     formStructure: FormSection[]
   ): Observable<FormSubmission> {
+    // Extract configuration metadata from form data
+    const metadata = formData._metadata || {};
+
     const submission: FormSubmission = {
       submissionId: this.generateId(),
       formType,
@@ -62,8 +70,19 @@ export class FormSubmissionService {
       status: 'submitted',
       createdAt: new Date(),
       updatedAt: new Date(),
-      emailStatus: { status: 'pending' }
+      emailStatus: { status: 'pending' },
+      // Enhanced configuration tracking
+      configurationId: metadata.configurationId,
+      configurationName: metadata.configurationName,
+      companyId: metadata.companyId,
+      configurationVersion: metadata.configurationVersion
     };
+
+    console.log('📝 Creating submission with configuration metadata:', {
+      configurationId: submission.configurationId,
+      configurationName: submission.configurationName,
+      companyId: submission.companyId
+    });
 
     // Save submission first
     this.submissions.push(submission);
@@ -84,7 +103,7 @@ export class FormSubmissionService {
     });
 
     // Handle automatic email sending for RFQ submissions
-    if (formType === 'RFQ') {
+    if (formType === 'rfq' || formType === 'RFQ') {
       // Use the original formData for processing (has all data for email/PDF generation)
       // but save sanitized version to IndexedDB
       this.sendRfqEmail(submission.submissionId, formData, formStructure).subscribe({
@@ -299,6 +318,58 @@ export class FormSubmissionService {
   getSubmission(submissionId: string): Observable<FormSubmission | undefined> {
     const submission = this.submissions.find(s => s.submissionId === submissionId);
     return of(submission);
+  }
+
+  // Get submissions by company
+  getSubmissionsByCompany(companyId: string): Observable<FormSubmission[]> {
+    const companySubmissions = this.submissions.filter(s => s.companyId === companyId);
+    return of(companySubmissions);
+  }
+
+  // Get submissions by configuration
+  getSubmissionsByConfiguration(configurationId: string): Observable<FormSubmission[]> {
+    const configSubmissions = this.submissions.filter(s => s.configurationId === configurationId);
+    return of(configSubmissions);
+  }
+
+  // Get submissions by form type
+  getSubmissionsByFormType(formType: string): Observable<FormSubmission[]> {
+    const typeSubmissions = this.submissions.filter(s => s.formType === formType);
+    return of(typeSubmissions);
+  }
+
+  // Get submission statistics
+  getSubmissionStats(): Observable<any> {
+    const stats = {
+      total: this.submissions.length,
+      byFormType: {} as Record<string, number>,
+      byCompany: {} as Record<string, number>,
+      byConfiguration: {} as Record<string, number>,
+      byStatus: {} as Record<string, number>,
+      recent: this.submissions
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+        .slice(0, 5)
+    };
+
+    this.submissions.forEach(submission => {
+      // Count by form type
+      stats.byFormType[submission.formType] = (stats.byFormType[submission.formType] || 0) + 1;
+
+      // Count by company
+      if (submission.companyId) {
+        stats.byCompany[submission.companyId] = (stats.byCompany[submission.companyId] || 0) + 1;
+      }
+
+      // Count by configuration
+      if (submission.configurationId) {
+        stats.byConfiguration[submission.configurationId] = (stats.byConfiguration[submission.configurationId] || 0) + 1;
+      }
+
+      // Count by status
+      stats.byStatus[submission.status] = (stats.byStatus[submission.status] || 0) + 1;
+    });
+
+    return of(stats);
   }
 
   // Delete submission

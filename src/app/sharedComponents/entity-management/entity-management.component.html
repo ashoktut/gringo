@@ -1,0 +1,472 @@
+<div class="entity-management-container">
+  <!-- Header Section -->
+  <div class="management-header">
+    <div class="header-content">
+      <div class="header-info">
+        <mat-icon class="entity-icon">{{ config.icon }}</mat-icon>
+        <div class="header-text">
+          <h1 class="entity-title">
+            {{ title || config.entityNamePlural }}
+            @if (statistics() && Object.keys(statistics()).length > 0) {
+            <mat-chip class="total-chip" color="primary">
+              <mat-icon matChipAvatar>tag</mat-icon>
+              {{ filteredEntities().length }} of {{ entities().length }}
+            </mat-chip>
+            }
+          </h1>
+          @if (subtitle) {
+          <p class="entity-subtitle">{{ subtitle }}</p>
+          }
+        </div>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        @if (hasPermission().canCreate) {
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="onCreateEntity()"
+          [disabled]="isLoading()"
+        >
+          <mat-icon>add</mat-icon>
+          Create {{ config.entityName }}
+        </button>
+        }
+
+        <button
+          mat-icon-button
+          matTooltip="Refresh"
+          (click)="onRefresh()"
+          [disabled]="isLoading()"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
+
+        @if (enableFilters && config.filters && config.filters.length > 0) {
+        <button
+          mat-icon-button
+          matTooltip="Filters"
+          (click)="showFilterDialog.set(true)"
+          [color]="
+            Object.keys(activeFilters()).length > 0 ? 'accent' : undefined
+          "
+        >
+          <mat-icon>filter_list</mat-icon>
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  @if (showStatistics && statistics() && Object.keys(statistics()).length > 0) {
+  <div class="statistics-section">
+    <div class="statistics-grid">
+      @for (stat of Object.entries(statistics()); track stat[0]) {
+      <mat-card class="stat-card elevation-2">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-value">{{ stat[1] }}</div>
+            <div class="stat-label">{{ stat[0] | titlecase }}</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+      }
+    </div>
+  </div>
+  }
+
+  <!-- Search and Filters -->
+  @if (enableSearch || enableFilters) {
+  <mat-card class="search-card elevation-2">
+    <mat-card-content>
+      <div class="search-controls">
+        @if (enableSearch) {
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search {{ config.entityNamePlural }}</mat-label>
+          <input
+            matInput
+            placeholder="Type to search..."
+            (input)="onSearch($event.target.value || '')"
+            [value]="searchQuery()"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        } @if (activeFilters() && Object.keys(activeFilters()).length > 0) {
+        <div class="active-filters">
+          <span class="filters-label">Active Filters:</span>
+          <mat-chip-set>
+            @for (filter of Object.entries(activeFilters()); track filter[0]) {
+            @if (filter[1]) {
+            <mat-chip
+              color="accent"
+              removable
+              (removed)="clearFilter(filter[0])"
+            >
+              {{ filter[0] }}: {{ filter[1] }}
+              <mat-icon matChipRemove>cancel</mat-icon>
+            </mat-chip>
+            } }
+          </mat-chip-set>
+        </div>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+  <mat-card class="loading-card elevation-2">
+    <mat-card-content>
+      <div class="loading-content">
+        <mat-spinner diameter="40" color="primary"></mat-spinner>
+        <h3>Loading {{ config.entityNamePlural }}</h3>
+        <p>Please wait while we fetch the data...</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Error State -->
+  @if (error() && !isLoading()) {
+  <mat-card class="error-card elevation-2">
+    <mat-card-content>
+      <div class="error-content">
+        <mat-icon class="error-icon">error_outline</mat-icon>
+        <div class="error-text">
+          <h3>Error Loading Data</h3>
+          <p>{{ error() }}</p>
+        </div>
+        <div class="error-actions">
+          <button mat-raised-button color="primary" (click)="onRefresh()">
+            <mat-icon>refresh</mat-icon>
+            Try Again
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Data Table -->
+  @if (!isLoading() && !error() && filteredEntities().length > 0) {
+  <mat-card class="table-card elevation-2">
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" class="entity-table" matSort>
+          <!-- Selection Column -->
+          @if (enableBulkActions) {
+          <ng-container matColumnDef="select">
+            <th mat-header-cell *matHeaderCellDef>
+              <mat-checkbox></mat-checkbox>
+            </th>
+            <td mat-cell *matCellDef="let entity">
+              <mat-checkbox></mat-checkbox>
+            </td>
+          </ng-container>
+          }
+
+          <!-- Dynamic Columns -->
+          @for (column of config.columns; track column.key) {
+          <ng-container [matColumnDef]="column.key">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              [mat-sort-header]="column.sortable ? column.key : ''"
+              [style.width]="column.width"
+            >
+              {{ column.label }}
+            </th>
+            <td mat-cell *matCellDef="let entity" [style.width]="column.width">
+              @switch (column.type) { @case ('chip') {
+              <mat-chip color="primary">{{
+                getColumnValue(entity, column)
+              }}</mat-chip>
+              } @case ('boolean') {
+              <mat-icon [color]="entity[column.key] ? 'primary' : 'warn'">
+                {{ entity[column.key] ? "check_circle" : "cancel" }}
+              </mat-icon>
+              } @case ('custom') {
+              <!-- Custom template would go here -->
+              <span>{{ getColumnValue(entity, column) }}</span>
+              } @default {
+              <span>{{ getColumnValue(entity, column) }}</span>
+              } }
+            </td>
+          </ng-container>
+          }
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="actions-header">
+              Actions
+            </th>
+            <td mat-cell *matCellDef="let entity" class="actions-cell">
+              <div class="action-buttons">
+                @for (action of config.actions; track action.id) { @if
+                (isActionVisible(action, entity)) { @if (action.type ===
+                'button') {
+                <button
+                  mat-icon-button
+                  [color]="action.color || 'primary'"
+                  [matTooltip]="action.label"
+                  [disabled]="isActionDisabled(action, entity)"
+                  (click)="executeAction(action, entity)"
+                >
+                  <mat-icon>{{ action.icon }}</mat-icon>
+                </button>
+                } } }
+
+                <!-- Menu for additional actions -->
+                @if (hasMenuActions(entity)) {
+                <button mat-icon-button [matMenuTriggerFor]="actionMenu">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+                <mat-menu #actionMenu="matMenu">
+                  @for (action of config.actions; track action.id) { @if
+                  (action.type === 'menu-item' && isActionVisible(action,
+                  entity)) {
+                  <button
+                    mat-menu-item
+                    [disabled]="isActionDisabled(action, entity)"
+                    (click)="executeAction(action, entity)"
+                  >
+                    <mat-icon>{{ action.icon }}</mat-icon>
+                    <span>{{ action.label }}</span>
+                  </button>
+                  } }
+                </mat-menu>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns()"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+        </table>
+
+        <!-- Pagination -->
+        @if (config.pagination) {
+        <mat-paginator
+          [pageSize]="config.pagination.pageSize"
+          [pageSizeOptions]="config.pagination.pageSizeOptions"
+          [showFirstLastButtons]="
+            config.pagination.showFirstLastButtons || true
+          "
+          showFirstLastButtons
+        >
+        </mat-paginator>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && !error() && filteredEntities().length === 0) {
+  <mat-card class="empty-card elevation-2">
+    <mat-card-content>
+      <div class="empty-content">
+        <mat-icon class="empty-icon">{{ config.icon }}</mat-icon>
+        <h3>No {{ config.entityNamePlural }} Found</h3>
+        @if (searchQuery() || hasActiveFilters()) {
+        <p>
+          No {{ config.entityNamePlural.toLowerCase() }} match your current
+          search or filters.
+        </p>
+        <div class="empty-actions">
+          <button mat-button (click)="clearAllFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear Search & Filters
+          </button>
+        </div>
+        } @else {
+        <p>
+          You haven't created any
+          {{ config.entityNamePlural.toLowerCase() }} yet.
+        </p>
+        @if (hasPermission().canCreate) {
+        <div class="empty-actions">
+          <button mat-raised-button color="primary" (click)="onCreateEntity()">
+            <mat-icon>add</mat-icon>
+            Create First {{ config.entityName }}
+          </button>
+        </div>
+        } }
+      </div>
+    </mat-card-content>
+  </mat-card>
+  }
+</div>
+
+<!-- Create Dialog -->
+@if (showCreateDialog()) {
+<div class="dialog-overlay" (click)="onCancelCreate()">
+  <mat-card class="dialog-card" (click)="$event.stopPropagation()">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>{{ config.icon }}</mat-icon>
+        Create {{ config.entityName }}
+      </mat-card-title>
+      <button mat-icon-button (click)="onCancelCreate()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="createForm" class="entity-form">
+        @for (field of config.createFormFields; track field.key) {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ field.label }}</mat-label>
+          @switch (field.type) { @case ('textarea') {
+          <textarea
+            matInput
+            [formControlName]="field.key"
+            [placeholder]="field.placeholder || ''"
+            rows="3"
+          >
+          </textarea>
+          } @case ('select') {
+          <mat-select [formControlName]="field.key">
+            @for (option of field.options || []; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+          } @case ('number') {
+          <input
+            matInput
+            type="number"
+            [formControlName]="field.key"
+            [placeholder]="field.placeholder || ''"
+          />
+          } @case ('date') {
+          <input matInput type="date" [formControlName]="field.key" />
+          } @default {
+          <input
+            matInput
+            [formControlName]="field.key"
+            [placeholder]="field.placeholder || ''"
+          />
+          } } @if (field.hint) {
+          <mat-hint>{{ field.hint }}</mat-hint>
+          } @if (createForm.get(field.key)?.errors &&
+          createForm.get(field.key)?.touched) {
+          <mat-error>
+            @if (createForm.get(field.key)?.errors?.['required']) {
+            {{ field.label }} is required } @if
+            (createForm.get(field.key)?.errors?.['maxlength']) { Maximum
+            {{ field.maxLength }} characters allowed } @if
+            (createForm.get(field.key)?.errors?.['minlength']) { Minimum
+            {{ field.minLength }} characters required }
+          </mat-error>
+          }
+        </mat-form-field>
+        }
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="dialog-actions">
+      <button mat-button (click)="onCancelCreate()">Cancel</button>
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="!createForm.valid || isLoading()"
+        (click)="onSubmitCreate()"
+      >
+        @if (isLoading()) {
+        <mat-spinner diameter="16"></mat-spinner>
+        } @else {
+        <mat-icon>save</mat-icon>
+        } Create
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+}
+
+<!-- Edit Dialog -->
+@if (showEditDialog() && editingEntity()) {
+<div class="dialog-overlay" (click)="onCancelEdit()">
+  <mat-card class="dialog-card" (click)="$event.stopPropagation()">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>{{ config.icon }}</mat-icon>
+        Edit {{ editingEntity()!.name }}
+      </mat-card-title>
+      <button mat-icon-button (click)="onCancelEdit()" class="close-button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="editForm" class="entity-form">
+        @for (field of config.editFormFields; track field.key) {
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ field.label }}</mat-label>
+          @switch (field.type) { @case ('textarea') {
+          <textarea
+            matInput
+            [formControlName]="field.key"
+            [placeholder]="field.placeholder || ''"
+            rows="3"
+          >
+          </textarea>
+          } @case ('select') {
+          <mat-select [formControlName]="field.key">
+            @for (option of field.options || []; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+            }
+          </mat-select>
+          } @case ('number') {
+          <input
+            matInput
+            type="number"
+            [formControlName]="field.key"
+            [placeholder]="field.placeholder || ''"
+          />
+          } @case ('date') {
+          <input matInput type="date" [formControlName]="field.key" />
+          } @default {
+          <input
+            matInput
+            [formControlName]="field.key"
+            [placeholder]="field.placeholder || ''"
+          />
+          } } @if (field.hint) {
+          <mat-hint>{{ field.hint }}</mat-hint>
+          } @if (editForm.get(field.key)?.errors &&
+          editForm.get(field.key)?.touched) {
+          <mat-error>
+            @if (editForm.get(field.key)?.errors?.['required']) {
+            {{ field.label }} is required } @if
+            (editForm.get(field.key)?.errors?.['maxlength']) { Maximum
+            {{ field.maxLength }} characters allowed } @if
+            (editForm.get(field.key)?.errors?.['minlength']) { Minimum
+            {{ field.minLength }} characters required }
+          </mat-error>
+          }
+        </mat-form-field>
+        }
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions class="dialog-actions">
+      <button mat-button (click)="onCancelEdit()">Cancel</button>
+      <button
+        mat-raised-button
+        color="primary"
+        [disabled]="!editForm.valid || isLoading()"
+        (click)="onSubmitEdit()"
+      >
+        @if (isLoading()) {
+        <mat-spinner diameter="16"></mat-spinner>
+        } @else {
+        <mat-icon>save</mat-icon>
+        } Update
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>
+}

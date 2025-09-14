@@ -1,0 +1,437 @@
+/* Configuration Management Component Styles */
+.config-management-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: var(--background);
+  min-height: 100vh;
+}
+
+/* Header Section */
+.header-section {
+  margin-bottom: 24px;
+}
+
+.header-card {
+  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  color: white;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.3);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.title-section h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-section h1 mat-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+}
+
+.title-section p {
+  margin: 8px 0 0 0;
+  opacity: 0.9;
+  font-size: 1.1rem;
+}
+
+.action-section button {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-weight: 500;
+}
+
+.action-section button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Statistics Section */
+.stats-section {
+  margin-bottom: 32px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  border-radius: 12px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(25, 118, 210, 0.1);
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.15);
+}
+
+.stat-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-icon.primary {
+  background: rgba(25, 118, 210, 0.1);
+  color: var(--primary-color);
+}
+
+.stat-icon.accent {
+  background: rgba(3, 218, 198, 0.1);
+  color: var(--secondary-color);
+}
+
+.stat-icon.warn {
+  background: rgba(255, 152, 0, 0.1);
+  color: #ff9800;
+}
+
+.stat-info h3 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.stat-info p {
+  margin: 4px 0 0 0;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Loading State */
+.loading-card {
+  text-align: center;
+  padding: 60px 20px;
+  border-radius: 12px !important;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Table Section */
+.table-card {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(25, 118, 210, 0.1);
+  overflow: hidden;
+}
+
+.table-card mat-card-header {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.table-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--primary-color);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.table-card mat-card-subtitle {
+  color: #666;
+  font-size: 1rem;
+  margin: 8px 0 0 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.configurations-table {
+  width: 100%;
+  background: white;
+}
+
+.configurations-table th {
+  background: #fafafa;
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 16px 12px;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.configurations-table td {
+  padding: 16px 12px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.configurations-table tr:hover {
+  background-color: rgba(25, 118, 210, 0.02);
+}
+
+/* Table Cell Styles */
+.config-name-cell {
+  min-width: 200px;
+}
+
+.config-name {
+  font-weight: 600;
+  color: #333;
+  font-size: 1rem;
+  margin-bottom: 4px;
+}
+
+.config-description {
+  color: #666;
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.form-type-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.form-type-icon {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.form-type-text {
+  font-weight: 500;
+  color: #333;
+}
+
+.company-chip {
+  background: rgba(25, 118, 210, 0.1);
+  color: var(--primary-color);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.global-chip {
+  background: rgba(76, 175, 80, 0.1);
+  color: #4caf50;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.default-icon {
+  color: #ffc107;
+  font-size: 1.2rem;
+}
+
+.usage-cell {
+  text-align: center;
+  min-width: 100px;
+}
+
+.usage-count {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: var(--primary-color);
+  display: block;
+}
+
+.usage-label {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.last-used {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.actions-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 120px;
+}
+
+.actions-cell mat-slide-toggle {
+  transform: scale(0.9);
+}
+
+.delete-action {
+  color: #d32f2f;
+}
+
+.delete-action mat-icon {
+  color: #d32f2f;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: #666;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.empty-state p {
+  margin: 0 0 24px 0;
+  font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .config-management-container {
+    padding: 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .title-section h1 {
+    font-size: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .configurations-table {
+    font-size: 0.9rem;
+  }
+
+  .configurations-table th,
+  .configurations-table td {
+    padding: 12px 8px;
+  }
+
+  .config-name-cell {
+    min-width: 150px;
+  }
+
+  .form-type-cell {
+    min-width: 100px;
+  }
+
+  .actions-cell {
+    min-width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .title-section h1 {
+    font-size: 1.3rem;
+  }
+
+  .title-section p {
+    font-size: 1rem;
+  }
+
+  .stat-info h3 {
+    font-size: 1.5rem;
+  }
+
+  .configurations-table {
+    font-size: 0.8rem;
+  }
+}
+
+/* Material Design Enhancements */
+.mat-mdc-card {
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.mat-mdc-button {
+  border-radius: 8px !important;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.mat-mdc-chip {
+  border-radius: 16px;
+  font-weight: 500;
+}
+
+.mat-mdc-slide-toggle {
+  --mdc-switch-selected-track-color: var(--primary-color);
+  --mdc-switch-selected-handle-color: var(--primary-color);
+}
+
+/* Animation for table rows */
+.configurations-table tr {
+  transition: background-color 0.3s ease;
+}
+
+/* Improved focus states */
+.mat-mdc-button:focus,
+.mat-mdc-icon-button:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
