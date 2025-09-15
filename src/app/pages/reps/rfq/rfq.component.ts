@@ -449,48 +449,48 @@ export class RfqComponent implements OnInit {
 
         // ADD PICTURE FIELDS FOR DOCUMENTATION
         // Site photos
-        {
-          name: 'sitePhoto',
-          label: 'Site Photo',
-          type: 'picture',
-          required: false,
-          pictureConfig: {
-            placeholder: 'Add Site Photo',
-            maxFileSize: 10485760, // 10MB for high-quality photos
-            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-          },
-        },
+        // {
+        //   name: 'sitePhoto',
+        //   label: 'Site Photo',
+        //   type: 'picture',
+        //   required: false,
+        //   pictureConfig: {
+        //     placeholder: 'Add Site Photo',
+        //     maxFileSize: 10485760, // 10MB for high-quality photos
+        //     acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+        //   },
+        // },
 
         // Architectural drawings/plans
-        {
-          name: 'architecturalDrawing',
-          label: 'Architectural Drawing / Plan',
-          type: 'picture',
-          required: false,
-          pictureConfig: {
-            placeholder: 'Upload Drawing/Plan',
-            maxFileSize: 15728640, // 15MB for detailed drawings
-            acceptedTypes: [
-              'image/jpeg',
-              'image/png',
-              'image/webp',
-              'image/tiff',
-            ],
-          },
-        },
+        // {
+        //   name: 'architecturalDrawing',
+        //   label: 'Architectural Drawing / Plan',
+        //   type: 'picture',
+        //   required: false,
+        //   pictureConfig: {
+        //     placeholder: 'Upload Drawing/Plan',
+        //     maxFileSize: 15728640, // 15MB for detailed drawings
+        //     acceptedTypes: [
+        //       'image/jpeg',
+        //       'image/png',
+        //       'image/webp',
+        //       'image/tiff',
+        //     ],
+        //   },
+        // },
 
         // Reference photo
-        {
-          name: 'referencePhoto',
-          label: 'Reference Photo (Optional)',
-          type: 'picture',
-          required: false,
-          pictureConfig: {
-            placeholder: 'Add Reference Photo',
-            maxFileSize: 5242880, // 5MB
-            acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-          },
-        },
+        // {
+        //   name: 'referencePhoto',
+        //   label: 'Reference Photo (Optional)',
+        //   type: 'picture',
+        //   required: false,
+        //   pictureConfig: {
+        //     placeholder: 'Add Reference Photo',
+        //     maxFileSize: 5242880, // 5MB
+        //     acceptedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+        //   },
+        // },
 
         // Ceiling type field
         {
@@ -498,6 +498,7 @@ export class RfqComponent implements OnInit {
           label: 'Ceiling Type',
           type: 'select',
           required: true,
+          clearable: true,
           options: [
             {
               value: 'Standard Fixed Ceiling',
@@ -765,61 +766,61 @@ export class RfqComponent implements OnInit {
         //////////
 
         // building type field
-        {
-          name: 'buildingType',
-          label: 'Building Type',
-          type: 'select',
-          required: false,
-          clearable: true,
-          options: [
-            { value: 'Residential', label: 'Residential' },
-            { value: 'Commercial', label: 'Commercial' },
-            { value: 'Addition less than 80m²', label: 'Addition less than 80m²' },
-            { value: 'Addition more than 80m²', label: 'Addition more than 80m²' },
-            { value: 'Direct Match', label: 'Direct Match' },
-            { value: 'Public Building', label: 'Public Building' },
-            { value: 'Other', label: 'Other Building Type' },
-          ],
-        },
+        // {
+        //   name: 'buildingType',
+        //   label: 'Building Type',
+        //   type: 'select',
+        //   required: false,
+        //   clearable: true,
+        //   options: [
+        //     { value: 'Residential', label: 'Residential' },
+        //     { value: 'Commercial', label: 'Commercial' },
+        //     { value: 'Addition less than 80m²', label: 'Addition less than 80m²' },
+        //     { value: 'Addition more than 80m²', label: 'Addition more than 80m²' },
+        //     { value: 'Direct Match', label: 'Direct Match' },
+        //     { value: 'Public Building', label: 'Public Building' },
+        //     { value: 'Other', label: 'Other Building Type' },
+        //   ],
+        // },
 
         // ADD CONDITIONAL FIELD FOR OTHER building type
-        {
-          name: 'otherBuild',
-          label: 'Other Building Type',
-          type: 'text',
-          required: true,
-          clearable: true,
-          placeholder: 'Other Building Type',
-          conditional: {
-            dependsOn: 'buildingType',
-            showWhen: 'Other',
-          },
-        },
+        // {
+        //   name: 'otherBuild',
+        //   label: 'Other Building Type',
+        //   type: 'text',
+        //   required: true,
+        //   clearable: true,
+        //   placeholder: 'Other Building Type',
+        //   conditional: {
+        //     dependsOn: 'buildingType',
+        //     showWhen: 'Other',
+        //   },
+        // },
 
         // municipality field
-        {
-          name: 'municipality',
-          label: 'Municipality',
-          type: 'text',
-          required: false,
-          clearable: true,
-        },
+        // {
+        //   name: 'municipality',
+        //   label: 'Municipality',
+        //   type: 'text',
+        //   required: false,
+        //   clearable: true,
+        // },
 
         // Maps field:
-        {
-          name: 'projectLocation',
-          label: 'Project Location (Click to Select)',
-          type: 'map',
-          required: true,
-          mapConfig: {
-            defaultCenter: [28.0473, -26.2041], // Johannesburg
-            zoom: 10,
-            height: '450px',
-            enableGeocoding: true,
-            enableLocationPicker: true,
-            style: 'liberty',
-          },
-        },
+        // {
+        //   name: 'projectLocation',
+        //   label: 'Project Location (Click to Select)',
+        //   type: 'map',
+        //   required: true,
+        //   mapConfig: {
+        //     defaultCenter: [28.0473, -26.2041], // Johannesburg
+        //     zoom: 10,
+        //     height: '450px',
+        //     enableGeocoding: true,
+        //     enableLocationPicker: true,
+        //     style: 'liberty',
+        //   },
+        // },
       ],
     },
 
@@ -1774,16 +1775,9 @@ export class RfqComponent implements OnInit {
         const nestedFields = this.extractAllFormFields(value, fieldKey);
         Object.assign(fields, nestedFields);
       } else {
-        // Format dateSubmitted and dateDue as DD-MM-YYYY
-        if ((key === 'dateSubmitted' || key === 'dateDue') && typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-          const [year, month, day] = value.split('-');
-          const formatted = `${day}-${month}-${year}`;
-          fields[fieldKey] = formatted;
-          fields[key] = formatted;
-        } else {
-          fields[fieldKey] = value;
-          fields[key] = value; // Also store without prefix for simple access
-        }
+        // Store primitive values, arrays, or dates
+        fields[fieldKey] = value;
+        fields[key] = value; // Also store without prefix for simple access
       }
     });
 
@@ -1894,10 +1888,6 @@ export class RfqComponent implements OnInit {
           </style>
         </head>
         <body>
-          <div class="header">
-            <h1>${formType.toUpperCase()} Document</h1>
-            <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
-          </div>
 
           ${content}
 
