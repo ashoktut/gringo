@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Request for Quote - LCP Roofing</title>
+  </head>
+  <body style="margin:0;padding:20px;font-family:Arial,sans-serif;font-size:12px;line-height:1.4;color:#333;">
+    <div style="max-width:800px;margin:0 auto;">
+      <!-- Header -->
+      <div style="text-align:center;padding:10px 0;border-bottom:3px solid #1976d2;margin-bottom:20px;">
+        <h1 style="color:#1976d2;margin:0;font-size:24px;">LCP ROOFING</h1>
+        <h2 style="color:#333;margin:5px 0 0 0;font-size:18px;">Request for Quote: ROOF TRUSSES and COVERINGS</h2>
+      </div>
+
+      <!-- Meta Information -->
+      <div style="background:#e3f2fd;padding:10px;margin-bottom:15px;border-radius:5px;">
+        <strong>Submitted by:</strong> {{repName}} |
+        <strong>Timestamp:</strong> {{createdAt}} |
+        <strong>ID:</strong> {{submissionId}}
+      </div>
+
+      <!-- Office Use -->
+      <div style="background:#fff3e0;padding:8px;margin-bottom:15px;text-align:center;color:#d84315;border-radius:5px;">
+        <strong>Office use:</strong> Emailed ☐
+      </div>
+
+      <!-- Quick Meta Table -->
+      <table style="width:100%;border-collapse:collapse;margin-bottom:20px;background:#f5f5f5;">
+        <tr>
+          <td style="padding:8px;border:1px solid #ddd;"><strong>Drawn on:</strong> {{drawnOn}}</td>
+          <td style="padding:8px;border:1px solid #ddd;"><strong>Drawn By:</strong> {{drawnBy}}</td>
+          <td style="padding:8px;border:1px solid #ddd;"><strong>Customer no:</strong> {{customerNo}}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;border:1px solid #ddd;"><strong>Quoted on:</strong> {{quotedOn}}</td>
+          <td style="padding:8px;border:1px solid #ddd;"><strong>Estimator:</strong> {{estimator}}</td>
+          <td style="padding:8px;border:1px solid #ddd;"><strong>Quote no:</strong> {{quoteNo}}</td>
+        </tr>
+        <tr>
+          <td style="padding:8px;border:1px solid #ddd;" colspan="3"><strong>Rate check:</strong> {{rateCheck}}</td>
+        </tr>
+      </table>
+
+      <!-- RFQ Details -->
+      <div style="background:#fff;padding:15px;border:1px solid #ddd;margin-bottom:15px;border-radius:5px;">
+        <h3 style="color:#1976d2;margin:0 0 10px 0;">RFQ Details</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:5px;width:50%;"><strong>Date requested:</strong> {{dateSubmitted}}</td>
+            <td style="padding:5px;"><strong>Requested by:</strong> {{repName}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Date required:</strong> {{dateDue}}</td>
+            <td style="padding:5px;"><strong>ABK:</strong> {{abk}}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- PROJECT INFORMATION -->
+      <div style="background:#f0f7ff;padding:15px;border:1px solid #ddd;margin-bottom:15px;border-radius:5px;">
+        <h3 style="color:#1976d2;margin:0 0 10px 0;">PROJECT INFORMATION</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:5px;width:50%;"><strong>Address:</strong> {{standNum}}</td>
+            <td style="padding:5px;"><strong>Company:</strong> {{companyName}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Client Name:</strong> {{clientName}}</td>
+            <td style="padding:5px;"><strong>Email:</strong> {{clientEmail}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Contact No:</strong> {{clientPhone}}</td>
+            <td style="padding:5px;"><strong>Building Type:</strong> {{buildingType}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Municipality:</strong> {{municipality}}</td>
+            <td style="padding:5px;"><strong>Timeline:</strong> {{roofTimeline}}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- PROJECT DESIGN INFORMATION -->
+      <div style="background:#f8fafd;padding:15px;border:1px solid #ddd;margin-bottom:15px;border-radius:5px;">
+        <h3 style="color:#1976d2;margin:0 0 10px 0;">PROJECT DESIGN INFORMATION</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:5px;width:50%;"><strong>Gate Access:</strong> {{gateAccess}}</td>
+            <td style="padding:5px;"><strong>Structure Type:</strong> {{structureType}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Max Truss Spacing:</strong> {{maxTrussSpacing}}</td>
+            <td style="padding:5px;"><strong>Main Pitch:</strong> {{mainPitch}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Service Type:</strong> {{serviceType}}</td>
+            <td style="padding:5px;"><strong>Membrane Type:</strong> {{membraneType}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Ceiling Type:</strong> {{ceilingType}}</td>
+            <td style="padding:5px;"><strong>Solar Load:</strong> {{solarLoad}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Geyser Load:</strong> {{geyserLoad}}</td>
+            <td style="padding:5px;"><strong>Exposed Truss:</strong> {{exposedTruss}}</td>
+          </tr>
+        </table>
+        <div style="margin-top:10px;">
+          <strong>Truss Notes:</strong><br>
+          {{trussNotes}}
+        </div>
+      </div>
+
+      <!-- ROOF COVERING INFORMATION -->
+      <div style="background:#fafcf5;padding:15px;border:1px solid #ddd;margin-bottom:15px;border-radius:5px;">
+        <h3 style="color:#1976d2;margin:0 0 10px 0;">ROOF COVERING INFORMATION</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:5px;width:50%;"><strong>Quote Cover:</strong> {{coverReq}}</td>
+            <td style="padding:5px;"><strong>Covering Type:</strong> {{coverType}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Tile Profile:</strong> {{tileProfile}}</td>
+            <td style="padding:5px;"><strong>Tile Colour:</strong> {{tileColour}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Sheet Profile:</strong> {{sheetProfile}}</td>
+            <td style="padding:5px;"><strong>Sheet Colour:</strong> {{sheetColour}}</td>
+          </tr>
+        </table>
+        <div style="margin-top:10px;">
+          <strong>Cover Notes:</strong><br>
+          {{coverNotes}}
+        </div>
+      </div>
+
+      <!-- DRAWING DETAILS -->
+      <div style="background:#f9f6fa;padding:15px;border:1px solid #ddd;margin-bottom:15px;border-radius:5px;">
+        <h3 style="color:#1976d2;margin:0 0 10px 0;">DRAWING DETAILS & REVISIONS</h3>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:5px;width:50%;"><strong>Drawing 1:</strong> {{drawings1}} {{dwg1No}}</td>
+            <td style="padding:5px;"><strong>Drawing 2:</strong> {{drawings2}} {{dwg2No}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;"><strong>Drawing 3:</strong> {{drawings3}} {{dwg3No}}</td>
+            <td style="padding:5px;"><strong>Drawing 4:</strong> {{drawings4}} {{dwg4No}}</td>
+          </tr>
+          <tr>
+            <td style="padding:5px;" colspan="2"><strong>Drawing 5:</strong> {{drawings5}} {{dwg5No}}</td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- GENERAL NOTES -->
+      <div style="background:#f8f9ff;padding:15px;border:1px solid #ddd;margin-bottom:15px;border-radius:5px;">
+        <h3 style="color:#1976d2;margin:0 0 10px 0;">GENERAL NOTES</h3>
+
+        <div style="background:#fff3cd;padding:10px;margin-bottom:10px;border-radius:3px;">
+          <strong>Additional notes:</strong> {{generalNotes}}
+        </div>
+
+        <div style="background:#ffffff;padding:12px;border-left:4px solid #ff5722;margin-bottom:10px;">
+          <h4 style="color:#1976d2;margin:0 0 8px 0;">IMPORTANT INFORMATION</h4>
+          <p style="margin:0;"><strong style="color:#ff5722;">Notes for consideration when requesting a quote:</strong></p>
+        </div>
+
+        <div style="background:#ffffff;padding:10px;border-left:3px solid #4caf50;margin-bottom:8px;">
+          <h5 style="color:#4caf50;margin:0 0 5px 0;">Manufacturing & Delivery</h5>
+          <p style="margin:0;font-size:11px;">
+            1. Manufacture & delivery dates depend on workload at deposit payment<br>
+            2. Material availability affects manufacturing timing<br>
+            3. Laminated beams can take 3-4 weeks to procure
+          </p>
+        </div>
+
+        <div style="background:#ffffff;padding:10px;border-left:3px solid #ff9800;margin-bottom:8px;">
+          <h5 style="color:#ff9800;margin:0 0 5px 0;">Contract Requirements</h5>
+          <p style="margin:0;font-size:11px;">
+            4. No manufacture until deposit paid and terms signed<br>
+            5. Final design only done when terms signed and deposit paid<br>
+            6. Design changes delay manufacture and erection
+          </p>
+        </div>
+
+        <div style="background:#ffffff;padding:10px;border-left:3px solid #607d8b;">
+          <h5 style="color:#607d8b;margin:0 0 5px 0;">Service Guarantee</h5>
+          <p style="margin:0;font-size:11px;">
+            7. LCP guarantees quoted price for complete service<br>
+            8. Material shortages charged if LCP doesn't do erection<br>
+            9. No refunds for excess materials left on site
+          </p>
+        </div>
+      </div>
+
+      <!-- SIGNATURE SECTION -->
+      <div style="background:#fff;padding:20px;border:1px solid #ddd;margin-bottom:15px;border-radius:5px;">
+        <h4 style="color:#1976d2;margin:0 0 15px 0;">Client Approval</h4>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="padding:10px;width:40%;"><strong>Client Signature:</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #333;width:30%;"></td>
+            <td style="padding:10px;width:15%;"><strong>Date:</strong></td>
+            <td style="padding:10px;border-bottom:1px solid #333;width:15%;"></td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- FOOTER -->
+      <div style="text-align:center;margin-top:20px;padding-top:10px;border-top:1px solid #ddd;color:#666;font-size:11px;">
+        <p>LCP Roofing - Professional Roofing Solutions</p>
+        <p>This document was automatically generated on {{createdAt}}</p>
+      </div>
+    </div>
+  </body>
+</html>

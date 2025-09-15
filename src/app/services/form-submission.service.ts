@@ -1,9 +1,10 @@
 import { Injectable, Inject } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { switchMap, catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { switchMap, catchError, tap, map } from 'rxjs/operators';
 import { FormSection } from '../sharedComponents/reusable-form/reusable-form.component';
 import { TemplateManagementService } from './template-management.service';
 import { DocxProcessingService } from './docx-processing.service';
+import { IndexedDbService } from './indexed-db.service';
 
 import { EmailService } from './email.service';
 
@@ -38,9 +39,10 @@ export class FormSubmissionService {
   constructor(
     private templateService: TemplateManagementService,
     private emailService: EmailService,
-    private docxService: DocxProcessingService
+    private docxService: DocxProcessingService,
+    private indexedDbService: IndexedDbService
   ) {
-    // Load from localStorage on service initialization
+    // Load from IndexedDB on service initialization
     this.loadSubmissionsFromStorage();
   }
 
@@ -55,8 +57,8 @@ export class FormSubmissionService {
       submissionId: this.generateId(),
       formType,
       formTitle,
-      formData,
-      formStructure,
+      formData: this.sanitizeForStorage(formData),
+      formStructure: this.sanitizeFormStructure(formStructure),
       status: 'submitted',
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -65,11 +67,26 @@ export class FormSubmissionService {
 
     // Save submission first
     this.submissions.push(submission);
-    this.saveSubmissionsToStorage();
-    this.submissionsSubject.next([...this.submissions]);
+    this.saveSubmissionsToStorage().subscribe({
+      next: () => {
+        this.submissionsSubject.next([...this.submissions]);
+        console.log('✅ Submission saved to IndexedDB:', submission.submissionId);
+      },
+      error: (error) => {
+        console.error('❌ Failed to save submission to IndexedDB:', error);
+        // Remove from memory if save failed
+        const index = this.submissions.findIndex(s => s.submissionId === submission.submissionId);
+        if (index > -1) {
+          this.submissions.splice(index, 1);
+        }
+        throw error;
+      }
+    });
 
     // Handle automatic email sending for RFQ submissions
     if (formType === 'RFQ') {
+      // Use the original formData for processing (has all data for email/PDF generation)
+      // but save sanitized version to IndexedDB
       this.sendRfqEmail(submission.submissionId, formData, formStructure).subscribe({
         next: (emailResult) => {
           submission.emailStatus = emailResult;
@@ -85,6 +102,7 @@ export class FormSubmissionService {
       });
 
       // ✅ Enhanced RFQ processing with PDF generation and distribution
+      // Use original formData for processing
       this.processRfqWithDocx(formData).subscribe({
         next: (result: any) => {
           console.log('📄 RFQ processed successfully:', {
@@ -202,6 +220,15 @@ export class FormSubmissionService {
         const template = templates[0]; // Use first available template
         console.log('📋 Using RFQ template:', template.name);
 
+        // Check if this is an HTML template or a DOCX template
+        if (template.name.includes('.html') || template.type === 'html') {
+          console.log('🌐 HTML template detected, skipping DOCX processing');
+          return of({
+            pdfBlob: null,
+            emailStatus: { sent: false, recipients: [], note: 'HTML template used - PDF generation handled elsewhere' }
+          });
+        }
+
         // Extract recipients
         const recipients = this.extractCcMailAddresses(formData);
         const clientEmail = formData['clientEmail'];
@@ -236,9 +263,30 @@ export class FormSubmissionService {
   private updateSubmission(updatedSubmission: FormSubmission): void {
     const index = this.submissions.findIndex(s => s.submissionId === updatedSubmission.submissionId);
     if (index !== -1) {
+      updatedSubmission.updatedAt = new Date();
+
+      // Sanitize data before saving to IndexedDB
+      const sanitizedSubmission = {
+        ...updatedSubmission,
+        formData: this.sanitizeForStorage(updatedSubmission.formData),
+        formStructure: this.sanitizeFormStructure(updatedSubmission.formStructure)
+      };
+
       this.submissions[index] = updatedSubmission;
-      this.saveSubmissionsToStorage();
-      this.submissionsSubject.next([...this.submissions]);
+
+      this.indexedDbService.save(
+        this.indexedDbService.STORES.SUBMISSIONS,
+        sanitizedSubmission.submissionId,
+        sanitizedSubmission
+      ).subscribe({
+        next: () => {
+          this.submissionsSubject.next([...this.submissions]);
+          console.log('✅ Submission updated in IndexedDB:', updatedSubmission.submissionId);
+        },
+        error: (error) => {
+          console.error('❌ Failed to update submission in IndexedDB:', error);
+        }
+      });
     }
   }
 
@@ -258,9 +306,16 @@ export class FormSubmissionService {
     const index = this.submissions.findIndex(s => s.submissionId === submissionId);
     if (index > -1) {
       this.submissions.splice(index, 1);
-      this.saveSubmissionsToStorage();
-      this.submissionsSubject.next([...this.submissions]);
-      return of(true);
+      return this.indexedDbService.delete(this.indexedDbService.STORES.SUBMISSIONS, submissionId).pipe(
+        tap(() => {
+          this.submissionsSubject.next([...this.submissions]);
+          console.log('✅ Submission deleted from IndexedDB:', submissionId);
+        }),
+        catchError(error => {
+          console.error('❌ Failed to delete submission from IndexedDB:', error);
+          return of(false);
+        })
+      );
     }
     return of(false);
   }
@@ -283,19 +338,135 @@ export class FormSubmissionService {
     return [];
   }
 
-  private saveSubmissionsToStorage(): void {
-    localStorage.setItem('gringo_submissions', JSON.stringify(this.submissions));
+  private saveSubmissionsToStorage(): Observable<void> {
+    const itemsToSave = this.submissions.map(submission => ({
+      id: submission.submissionId,
+      data: {
+        ...submission,
+        formData: this.sanitizeForStorage(submission.formData),
+        formStructure: this.sanitizeFormStructure(submission.formStructure)
+      }
+    }));
+
+    return this.indexedDbService.saveAll(this.indexedDbService.STORES.SUBMISSIONS, itemsToSave).pipe(
+      map(() => void 0),
+      catchError(error => {
+        console.error('❌ Failed to save submissions to IndexedDB:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Sanitize data to remove non-serializable properties (functions, etc.) before IndexedDB storage
+   */
+  private sanitizeForStorage(data: any): any {
+    if (!data) return data;
+
+    // Convert to JSON and back to remove functions and non-serializable data
+    try {
+      return JSON.parse(JSON.stringify(data));
+    } catch (error) {
+      console.warn('⚠️ Failed to sanitize data, using fallback sanitization:', error);
+      return this.deepSanitize(data);
+    }
+  }
+
+  /**
+   * Deep sanitize form structure to remove validator functions
+   */
+  private sanitizeFormStructure(formStructure: FormSection[]): FormSection[] {
+    if (!formStructure) return [];
+
+    return formStructure.map(section => ({
+      ...section,
+      fields: section.fields?.map(field => {
+        const sanitizedField: any = { ...field };
+
+        // Remove validator functions
+        if (sanitizedField.validators) {
+          delete sanitizedField.validators;
+        }
+
+        // Remove any other function properties
+        Object.keys(sanitizedField).forEach(key => {
+          if (typeof (sanitizedField as any)[key] === 'function') {
+            delete (sanitizedField as any)[key];
+          }
+        });
+
+        return sanitizedField;
+      }) || []
+    }));
+  }
+
+  /**
+   * Fallback deep sanitization for complex objects
+   */
+  private deepSanitize(obj: any): any {
+    if (obj === null || obj === undefined) {
+      return obj;
+    }
+
+    if (typeof obj === 'function') {
+      return undefined; // Remove functions
+    }
+
+    if (obj instanceof Date) {
+      return obj; // Keep dates as-is
+    }
+
+    if (Array.isArray(obj)) {
+      return obj.map(item => this.deepSanitize(item)).filter(item => item !== undefined);
+    }
+
+    if (typeof obj === 'object') {
+      const sanitized: any = {};
+      for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+          const sanitizedValue = this.deepSanitize(obj[key]);
+          if (sanitizedValue !== undefined) {
+            sanitized[key] = sanitizedValue;
+          }
+        }
+      }
+      return sanitized;
+    }
+
+    return obj; // Primitive values
   }
 
   private loadSubmissionsFromStorage(): void {
-    const stored = localStorage.getItem('gringo_submissions');
-    if (stored) {
-      this.submissions = JSON.parse(stored).map((s: any) => ({
-        ...s,
-        createdAt: new Date(s.createdAt),
-        updatedAt: new Date(s.updatedAt)
-      }));
-      this.submissionsSubject.next([...this.submissions]);
-    }
+    // First try to migrate any existing localStorage data
+    this.indexedDbService.migrateFromLocalStorage('gringo_submissions', this.indexedDbService.STORES.SUBMISSIONS).subscribe({
+      next: () => {
+        // After migration (or if no migration needed), load from IndexedDB
+        this.loadFromIndexedDB();
+      },
+      error: (error) => {
+        console.error('❌ Migration failed, loading from IndexedDB anyway:', error);
+        this.loadFromIndexedDB();
+      }
+    });
+  }
+
+  private loadFromIndexedDB(): void {
+    this.indexedDbService.getAll<FormSubmission>(this.indexedDbService.STORES.SUBMISSIONS).subscribe({
+      next: (items) => {
+        this.submissions = items.map(item => ({
+          ...item.data,
+          createdAt: new Date(item.data.createdAt),
+          updatedAt: new Date(item.data.updatedAt)
+        }));
+        this.submissionsSubject.next([...this.submissions]);
+        console.log('✅ Loaded submissions from IndexedDB:', this.submissions.length);
+      },
+      error: (error) => {
+        console.error('❌ Failed to load submissions from IndexedDB:', error);
+        // Fallback: keep empty array
+        this.submissions = [];
+        this.submissionsSubject.next([]);
+      }
+    });
   }
 }

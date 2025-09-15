@@ -92,4 +92,36 @@
       </mat-card-actions>
     </mat-card>
   </div>
+
+  <!-- PDF Testing Section -->
+  <div class="testing-section">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>picture_as_pdf</mat-icon>
+          Enhanced PDF Testing
+        </mat-card-title>
+        <mat-card-subtitle>
+          Test the new enhanced RFQ PDF template with sample data
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>Generate a sample enhanced RFQ PDF to test the new professional template with branding, trust signals, and improved layout.</p>
+      </mat-card-content>
+      <mat-card-actions align="end">
+        <button mat-raised-button color="primary" (click)="testEnhancedPDF()">
+          <mat-icon>download</mat-icon>
+          Generate Test PDF
+        </button>
+        <button mat-button color="accent" (click)="debugTemplate()">
+          <mat-icon>bug_report</mat-icon>
+          Debug Template
+        </button>
+        <button mat-button color="warn" (click)="testSimplePDF()">
+          <mat-icon>science</mat-icon>
+          Simple PDF Test
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
 </div>

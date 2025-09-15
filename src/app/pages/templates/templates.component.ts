@@ -62,7 +62,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </div>
         </div>
       </div>
-    
+
       <!-- Upload Section -->
       <mat-card class="upload-section">
         <mat-card-header>
@@ -82,7 +82,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </app-document-template>
         </mat-card-content>
       </mat-card>
-    
+
       <!-- Templates Management -->
       <div class="templates-management">
         <mat-card>
@@ -96,7 +96,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
               {{ currentFormType ? 'for ' + currentFormType.toUpperCase() : 'across all form types' }}
             </mat-card-subtitle>
           </mat-card-header>
-    
+
           <!-- Form Type Tabs -->
           @if (!currentFormType) {
             <mat-tab-group
@@ -145,7 +145,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
               }
             </mat-tab-group>
           }
-    
+
           <!-- Single Form Type View -->
           @if (currentFormType) {
             <div class="single-form-view">
@@ -168,7 +168,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           }
         </mat-card>
       </div>
-    
+
       <!-- Quick Actions -->
       @if (availableFormTypes.length > 0) {
         <mat-card class="quick-actions">
@@ -194,7 +194,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </mat-card-content>
         </mat-card>
       }
-    
+
       <!-- Template Instructions -->
       <mat-card class="instructions-card">
         <mat-card-header>
@@ -214,7 +214,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
                 <p>Use Word or Google Docs to create your template with placeholders like <code>{{ '{' }}{{ '{' }}clientName{{ '}' }}{{ '}' }}</code></p>
               </div>
             </div>
-    
+
             <div class="instruction-item">
               <div class="instruction-icon">
                 <mat-icon>upload</mat-icon>
@@ -224,7 +224,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
                 <p>Upload your document and specify which form type it's designed for</p>
               </div>
             </div>
-    
+
             <div class="instruction-item">
               <div class="instruction-icon">
                 <mat-icon>preview</mat-icon>
@@ -238,7 +238,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
         </mat-card-content>
       </mat-card>
     </div>
-    
+
     <!-- Template Card Template -->
     <ng-template #templateCardTemplate let-template="template">
       <mat-card class="template-item">
@@ -254,7 +254,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
             <span class="upload-date">{{ template.uploadedAt | date:'short' }}</span>
           </mat-card-subtitle>
         </mat-card-header>
-    
+
         <mat-card-content>
           <div class="template-details">
             <div class="detail-row">
@@ -272,7 +272,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
               </div>
             }
           </div>
-    
+
           @if (template.placeholders.length > 0) {
             <div class="placeholders-preview">
               <mat-chip-set>
@@ -292,7 +292,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
             </div>
           }
         </mat-card-content>
-    
+
         <mat-card-actions>
           <button mat-button
             color="primary"
@@ -301,13 +301,13 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
             <mat-icon>preview</mat-icon>
             Test
           </button>
-    
+
           <button mat-button
             [matMenuTriggerFor]="templateMenu"
             matTooltip="More actions">
             <mat-icon>more_vert</mat-icon>
           </button>
-    
+
           <mat-menu #templateMenu="matMenu">
             <button mat-menu-item (click)="cloneTemplate(template)">
               <mat-icon>content_copy</mat-icon>
@@ -601,7 +601,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
 })
 export class TemplatesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   currentFormType: TemplateType | '' = '';
   allTemplates: Template[] = [];
   filteredTemplates: Template[] = [];
@@ -626,8 +626,8 @@ export class TemplatesComponent implements OnInit, OnDestroy {
       takeUntil(this.destroy$)
     ).subscribe(params => {
       const formTypeParam = params.get('formType');
-      this.currentFormType = (formTypeParam && ['rfq', 'rqr', 'invoice', 'quote', 'report'].includes(formTypeParam)) 
-        ? formTypeParam as TemplateType 
+      this.currentFormType = (formTypeParam && ['rfq', 'rqr', 'invoice', 'quote', 'report'].includes(formTypeParam))
+        ? formTypeParam as TemplateType
         : '';
       this.loadTemplates();
     });
@@ -683,7 +683,7 @@ export class TemplatesComponent implements OnInit, OnDestroy {
   }
 
   getTemplatesForFormType(formType: TemplateType): Template[] {
-    return this.allTemplates.filter(template => 
+    return this.allTemplates.filter(template =>
       template.formType === formType || template.isUniversal
     );
   }

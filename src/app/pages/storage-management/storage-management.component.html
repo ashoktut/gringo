@@ -1,0 +1,62 @@
+<div class="storage-management-page">
+  <div class="page-header">
+    <mat-card class="header-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>settings</mat-icon>
+          Storage Management
+        </mat-card-title>
+        <mat-card-subtitle>
+          Monitor and manage your application's data storage. This page provides comprehensive tools for managing localStorage and IndexedDB data.
+        </mat-card-subtitle>
+      </mat-card-header>
+    </mat-card>
+  </div>
+
+  <!-- Storage Dashboard Component -->
+  <app-storage-dashboard></app-storage-dashboard>
+
+  <!-- Additional Information -->
+  <mat-card class="info-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>info</mat-icon>
+        About Storage Migration
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="info-grid">
+        <div class="info-section">
+          <h4>Why IndexedDB?</h4>
+          <ul>
+            <li>Much larger storage capacity (hundreds of MBs vs 5-10MB)</li>
+            <li>Better performance for large datasets</li>
+            <li>Asynchronous operations don't block the UI</li>
+            <li>Supports complex data types and binary data</li>
+            <li>Transactional operations prevent data corruption</li>
+          </ul>
+        </div>
+
+        <div class="info-section">
+          <h4>Migration Process</h4>
+          <ul>
+            <li>Data is automatically migrated when services start</li>
+            <li>Original localStorage data is preserved during migration</li>
+            <li>You can manually clear localStorage after successful migration</li>
+            <li>All existing functionality continues to work seamlessly</li>
+          </ul>
+        </div>
+
+        <div class="info-section">
+          <h4>Browser Support</h4>
+          <ul>
+            <li>Supported in all modern browsers (Chrome, Firefox, Safari, Edge)</li>
+            <li>Graceful fallback to localStorage if IndexedDB fails</li>
+            <li>Data persists between browser sessions</li>
+            <li>Not affected by private/incognito browsing limitations</li>
+          </ul>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

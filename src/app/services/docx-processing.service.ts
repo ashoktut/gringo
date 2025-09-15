@@ -8,6 +8,7 @@ import {
   ImageProcessingOptions,
 } from '../models/template.models';
 import { HttpClient } from '@angular/common/http';
+import { PdfAssemblerService } from './pdf-assembler.service';
 
 // Import pizzip and docxtemplater properly for bundling
 import * as mammoth from 'mammoth';
@@ -29,7 +30,10 @@ export interface RfqProcessingResult {
   providedIn: 'root',
 })
 export class DocxProcessingService {
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private pdfAssemblerService: PdfAssemblerService
+  ) {}
 
   /**
    * Complete RFQ processing pipeline:
@@ -122,10 +126,12 @@ export class DocxProcessingService {
       switchMap(async (arrayBuffer) => {
         // 1. Convert DOCX to HTML with mammoth
         const { value: html } = await mammoth.convertToHtml({ arrayBuffer });
-        // 2. Interpolate placeholders in HTML
-        const interpolatedHtml = this.interpolateHtmlPlaceholders(html, formData);
-        // 3. Convert HTML to PDF using html2pdf.js
-        const pdfBlob = await this.htmlToPdfBlob(interpolatedHtml);
+
+        // 2. Use professional PDF template with styling
+        const styledHtml = await this.pdfAssemblerService.assemblePdfHtml(html, formData);
+
+        // 3. Convert styled HTML to PDF using html2pdf.js
+        const pdfBlob = await this.htmlToPdfBlob(styledHtml);
         return pdfBlob;
       })
     );
@@ -141,17 +147,55 @@ export class DocxProcessingService {
   }
 
   /**
-   * Convert HTML string to PDF Blob using html2pdf.js
+   * Convert HTML string to PDF Blob using html2pdf.js with enhanced options
    */
   private async htmlToPdfBlob(html: string): Promise<Blob> {
     return new Promise((resolve, reject) => {
       const element = document.createElement('div');
       element.innerHTML = html;
+
+      // Enhanced html2pdf options for better styling support
+      const options = {
+        margin: [10, 10, 10, 10], // Top, Right, Bottom, Left margins in mm
+        filename: 'rfq-document.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2, // Higher quality
+          useCORS: true,
+          allowTaint: true,
+          letterRendering: true,
+          backgroundColor: '#ffffff',
+          logging: true, // Enable logging for debugging
+          width: 800,
+          height: 1200
+        },
+        jsPDF: {
+          unit: 'mm',
+          format: 'a4',
+          orientation: 'portrait',
+          compress: true,
+          precision: 2
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] },
+        enableLinks: false,
+        debug: true
+      };
+
+      console.log('🖨️ Generating PDF with enhanced options...');
+      console.log('📏 HTML content length:', element.innerHTML.length);
+
       html2pdf()
         .from(element)
+        .set(options)
         .outputPdf('blob')
-        .then((blob: Blob) => resolve(blob))
-        .catch(reject);
+        .then((blob: Blob) => {
+          console.log('✅ PDF generated successfully, size:', blob.size, 'bytes');
+          resolve(blob);
+        })
+        .catch((error) => {
+          console.error('❌ PDF generation failed:', error);
+          reject(error);
+        });
     });
   }
 
@@ -210,7 +254,7 @@ export class DocxProcessingService {
         }
       }
 
-      if (template.originalFile) {
+      if (template.originalFile && template.originalFile instanceof Blob) {
         const reader = new FileReader();
         reader.onload = () => {
           const arrayBuffer = reader.result as ArrayBuffer;

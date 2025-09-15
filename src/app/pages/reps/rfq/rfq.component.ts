@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { MatButtonModule } from '@angular/material/button';
 import { DocxProcessingService } from '../../../services/docx-processing.service';
+import { PdfTemplateService } from '../../../services/pdf-template.service';
 import { TemplateManagementService } from '../../../services/template-management.service';
 
 @Component({
@@ -30,12 +31,16 @@ export class RfqComponent implements OnInit {
   originalSubmissionId: string | null = null;
   repeatedSubmissionData: any = null;
 
+  // Add a property to hold initial form data
+  initialFormData: any = {};
+
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private formSubmissionService: FormSubmissionService,
-    private docxProcessingService: DocxProcessingService,
-    private templateManagementService: TemplateManagementService
+  private route: ActivatedRoute,
+  private router: Router,
+  private formSubmissionService: FormSubmissionService,
+  private docxProcessingService: DocxProcessingService,
+  private templateManagementService: TemplateManagementService,
+  private pdfTemplateService: PdfTemplateService
   ) {}
 
   ngOnInit() {
@@ -47,6 +52,11 @@ export class RfqComponent implements OnInit {
         this.loadSubmissionForRepeat(params['submissionId']);
       }
     });
+    // Set default dateSubmitted if not in repeat mode
+    if (!this.isRepeatMode) {
+      const today = new Date();
+      this.initialFormData.dateSubmitted = today.toISOString().split('T')[0];
+    }
   }
   // To make a field not rquired, set required: false
   // To make a field required, set required: true
@@ -116,11 +126,11 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'bryan', label: 'Bryan Van Staden' },
-            { value: 'jeff', label: 'Jeff Nain' },
-            { value: 'roux', label: 'Roux Mahlerbe' },
-            { value: 'ruan', label: 'Ruan Schroder' },
-            { value: 'other', label: 'Other' },
+            { value: 'Bryan Van Staden', label: 'Bryan Van Staden' },
+            { value: 'Jeff Nain', label: 'Jeff Nain' },
+            { value: 'Roux Mahlerbe', label: 'Roux Mahlerbe' },
+            { value: 'Ruan Schroder', label: 'Ruan Schroder' },
+            { value: 'Other', label: 'Other' },
           ],
         },
 
@@ -133,13 +143,13 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'andri@roofing.com', label: 'Andri Pretorius' },
-            { value: 'bryan@roofing.com', label: 'Bryan Van Staden' },
-            { value: 'jeff@roofing.com', label: 'Jeff Nain' },
-            { value: 'roux@roofing.com', label: 'Roux Mahlerbe' },
-            { value: 'ruan@roofing.com', label: 'Ruan Schroder' },
-            { value: 'lyndsay@roofing.com', label: 'Lyndsay Cotton' },
-            { value: 'stacy@roofing.com', label: 'Stacy Burgess' },
+            { value: 'andri@lcproofing.co.za', label: 'Andri Pretorius' },
+            { value: 'bryan@lcproofing.co.za', label: 'Bryan Van Staden' },
+            { value: 'jeff@lcproofing.co.za', label: 'Jeff Nain' },
+            { value: 'roux@lcproofing.co.za', label: 'Roux Mahlerbe' },
+            { value: 'ruan@lcproofing.co.za', label: 'Ruan Schroder' },
+            { value: 'lyndsay@lcproofing.co.za', label: 'Lyndsay Cotton' },
+            { value: 'stacy@lcproofing.co.za', label: 'Stacy Burgess' },
           ],
         },
       ],
@@ -176,7 +186,7 @@ export class RfqComponent implements OnInit {
             { value: '2 months', label: '2 months' },
             { value: '3 months', label: '3 months' },
             { value: '6 months', label: '6 months' },
-            { value: 'above 6 months', label: '> 6 months' },
+            { value: 'above 6 months', label: 'More than 6 months' },
           ],
         },
 
@@ -260,8 +270,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'private', label: 'Private Client' },
-            { value: 'company', label: 'Company' },
+            { value: 'Private', label: 'Private Client' },
+            { value: 'Company', label: 'Company' },
           ],
         },
 
@@ -275,7 +285,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'Enter company name',
           conditional: {
             dependsOn: 'clientType',
-            showWhen: 'company',
+            showWhen: 'Company',
           },
         },
 
@@ -316,13 +326,13 @@ export class RfqComponent implements OnInit {
           required: false,
           clearable: true,
           options: [
-            { value: '0', label: 'Residential' },
-            { value: 'commercial', label: 'Commercial' },
-            { value: 'addLess', label: 'Addition less than 80m²' },
-            { value: 'addMore', label: 'Addition more than 80m²' },
-            { value: 'directMatch', label: 'Direct Match' },
-            { value: 'public', label: 'Public Building' },
-            { value: 'other', label: 'Other Building Type' },
+            { value: 'Residential', label: 'Residential' },
+            { value: 'Commercial', label: 'Commercial' },
+            { value: 'Addition less than 80m²', label: 'Addition less than 80m²' },
+            { value: 'Addition more than 80m²', label: 'Addition more than 80m²' },
+            { value: 'Direct Match', label: 'Direct Match' },
+            { value: 'Public Building', label: 'Public Building' },
+            { value: 'Other', label: 'Other Building Type' },
           ],
         },
 
@@ -374,9 +384,9 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'tiled', label: 'Tiled Roof' },
-            { value: 'sheeted', label: 'Sheeted Roof' },
-            { value: 'slated', label: 'Slated Roof' },
+            { value: 'Tiled Roof', label: 'Tiled Roof' },
+            { value: 'Sheeted Roof', label: 'Sheeted Roof' },
+            { value: 'Slated Roof', label: 'Slated Roof' },
           ],
         },
 
@@ -408,7 +418,7 @@ export class RfqComponent implements OnInit {
           required: false,
           clearable: true,
           placeholder: 'Decimal values accepted also',
-          validators: [Validators.min(1), Validators.max(100000)],
+          validators: [Validators.min(0), Validators.max(100000)],
         },
 
         // Roofing Services field
@@ -497,10 +507,10 @@ export class RfqComponent implements OnInit {
           ],
         },
 
-        // Wall cobbling field
+        // Wall corbel field
         {
-          name: 'wallCobbling',
-          label: 'Wall Cobbling',
+          name: 'wallCorbel',
+          label: 'Wall Corbel',
           type: 'text',
           required: false,
           clearable: true,
@@ -553,12 +563,12 @@ export class RfqComponent implements OnInit {
               value: 'Double sided sisalation',
               label: 'Double sided sisalation',
             },
-            { value: 'Bubblefoil', label: 'Bubblefoil or similar' },
+            { value: 'Bubblefoil or Similar', label: 'Bubblefoil or similar' },
             { value: 'Thick Insulation', label: 'Thick insulation' },
             { value: 'Isoboard', label: 'Isoboard or similar' },
-            { value: 'AluBubble', label: 'ALU bubble' },
+            { value: 'Alu Bubble', label: 'ALU bubble' },
             { value: 'Durafoil', label: 'Durafoil' },
-            { value: 'OtherIns', label: 'OtherIns' },
+            { value: 'Other Ins', label: 'Other Ins' },
           ],
           placeholder: 'Select Items',
           clearable: true,
@@ -574,7 +584,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'Other and alternative specifications',
           conditional: {
             dependsOn: 'ulaySpec',
-            showWhen: 'OtherIns',
+            showWhen: 'Other Ins',
           },
         },
 
@@ -587,8 +597,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -602,7 +612,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Above bedroom',
           conditional: {
             dependsOn: 'solarLoad',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -615,8 +625,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -630,7 +640,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
             dependsOn: 'geyserLoad',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -643,8 +653,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -656,12 +666,12 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'partially', label: 'Partially Exposed' },
-            { value: 'completely', label: 'Completely Exposed' },
+            { value: 'Partially Exposed', label: 'Partially Exposed' },
+            { value: 'Completely Exposed', label: 'Completely Exposed' },
           ],
           conditional: {
             dependsOn: 'exposedTruss',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -675,7 +685,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
             dependsOn: 'exposedTruss',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -689,7 +699,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'eg. Bedroom, mention accurate area from plans',
           conditional: {
             dependsOn: 'exposedTruss',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -727,15 +737,15 @@ export class RfqComponent implements OnInit {
 
         // optional p&g1 question field
         {
-          name: 'optionalP&G1',
+          name: 'optionalPG1',
           label: 'Optional P&G1',
           type: 'select',
           multiple: false,
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -748,8 +758,8 @@ export class RfqComponent implements OnInit {
           clearable: true,
           placeholder: 'List all the items required in a short description',
           conditional: {
-            dependsOn: 'optionalP&G1',
-            showWhen: 'yes',
+            dependsOn: 'optionalPG1',
+            showWhen: 'Yes',
           },
         },
         //////////
@@ -762,13 +772,13 @@ export class RfqComponent implements OnInit {
           required: false,
           clearable: true,
           options: [
-            { value: '0', label: 'Residential' },
-            { value: 'commercial', label: 'Commercial' },
-            { value: 'addLess', label: 'Addition less than 80m²' },
-            { value: 'addMore', label: 'Addition more than 80m²' },
-            { value: 'directMatch', label: 'Direct Match' },
-            { value: 'public', label: 'Public Building' },
-            { value: 'other', label: 'Other Building Type' },
+            { value: 'Residential', label: 'Residential' },
+            { value: 'Commercial', label: 'Commercial' },
+            { value: 'Addition less than 80m²', label: 'Addition less than 80m²' },
+            { value: 'Addition more than 80m²', label: 'Addition more than 80m²' },
+            { value: 'Direct Match', label: 'Direct Match' },
+            { value: 'Public Building', label: 'Public Building' },
+            { value: 'Other', label: 'Other Building Type' },
           ],
         },
 
@@ -782,7 +792,7 @@ export class RfqComponent implements OnInit {
           placeholder: 'Other Building Type',
           conditional: {
             dependsOn: 'buildingType',
-            showWhen: 'other',
+            showWhen: 'Other',
           },
         },
 
@@ -839,8 +849,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -852,13 +862,13 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'tiles', label: 'Tiles' },
-            { value: 'sheeting', label: 'Sheeting' },
-            { value: 'slate', label: 'Slate, but not by LCP' },
+            { value: 'Tiles', label: 'Tiles' },
+            { value: 'Sheeting', label: 'Sheeting' },
+            { value: 'Slate, but not by LCP', label: 'Slate, but not by LCP' },
           ],
           conditional: {
             dependsOn: 'coverReq',
-            showWhen: 'yes',
+            showWhen: 'Yes',
           },
         },
 
@@ -871,7 +881,7 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'tiles',
+            showWhen: 'Tiles',
           },
         },
 
@@ -884,7 +894,7 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'tiles',
+            showWhen: 'Tiles',
           },
         },
 
@@ -897,11 +907,11 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'tiles',
+            showWhen: 'Tiles',
           },
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -914,17 +924,17 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'sheeting',
+            showWhen: 'Sheeting',
           },
           options: [
             { value: 'Corrugated', label: 'Corrugated' },
-            { value: 'sheeting', label: 'Concealed Fix' },
-            { value: 'slate', label: 'IBR' },
-            { value: 'slate', label: 'Craftlock' },
-            { value: 'slate', label: 'Widespan' },
-            { value: 'slate', label: 'Brownbuilt' },
-            { value: 'slate', label: 'Rheinzink Double Standing' },
-            { value: 'slate', label: 'Newlok' },
+            { value: 'Concealed Fix', label: 'Concealed Fix' },
+            { value: 'IBR', label: 'IBR' },
+            { value: 'Craftlock', label: 'Craftlock' },
+            { value: 'Widespan', label: 'Widespan' },
+            { value: 'Brownbuilt', label: 'Brownbuilt' },
+            { value: 'Rheinzink Double Standing', label: 'Rheinzink Double Standing' },
+            { value: 'Newlok', label: 'Newlok' },
           ],
         },
 
@@ -937,7 +947,7 @@ export class RfqComponent implements OnInit {
           clearable: true,
           conditional: {
             dependsOn: 'coverType',
-            showWhen: 'sheeting',
+            showWhen: 'Sheeting',
           },
         },
 
@@ -1257,8 +1267,8 @@ export class RfqComponent implements OnInit {
           required: true,
           clearable: true,
           options: [
-            { value: 'yes', label: 'Yes' },
-            { value: 'no', label: 'No' },
+            { value: 'Yes', label: 'Yes' },
+            { value: 'No', label: 'No' },
           ],
         },
 
@@ -1471,43 +1481,66 @@ export class RfqComponent implements OnInit {
       .subscribe({
         next: (response) => {
           // Merge metadata into form data for DOCX
-          const docxData = {
+          const docxDataRaw = {
             ...submissionData,
             submissionId: response.submissionId,
             createdAt: response.createdAt,
             updatedAt: response.updatedAt,
             status: response.status,
           };
+          // Process all fields for PDF output (labels always shown, values empty if not filled)
+  const docxData = this.processFieldsForPdf(docxDataRaw, this.rfqSections);
 
           // Fetch the first available RFQ template and generate PDF
           this.templateManagementService.getTemplatesForForm('rfq').subscribe({
             next: (templates) => {
               if (templates && templates.length > 0) {
                 const template = templates[0];
-                const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
-                const clientEmail = docxData.clientEmail || '';
-                this.docxProcessingService.processRfqSubmission(
-                  template,
-                  docxData,
-                  recipients,
-                  clientEmail,
-                  {
-                    preserveStyles: true,
-                    preserveImages: true,
-                    preserveTables: true,
-                    outputFormat: 'pdf',
-                  }
-                ).subscribe({
-                  next: (result) => {
-                    if (result && result.downloadUrl) {
-                      // Trigger download
-                      window.open(result.downloadUrl, '_blank');
+                if (template.type === 'html') {
+                  // Get template from template management service first, then generate PDF
+                  this.templateManagementService.getTemplate(template.id).subscribe({
+                    next: (fullTemplate) => {
+                      if (fullTemplate) {
+                        console.log('✅ Template found for PDF generation:', fullTemplate.name);
+                        // Use the content from the template management service
+                        this.generatePdfDirectly(fullTemplate, docxData, template.formType);
+                      } else {
+                        console.error('❌ Template not found in template management service:', template.id);
+                      }
+                    },
+                    error: (error) => {
+                      console.error('❌ Error getting template:', error);
                     }
-                  },
-                  error: (err) => {
-                    console.error('Error generating PDF:', err);
-                  },
-                });
+                  });
+                } else {
+                  // Use DOCX template PDF generation
+                  const recipients = Array.isArray(docxData.ccMail) ? docxData.ccMail : [];
+                  const clientEmail = docxData.clientEmail || '';
+                  this.docxProcessingService.processRfqSubmission(
+                    template,
+                    docxData,
+                    recipients,
+                    clientEmail,
+                    {
+                      preserveStyles: true,
+                      preserveImages: true,
+                      preserveTables: true,
+                      outputFormat: 'pdf',
+                    }
+                  ).subscribe({
+                    next: (result) => {
+                      if (result && result.downloadUrl) {
+                        // Trigger download
+                        window.open(result.downloadUrl, '_blank');
+                      }
+                      // Route to submissions page after successful PDF generation
+                      this.router.navigate(['/submissions']);
+                    },
+                    error: (err) => {
+                      console.error('Error generating PDF:', err);
+                    },
+                  });
+                }
               } else {
                 alert('No RFQ template found. Please upload a template first.');
               }
@@ -1586,4 +1619,294 @@ export class RfqComponent implements OnInit {
     // You can perform real-time validation or other actions here
     // For example, enable/disable submit button, show live preview, etc.
   }
+
+  /**
+   * Processes all fields for PDF output, ensuring all labels are present and
+   * values are empty string if not filled or not shown (conditional/dependent fields).
+   */
+  private processFieldsForPdf(formData: any, rfqSections: FormSection[]): any {
+    const processed: any = {};
+
+    // Always include these metadata fields if present in formData
+    ['createdAt', 'submissionId', 'repName'].forEach(key => {
+      if (formData[key] !== undefined) {
+        processed[key] = formData[key];
+      } else {
+        processed[key] = '';
+      }
+    });
+
+    rfqSections.forEach(section => {
+      section.fields.forEach(field => {
+        // Always use the value or empty string
+        let value = formData[field.name] ?? '';
+
+        // For conditional fields, always set their value (yes/no/other)
+        // For dependent fields, set value if condition met, else empty string
+        if (field.conditional) {
+          const depValue = formData[field.conditional.dependsOn];
+          if (field.conditional.showWhen === 'hasValue') {
+            if (!depValue) value = '';
+          } else if (depValue !== field.conditional.showWhen) {
+            value = '';
+          }
+        }
+
+        // Special logic for computed display fields
+        if (field.name === 'ulaySpec') {
+          if (Array.isArray(formData.ulaySpec)) {
+            if (formData.ulaySpec.includes('OtherIns')) {
+              processed.membraneType = formData.insSpec || '';
+            } else {
+              processed.membraneType = formData.ulaySpec.join(', ');
+            }
+          } else if (formData.ulaySpec === 'OtherIns') {
+            processed.membraneType = formData.insSpec || '';
+          } else {
+            processed.membraneType = formData.ulaySpec || '';
+          }
+        }
+
+        // Solar Area (dependent)
+        if (field.name === 'solarLoad') {
+          processed.solarLoad = formData.solarLoad ?? '';
+          processed.solarAreaDisplay = formData.solarLoad === 'yes' ? formData.solarArea || '' : '';
+        }
+
+        // Geyser Area (dependent)
+        if (field.name === 'geyserLoad') {
+          processed.geyserLoad = formData.geyserLoad ?? '';
+          processed.geyserAreaDisplay = formData.geyserLoad === 'yes' ? formData.geyserArea || '' : '';
+        }
+
+        // Exposed Truss (dependent)
+        if (field.name === 'exposedTruss') {
+          processed.exposedTruss = formData.exposedTruss ?? '';
+          processed.trussTypeDisplay = formData.exposedTruss === 'yes' ? formData.trussType || '' : '';
+          processed.trussType2Display = formData.exposedTruss === 'yes' ? formData.trussType2 || '' : '';
+          processed.trussAreaDisplay = formData.exposedTruss === 'yes' ? formData.trussArea || '' : '';
+        }
+
+        // Optional P&G1 (dependent)
+        if (field.name === 'optionalPG1') {
+          processed.optionalPG1 = formData.optionalPG1 ?? '';
+          processed.pg1DescDisplay = formData.optionalPG1 === 'yes' ? formData.pg1Desc || '' : '';
+        }
+
+        // Building Type (Other)
+        if (field.name === 'buildingType') {
+          processed.buildingType = formData.buildingType ?? '';
+          processed.otherBuildDisplay = formData.buildingType === 'other' ? formData.otherBuild || '' : '';
+        }
+
+        // === IMAGE & SIGNATURE HANDLING ===
+        if (field.type === 'picture') {
+          // If value is a PictureData object, extract dataUrl; else use as-is
+          if (value && typeof value === 'object' && value.dataUrl) {
+            processed[field.name] = value.dataUrl;
+          } else if (typeof value === 'string' && value.startsWith('data:image/')) {
+            processed[field.name] = value;
+          } else {
+            processed[field.name] = '';
+          }
+          return; // Skip default assignment below
+        }
+
+        if (field.type === 'signature') {
+          // Signature is expected to be a base64 PNG data URL
+          if (typeof value === 'string' && value.startsWith('data:image/')) {
+            processed[field.name] = value;
+          } else {
+            processed[field.name] = '';
+          }
+          return; // Skip default assignment below
+        }
+
+        // Always set the field (unless it's a computed display field above)
+        if (!processed.hasOwnProperty(field.name)) {
+          processed[field.name] = value;
+        }
+      });
+    });
+
+    return processed;
+  }
+
+  private generatePdfDirectly(template: any, formData: any, formType: string): void {
+    // Create a simple HTML content from the template
+    let htmlContent = template.content || '<h1>PDF Document</h1><p>Generated from form data</p>';
+
+    // Extract form fields for replacement
+    const allFormFields = this.extractAllFormFields(formData);
+
+    // Replace placeholders in template
+    Object.keys(allFormFields).forEach(key => {
+      const placeholder = `{{${key}}}`;
+      let value = allFormFields[key];
+
+      if (typeof value === 'string' && value.startsWith('data:image/')) {
+        value = `<img src="${value}" alt="${key}" style="max-width: 400px; max-height: 200px; display: block; margin: 8px 0;" />`;
+      }
+
+      htmlContent = htmlContent.replace(new RegExp(placeholder, 'g'), value || 'N/A');
+    });
+
+    // Create printable HTML
+    const printableHtml = this.wrapInPrintableHtml(htmlContent, formType);
+
+    // Open print window
+    this.printToPdf(printableHtml, `${formType}-${formData.submissionId || 'document'}.pdf`);
+  }
+
+  private extractAllFormFields(data: any, prefix: string = ''): Record<string, any> {
+    const fields: Record<string, any> = {};
+
+    if (!data || typeof data !== 'object') {
+      return fields;
+    }
+
+    Object.keys(data).forEach(key => {
+      const value = data[key];
+      const fieldKey = prefix ? `${prefix}.${key}` : key;
+
+      if (value && typeof value === 'object' && !Array.isArray(value) && !(value instanceof Date)) {
+        // Recursively extract nested objects
+        const nestedFields = this.extractAllFormFields(value, fieldKey);
+        Object.assign(fields, nestedFields);
+      } else {
+        // Format dateSubmitted and dateDue as DD-MM-YYYY
+        if ((key === 'dateSubmitted' || key === 'dateDue') && typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          const [year, month, day] = value.split('-');
+          const formatted = `${day}-${month}-${year}`;
+          fields[fieldKey] = formatted;
+          fields[key] = formatted;
+        } else {
+          fields[fieldKey] = value;
+          fields[key] = value; // Also store without prefix for simple access
+        }
+      }
+    });
+
+    return fields;
+  }
+
+  private printToPdf(htmlContent: string, filename: string): void {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      console.error('Unable to open print window');
+      return;
+    }
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+    printWindow.focus();
+
+    // Automatically trigger print dialog after a short delay
+    setTimeout(() => {
+      printWindow.print();
+    }, 250);
+  }
+
+  private wrapInPrintableHtml(content: string, formType: string): string {
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${formType.toUpperCase()} Document</title>
+          <style>
+            @media print {
+              body { -webkit-print-color-adjust: exact; }
+            }
+
+            * {
+              box-sizing: border-box;
+            }
+
+            body {
+              font-family: Arial, sans-serif;
+              line-height: 1.6;
+              color: #333;
+              max-width: 8.5in;
+              margin: 0 auto;
+              padding: 0.5in;
+              background: white;
+            }
+
+            .header {
+              text-align: center;
+              border-bottom: 2px solid #333;
+              padding-bottom: 20px;
+              margin-bottom: 30px;
+            }
+
+            .header h1 {
+              margin: 0;
+              color: #2c3e50;
+              font-size: 24px;
+            }
+
+            .header p {
+              margin: 5px 0 0 0;
+              color: #7f8c8d;
+              font-size: 14px;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+              background: white;
+            }
+
+            th, td {
+              border: 1px solid #ddd;
+              padding: 12px;
+              text-align: left;
+              vertical-align: top;
+            }
+
+            th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+              color: #2c3e50;
+            }
+
+            .field-label {
+              background-color: #f8f9fa;
+              font-weight: bold;
+              width: 30%;
+              color: #495057;
+            }
+
+            .field-value {
+              width: 70%;
+              word-wrap: break-word;
+            }
+
+            .footer {
+              margin-top: 30px;
+              text-align: center;
+              font-size: 10px;
+              color: #666;
+              border-top: 1px solid #ddd;
+              padding-top: 10px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>${formType.toUpperCase()} Document</h1>
+            <p>Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}</p>
+          </div>
+
+          ${content}
+
+          <div class="footer">
+            <p>This document was automatically generated from ${formType.toUpperCase()} form submission.</p>
+          </div>
+        </body>
+      </html>
+    `;
+  }
 }
+

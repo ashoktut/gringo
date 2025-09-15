@@ -32,7 +32,7 @@ import { map, shareReplay, filter } from 'rxjs/operators';
 })
 export class AppComponent {
   @ViewChild('drawer') drawer!: MatSidenav;
-  title = 'Gringo - Professional Services';
+  title = 'Gringo';
   currentRoute = '';
 
   isHandset$: Observable<boolean>;

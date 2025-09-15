@@ -1,0 +1,275 @@
+<div class="storage-dashboard">
+  <!-- Header -->
+  <mat-card class="dashboard-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>storage</mat-icon>
+        Storage Dashboard
+      </mat-card-title>
+      <mat-card-subtitle>
+        Monitor and manage your application's storage usage
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-actions align="end">
+      <button mat-icon-button
+              [color]="autoRefresh ? 'primary' : 'basic'"
+              (click)="toggleAutoRefresh()"
+              matTooltip="Toggle auto-refresh">
+        <mat-icon>{{autoRefresh ? 'pause' : 'play_arrow'}}</mat-icon>
+      </button>
+      <button mat-icon-button
+              (click)="loadStorageStats()"
+              [disabled]="isLoading"
+              matTooltip="Refresh stats">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <button mat-icon-button
+              (click)="exportStorageData()"
+              [disabled]="!stats"
+              matTooltip="Export data">
+        <mat-icon>download</mat-icon>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading storage statistics...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div *ngIf="!isLoading" class="dashboard-content">
+
+    <!-- Overview Cards -->
+    <div class="overview-grid">
+      <!-- Total Storage Usage -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>Total Storage Usage</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="usage-display">
+            <div class="usage-circle">
+              <mat-progress-spinner
+                [value]="getStorageUsagePercentage()"
+                [color]="getUsageColor()"
+                mode="determinate"
+                [diameter]="80">
+              </mat-progress-spinner>
+              <div class="usage-text">
+                <span class="percentage">{{getStorageUsagePercentage() | number:'1.0-1'}}%</span>
+              </div>
+            </div>
+            <div class="usage-details">
+              <p>Total: {{formatBytes((stats?.indexedDb?.totalSize || 0) + (stats?.localStorage?.size || 0))}}</p>
+              <small>Last updated: {{lastUpdated | date:'short'}}</small>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- IndexedDB Stats -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>database</mat-icon>
+            IndexedDB
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-item">
+            <span class="stat-label">Size:</span>
+            <span class="stat-value">{{formatBytes(stats?.indexedDb?.totalSize || 0)}}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Stores:</span>
+            <span class="stat-value">{{(stats?.indexedDb?.storeStats | keyvalue)?.length || 0}}</span>
+          </div>
+          <mat-chip-listbox class="store-chips">
+            <mat-chip-option *ngFor="let store of stats?.indexedDb?.storeStats | keyvalue"
+                            [selected]="true"
+                            disabled>
+              {{store.key}} ({{store.value.count}})
+            </mat-chip-option>
+          </mat-chip-listbox>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- localStorage Stats -->
+      <mat-card class="stat-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>folder</mat-icon>
+            localStorage
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="stat-item">
+            <span class="stat-label">Size:</span>
+            <span class="stat-value">{{formatBytes(stats?.localStorage?.size || 0)}}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Items:</span>
+            <span class="stat-value">{{stats?.localStorage?.items || 0}}</span>
+          </div>
+          <div class="localStorage-status"
+               [class.has-data]="(stats?.localStorage?.items || 0) > 0">
+            <mat-icon>{{(stats?.localStorage?.items || 0) > 0 ? 'warning' : 'check_circle'}}</mat-icon>
+            <span>{{(stats?.localStorage?.items || 0) > 0 ? 'Has legacy data' : 'Clean'}}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Actions Section -->
+    <mat-card class="actions-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>build</mat-icon>
+          Storage Operations
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="actions-grid">
+          <!-- Migration Actions -->
+          <div class="action-group">
+            <h4>Data Migration</h4>
+            <button mat-raised-button
+                    color="primary"
+                    (click)="migrateData()"
+                    [disabled]="isMigrating || isLoading">
+              <mat-icon>migrate</mat-icon>
+              <span *ngIf="!isMigrating">Migrate to IndexedDB</span>
+              <span *ngIf="isMigrating">Migrating...</span>
+            </button>
+            <p class="action-description">
+              Migrate all localStorage data to IndexedDB for better performance and larger capacity.
+            </p>
+          </div>
+
+          <!-- Cleanup Actions -->
+          <div class="action-group">
+            <h4>Data Cleanup</h4>
+            <button mat-raised-button
+                    color="warn"
+                    (click)="clearLocalStorage()"
+                    [disabled]="isClearing || isLoading || (stats?.localStorage?.items || 0) === 0">
+              <mat-icon>clear_all</mat-icon>
+              <span *ngIf="!isClearing">Clear localStorage</span>
+              <span *ngIf="isClearing">Clearing...</span>
+            </button>
+            <p class="action-description">
+              Remove migrated data from localStorage to free up space.
+            </p>
+          </div>
+        </div>
+
+        <!-- Migration Results -->
+        <mat-expansion-panel *ngIf="lastMigrationResult" class="migration-results">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon [color]="lastMigrationResult.success ? 'primary' : 'warn'">
+                {{lastMigrationResult.success ? 'check_circle' : 'error'}}
+              </mat-icon>
+              Last Migration Result
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="migration-details">
+            <div *ngIf="lastMigrationResult.success" class="success-details">
+              <div class="migration-stat">
+                <span class="label">Submissions:</span>
+                <span class="value">{{lastMigrationResult.migratedSubmissions || 0}} migrated</span>
+              </div>
+              <div class="migration-stat">
+                <span class="label">Templates:</span>
+                <span class="value">{{lastMigrationResult.migratedTemplates || 0}} migrated</span>
+              </div>
+              <div class="migration-stat">
+                <span class="label">PDF Templates:</span>
+                <span class="value">{{lastMigrationResult.migratedPdfTemplates || 0}} migrated</span>
+              </div>
+            </div>
+            <div *ngIf="!lastMigrationResult.success" class="error-details">
+              <p><strong>Error:</strong> {{lastMigrationResult.error?.message || 'Unknown error occurred'}}</p>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Detailed Breakdown Table -->
+    <mat-card class="breakdown-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>table_chart</mat-icon>
+          Storage Breakdown
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <table mat-table [dataSource]="storageBreakdownData" class="breakdown-table">
+          <!-- Store Name Column -->
+          <ng-container matColumnDef="store">
+            <th mat-header-cell *matHeaderCellDef>Store / Type</th>
+            <td mat-cell *matCellDef="let element">
+              <div class="store-info">
+                <mat-icon>{{element.type === 'IndexedDB' ? 'storage' : 'folder'}}</mat-icon>
+                <span class="store-name">{{element.store}}</span>
+                <mat-chip class="type-chip" [color]="element.type === 'IndexedDB' ? 'primary' : 'accent'">
+                  {{element.type}}
+                </mat-chip>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Items Column -->
+          <ng-container matColumnDef="items">
+            <th mat-header-cell *matHeaderCellDef>Items</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="item-count">{{element.items | number}}</span>
+            </td>
+          </ng-container>
+
+          <!-- Size Column -->
+          <ng-container matColumnDef="size">
+            <th mat-header-cell *matHeaderCellDef>Size</th>
+            <td mat-cell *matCellDef="let element">
+              <span class="size-display">{{formatBytes(element.size)}}</span>
+              <mat-progress-bar
+                mode="determinate"
+                [value]="(element.size / ((stats?.indexedDb?.totalSize || 0) + (stats?.localStorage?.size || 0))) * 100"
+                class="size-bar">
+              </mat-progress-bar>
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let element">
+              <button *ngIf="element.type === 'IndexedDB' && element.items > 0"
+                      mat-icon-button
+                      color="warn"
+                      (click)="clearIndexedDbStore(element.store)"
+                      matTooltip="Clear this store">
+                <mat-icon>delete</mat-icon>
+              </button>
+              <span *ngIf="element.type === 'localStorage'" class="no-actions">
+                Use "Clear localStorage" above
+              </span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <div *ngIf="storageBreakdownData.length === 0" class="no-data">
+          <mat-icon>info</mat-icon>
+          <p>No storage data available</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

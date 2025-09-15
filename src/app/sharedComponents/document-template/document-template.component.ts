@@ -39,27 +39,28 @@ import { TemplateManagementService } from '../../services/template-management.se
             (dragleave)="onDragLeave($event)"
             (drop)="onDrop($event)"
             (click)="fileInput.click()">
-    
+
             <input #fileInput
               type="file"
-              accept=".doc,.docx,.odt,.gdoc"
+              accept=".doc,.docx,.odt,.gdoc,.html"
               (change)="onFileSelected($event)"
               style="display: none">
-    
+
               <div class="upload-content">
                 <mat-icon class="upload-icon">cloud_upload</mat-icon>
                 <h3>Upload Template Document</h3>
-                <p>Drag and drop your Word document or Google Doc here, or click to browse</p>
+                <p>Drag and drop your Word, Google Doc, OpenDocument, or HTML template here, or click to browse</p>
                 <div class="supported-formats">
                   <mat-chip-set>
                     <mat-chip>Word (.docx, .doc)</mat-chip>
                     <mat-chip>Google Docs (.gdoc)</mat-chip>
                     <mat-chip>OpenDocument (.odt)</mat-chip>
+                    <mat-chip>HTML (.html)</mat-chip>
                   </mat-chip-set>
                 </div>
               </div>
             </div>
-    
+
             <!-- Form Type Selection -->
             @if (selectedFile) {
               <div class="form-config">
@@ -82,7 +83,7 @@ import { TemplateManagementService } from '../../services/template-management.se
                 </div>
               </div>
             }
-    
+
             <!-- File Info -->
             @if (selectedFile) {
               <div class="file-info">
@@ -95,7 +96,7 @@ import { TemplateManagementService } from '../../services/template-management.se
                 </div>
               </div>
             }
-    
+
             <!-- Upload Progress -->
             @if (isUploading) {
               <div class="upload-progress">
@@ -103,7 +104,7 @@ import { TemplateManagementService } from '../../services/template-management.se
                 <p>Processing template...</p>
               </div>
             }
-    
+
             <!-- Action Buttons -->
             @if (selectedFile && !isUploading) {
               <div class="actions">
@@ -123,7 +124,7 @@ import { TemplateManagementService } from '../../services/template-management.se
             }
           </mat-card-content>
         </mat-card>
-    
+
         <!-- Template Preview -->
         @if (uploadedTemplate) {
           <mat-card class="preview-card">
@@ -171,7 +172,7 @@ import { TemplateManagementService } from '../../services/template-management.se
             </mat-card-actions>
           </mat-card>
         }
-    
+
         <!-- Template Usage Guide -->
         <mat-card class="guide-card">
           <mat-card-header>
@@ -189,7 +190,7 @@ import { TemplateManagementService } from '../../services/template-management.se
                   <mat-chip class="example-chip">{{ '{' }}{{ '{' }}repName{{ '}' }}{{ '}' }}</mat-chip>
                 </mat-chip-set>
               </div>
-    
+
               <h4>2. Common Placeholders</h4>
               <div class="common-placeholders">
                 <div class="placeholder-category">
@@ -205,7 +206,7 @@ import { TemplateManagementService } from '../../services/template-management.se
                   <span>dateSubmitted, dateDue, roofTimeline</span>
                 </div>
               </div>
-    
+
               <h4>3. Show All Data</h4>
               <p>Use <code>{{ '{' }}{{ '{' }}ALL_FORM_DATA{{ '}' }}{{ '}' }}</code> to display a complete table of all form fields.</p>
             </div>
@@ -455,11 +456,11 @@ export class DocumentTemplateComponent {
   }
 
   private handleFileSelection(file: File) {
-    const validTypes = ['.doc', '.docx', '.odt', '.gdoc'];
+  const validTypes = ['.doc', '.docx', '.odt', '.gdoc', '.html'];
     const fileExtension = '.' + file.name.split('.').pop()?.toLowerCase();
 
     if (!validTypes.includes(fileExtension)) {
-      this.uploadError.emit('Please select a valid document file (.doc, .docx, .odt, .gdoc)');
+      this.uploadError.emit('Please select a valid document file (.doc, .docx, .odt, .gdoc, .html)');
       return;
     }
 

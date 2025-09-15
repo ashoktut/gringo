@@ -267,14 +267,21 @@ ngOnInit() {
       }
 
       const validators = this.getValidators(field);
-      const initialValue =
-        field.type === 'checkbox'
-          ? false
-          : field.type === 'select' && field.multiple
-          ? []
-          : field.type === 'picture'
-          ? null
-          : null;
+      // Use initialData if provided
+      let initialValue = null;
+      if (this.initialData && this.initialData.hasOwnProperty(field.name)) {
+        initialValue = this.initialData[field.name];
+      } else if (field.type === 'checkbox') {
+        initialValue = false;
+      } else if (field.type === 'select' && field.multiple) {
+        initialValue = [];
+      } else if (field.type === 'number') {
+        initialValue = 0;
+      } else if (field.type === 'picture') {
+        initialValue = null;
+      } else {
+        initialValue = '';
+      }
       group[field.name] = new FormControl(initialValue, validators);
     });
 
@@ -649,20 +656,22 @@ getFieldError(fieldName: string): string {
         ctrl.setValue(false);
         break;
       case 'radio':
-        ctrl.setValue(null);
+        ctrl.setValue(''); // Use empty string for radio to avoid null
         break;
       case 'select':
         ctrl.setValue(field.multiple ? [] : null);
         break;
       case 'number':
+        ctrl.setValue(0);
+        break;
       case 'date':
-        ctrl.setValue(null);
+        ctrl.setValue(null); // Keep null for date, as Angular Material expects null for empty date
         break;
       case 'map':
-        ctrl.setValue(null);
+        ctrl.setValue(null); // Keep null for map, unless your app expects something else
         break;
       case 'signature':
-        ctrl.setValue(null);
+        ctrl.setValue(null); // Keep null for signature, unless your app expects something else
         break;
       default:
         ctrl.setValue('');
