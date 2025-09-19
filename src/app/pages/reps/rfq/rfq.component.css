@@ -1,52 +1,212 @@
 .page-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #fafafa;
   min-height: 100vh;
+  background: var(--azure-gradient-primary);
+  padding: 0;
 }
 
+/* Consolidated Header */
 .form-header {
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(37, 99, 235, 0.2);
+  padding: 16px 24px;
+  margin-bottom: 0;
 }
 
-.form-header h1 {
-  color: #1976d2;
-  margin-bottom: 10px;
-  font-size: 2rem;
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.form-header p {
+.title-section h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a202c;
+  line-height: 1.2;
+}
+
+.form-instructions {
+  margin: 4px 0 0 0;
   color: #666;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
+}
+
+.repeat-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #667eea;
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.repeat-notice mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Compact Company Selection */
+.company-selector-inline {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.company-field-compact {
+  min-width: 280px;
   margin: 0;
 }
 
-/* Enhanced accordion styling for better UX */
-::ng-deep .mat-accordion {
-  margin-bottom: 20px;
+.config-chips {
+  display: flex;
+  align-items: center;
 }
 
-::ng-deep .mat-expansion-panel {
-  margin-bottom: 8px !important;
-  border-radius: 8px !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+.config-chips mat-chip-set {
+  margin: 0;
+}
+
+.config-chips mat-chip {
+  font-size: 0.8rem;
+  height: 28px;
+}
+
+/* Compact Loading State */
+.loading-container-compact {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  margin: 0 24px 20px;
+  border-radius: 8px;
+  color: #667eea;
+  font-weight: 500;
+}
+
+/* Compact Error State */
+.error-container-compact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: rgba(254, 226, 226, 0.9);
+  margin: 0 24px 20px;
+  border-radius: 8px;
+  border-left: 4px solid #f56565;
+  color: #c53030;
+}
+
+.error-container-compact button {
+  margin-left: auto;
+  min-width: auto;
+  padding: 0 12px;
+  height: 32px;
+  font-size: 0.85rem;
+}
+
+/* Form Content */
+.form-content {
+  padding: 0;
+  margin: 0;
+}
+
+/* Override reusable-form padding */
+.form-content ::ng-deep app-reusable-form {
+  display: block;
+}
+
+.form-content ::ng-deep .reusable-form-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: transparent;
+}
+
+.form-content ::ng-deep .form-title {
+  display: none; /* Hide duplicate title */
+}
+
+.form-content ::ng-deep .form-description {
+  margin-bottom: 24px;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 12px 16px;
+  border-radius: 8px;
+  backdrop-filter: blur(5px);
+}
+
+/* Form sections styling */
+.form-content ::ng-deep mat-expansion-panel {
+  background: rgba(255, 255, 255, 0.95);
+  margin-bottom: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
-::ng-deep .mat-expansion-panel:hover {
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
-  transform: translateY(-1px);
+.form-content ::ng-deep mat-expansion-panel:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
-::ng-deep .mat-expansion-panel.mat-expanded {
-  box-shadow: 0 6px 12px rgba(25, 118, 210, 0.2) !important;
-  border: 2px solid #1976d2;
+.form-content ::ng-deep mat-expansion-panel.mat-expanded {
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+  border: 2px solid #667eea;
+}
+
+.form-content ::ng-deep mat-expansion-panel-header {
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.form-content ::ng-deep mat-expansion-panel-header:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+.form-content ::ng-deep mat-expansion-panel-content {
+  padding: 0;
+}
+
+.form-content ::ng-deep .mat-expansion-panel-body {
+  padding: 24px;
+}
+
+/* Submit button */
+.form-content ::ng-deep .submit-button-container {
+  padding: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  margin-top: 24px;
+  text-align: center;
+}
+
+.form-content ::ng-deep .submit-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px 32px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  min-width: 200px;
+  transition: all 0.3s ease;
+}
+
+.form-content ::ng-deep .submit-button:hover {
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.3);
 }
 
 ::ng-deep .mat-expansion-panel-header {
@@ -137,52 +297,80 @@
   left: -2px;
   right: -2px;
   bottom: -2px;
-  background: linear-gradient(45deg, #1976d2, #42a5f5);
+  background: linear-gradient(45deg, var(--azure-primary), var(--azure-accent));
   border-radius: 10px;
   z-index: -1;
   opacity: 0.1;
 }
 
-.form-info {
-  margin-top: 30px;
-  padding: 20px;
-  background: white;
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-header {
+    padding: 12px 16px;
+  }
+
+  .title-section h1 {
+    font-size: 1.5rem;
+  }
+
+  .company-selector-inline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .company-field-compact {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .config-chips {
+    justify-content: flex-start;
+  }
+
+  .loading-container-compact,
+  .error-container-compact {
+    margin: 0 16px 16px;
+    padding: 12px 16px;
+  }
+
+  .form-content ::ng-deep .reusable-form-container {
+    padding: 16px;
+  }
+}
+
+/* Remove any margins from mat-cards that might be adding space */
+.form-content ::ng-deep mat-card {
+  margin: 0;
+  box-shadow: none;
+}
+
+/* Ensure no extra spacing in form fields */
+.form-content ::ng-deep mat-form-field {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+/* Additional form styling for better integration */
+.form-content ::ng-deep .mat-mdc-form-field {
+  background: rgba(255, 255, 255, 0.9);
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 4px 8px;
 }
 
-.form-info h3 {
-  color: #1976d2;
-  margin-bottom: 15px;
+.form-content ::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: 8px;
 }
 
-.form-info ul {
-  list-style: none;
-  padding: 0;
+/* Improve button styling */
+.form-content ::ng-deep button {
+  border-radius: 8px;
+  font-weight: 500;
 }
 
-.form-info li {
-  padding: 5px 0;
-  color: #333;
-}
-
-/* Company Selector Styling */
-.company-selector-card {
-  margin-bottom: 24px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 1px solid #e3f2fd;
-  border-radius: 12px !important;
-  box-shadow: 0 2px 8px rgba(25, 118, 210, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
-}
-
-.company-selector-card:hover {
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.15);
-  transform: translateY(-1px);
-}
-
-.company-selector {
-  display: flex;
+/* Style dropdown options */
+.form-content ::ng-deep .mat-mdc-option {
+  background: white;
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
@@ -209,131 +397,13 @@
   margin-top: 12px;
 }
 
-.config-info mat-chip-set {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.config-info mat-chip {
-  border-radius: 16px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.config-info mat-chip mat-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
-
-/* Responsive Company Selector */
-@media (max-width: 768px) {
-  .company-selector {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .company-field {
-    min-width: unset;
-    width: 100%;
-  }
-
-  .config-info mat-chip-set {
-    justify-content: center;
-  }
-}
-
-@media (max-width: 768px) {
-  .page-container {
-    padding: 10px;
-  }
-
-  .form-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .form-header p {
-    font-size: 1rem;
-  }
-}
-
-/* Repeat RFQ styling */
-.repeat-notice {
-  background: #e3f2fd;
-  border: 1px solid #2196f3;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #1976d2;
-}
-
-.repeat-notice mat-icon {
-  color: #2196f3;
-  font-size: 20px;
-}
-
-.repeat-notice p {
-  margin: 0;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-/* Loading and Error States */
-.loading-card,
-.error-card {
-  margin: 20px 0;
-  text-align: center;
-}
-
-.loading-container,
-.error-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 40px 20px;
-}
-
-.loading-container p {
-  color: #666;
-  font-size: 16px;
-  margin: 0;
-}
-
-.error-container mat-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
-}
-
-.error-container h3 {
-  color: #d32f2f;
-  margin: 0;
-  font-size: 20px;
-}
-
-.error-container p {
-  color: #666;
-  margin: 0;
-  text-align: center;
-  max-width: 400px;
-}
-
-.error-container button {
-  margin-top: 8px;
-}
-
 /* Animation for loading spinner */
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
 
-.loading-container mat-spinner {
+.loading-container-compact mat-spinner {
   animation: pulse 2s infinite;
 }
 

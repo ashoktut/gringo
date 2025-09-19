@@ -87,7 +87,7 @@ export class HomeComponent {
         <title>Simple Test</title>
       </head>
       <body style="font-family: Arial, sans-serif; padding: 20px;">
-        <h1 style="color: #1976d2;">Simple PDF Test</h1>
+        <h1 style="color: #0b7ad4;">Simple PDF Test</h1>
         <p>This is a simple test to verify html2pdf is working.</p>
         <p>Generated at: ${new Date().toLocaleString()}</p>
         <table style="border-collapse: collapse; width: 100%; margin-top: 20px;">
@@ -232,16 +232,23 @@ export class HomeComponent {
 
   quickActions = [
     {
+      "title": "Forms Dashboard",
+      "description": "Browse all available forms for your role",
+      "routePath": "/reps/forms",
+      "icon": "dashboard",
+      "color": "primary"
+    },
+    {
       "title": "Create RFQ",
       "description": "Request for Quote - Get quotes for your projects",
-      "routePath": "/rfq",
+      "routePath": "/reps/forms/rfq",
       "icon": "request_quote",
       "color": "primary"
     },
     {
       "title": "Create RQR",
       "description": "Request for Re-Quote - Request updated quotes",
-      "routePath": "/rqr",
+      "routePath": "/reps/forms/rqr",
       "icon": "refresh",
       "color": "accent"
     },

@@ -13,11 +13,11 @@
 }
 
 .hero-card {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 50%, #0d47a1 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 50%, var(--azure-primary-dark) 100%);
+  color: var(--azure-on-primary);
   text-align: center;
   padding: 48px 32px;
-  box-shadow: 0 16px 48px rgba(25, 118, 210, 0.3);
+  box-shadow: var(--azure-shadow-xl);
   position: relative;
   overflow: hidden;
   border-radius: 20px;
@@ -85,11 +85,11 @@
   cursor: default;
   transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
   border-radius: 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 2px solid rgba(25, 118, 210, 0.08);
+  background: linear-gradient(135deg, var(--azure-surface) 0%, var(--azure-surface-variant) 100%);
+  border: 2px solid var(--azure-outline);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.08);
+  box-shadow: var(--azure-shadow);
 }
 
 .stat-card .mat-mdc-card-content {
@@ -108,7 +108,7 @@
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(25, 118, 210, 0.05), transparent);
+  background: linear-gradient(90deg, transparent, rgba(11, 122, 212, 0.05), transparent);
   transition: left 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
@@ -118,8 +118,8 @@
 
 .stat-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 20px 40px rgba(25, 118, 210, 0.2);
-  border-color: rgba(25, 118, 210, 0.3);
+  box-shadow: var(--azure-shadow-lg);
+  border-color: var(--azure-primary);
 }
 
 .stat-content {
@@ -139,7 +139,7 @@
   height: 36px;
   padding: 16px;
   border-radius: 50%;
-  background: rgba(25, 118, 210, 0.1);
+  background: rgba(11, 122, 212, 0.1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -170,7 +170,7 @@
   text-overflow: ellipsis;
 }
 
-.stat-primary .stat-icon { color: #1976d2; background: rgba(25, 118, 210, 0.1); }
+.stat-primary .stat-icon { color: var(--azure-primary); background: rgba(11, 122, 212, 0.1); }
 .stat-accent .stat-icon { color: #ff4081; background: rgba(255, 64, 129, 0.1); }
 .stat-warn .stat-icon { color: #ff9800; background: rgba(255, 152, 0, 0.1); }
 
@@ -197,7 +197,7 @@
   transform: translateX(-50%);
   width: 60px;
   height: 3px;
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-accent) 100%);
   border-radius: 2px;
 }
 
@@ -215,8 +215,8 @@
   display: flex;
   flex-direction: column;
   border-radius: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 2px solid rgba(25, 118, 210, 0.08);
+  background: linear-gradient(135deg, var(--azure-surface) 0%, var(--azure-surface-variant) 100%);
+  border: 2px solid var(--azure-outline);
   position: relative;
   overflow: hidden;
 }
@@ -228,7 +228,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-accent) 100%);
   transform: scaleX(0);
   transition: transform 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
@@ -239,8 +239,8 @@
 
 .action-card:hover {
   transform: translateY(-12px) scale(1.03);
-  box-shadow: 0 24px 48px rgba(25, 118, 210, 0.25);
-  border-color: rgba(25, 118, 210, 0.3);
+  box-shadow: var(--azure-shadow-xl);
+  border-color: var(--azure-primary);
 }
 
 /* Enhanced mat-card-header for better icon and text layout */
@@ -274,17 +274,17 @@
 }
 
 .icon-primary {
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-  color: #1976d2;
+  background: var(--azure-gradient-subtle);
+  color: var(--azure-primary);
 }
 
 .icon-accent {
-  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  background: linear-gradient(135deg, rgba(255, 64, 129, 0.1) 0%, rgba(255, 64, 129, 0.05) 100%);
   color: #ff4081;
 }
 
 .icon-warn {
-  background: linear-gradient(135deg, #fff3e0 0%, #ffcc02 100%);
+  background: linear-gradient(135deg, rgba(255, 152, 0, 0.1) 0%, rgba(255, 204, 2, 0.05) 100%);
   color: #ff9800;
 }
 
@@ -325,7 +325,7 @@
 
 .action-card button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(25, 118, 210, 0.3);
+  box-shadow: var(--azure-shadow-lg);
 }
 
 /* Enhanced Recent Activity Section */
@@ -334,22 +334,22 @@
 }
 
 .activity-section mat-card {
-  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.1);
+  box-shadow: var(--azure-shadow);
   border-radius: 20px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-  border: 2px solid rgba(25, 118, 210, 0.08);
+  background: linear-gradient(135deg, var(--azure-surface) 0%, var(--azure-surface-variant) 100%);
+  border: 2px solid var(--azure-outline);
   transition: all 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .activity-section mat-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 40px rgba(25, 118, 210, 0.15);
-  border-color: rgba(25, 118, 210, 0.2);
+  box-shadow: var(--azure-shadow-lg);
+  border-color: var(--azure-primary);
 }
 
 .activity-section mat-card-header {
   padding-bottom: 0;
-  background: linear-gradient(135deg, rgba(25, 118, 210, 0.05) 0%, rgba(25, 118, 210, 0.02) 100%);
+  background: linear-gradient(135deg, rgba(11, 122, 212, 0.05) 0%, rgba(11, 122, 212, 0.02) 100%);
   border-radius: 20px 20px 0 0;
 }
 
@@ -375,8 +375,8 @@
   gap: 20px;
   padding: 16px 20px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border: 1px solid rgba(25, 118, 210, 0.08);
+  background: linear-gradient(135deg, var(--azure-surface-variant) 0%, var(--azure-surface) 100%);
+  border: 2px solid var(--azure-outline);
   transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -389,7 +389,7 @@
   top: 0;
   bottom: 0;
   width: 4px;
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-accent) 100%);
   transform: scaleY(0);
   transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
@@ -399,14 +399,14 @@
 }
 
 .activity-item:hover {
-  background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
-  border-color: rgba(25, 118, 210, 0.2);
+  background: var(--azure-gradient-subtle);
+  border-color: var(--azure-primary);
   transform: translateX(8px);
 }
 
 .activity-icon {
-  color: #1976d2;
-  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: var(--azure-primary);
+  background: var(--azure-gradient-subtle);
   border-radius: 50%;
   padding: 12px;
   font-size: 20px;
@@ -710,12 +710,12 @@
   border-radius: 12px;
   font-weight: 500;
   text-transform: none;
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.2);
+  box-shadow: var(--azure-shadow);
 }
 
 .mat-mdc-raised-button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(25, 118, 210, 0.3);
+  box-shadow: var(--azure-shadow-lg);
 }
 
 /* Material Design Elevation System Enhancement */
@@ -724,7 +724,7 @@
 }
 
 .elevation-hover:hover {
-  box-shadow: 0 12px 32px rgba(25, 118, 210, 0.2);
+  box-shadow: var(--azure-shadow-lg);
   transform: translateY(-4px);
 }
 

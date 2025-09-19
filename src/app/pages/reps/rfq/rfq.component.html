@@ -1,109 +1,101 @@
 <div class="page-container">
+  <!-- Consolidated Header -->
   <div class="form-header">
-    <h1>
-      {{ isRepeatMode ? 'Repeat Request For Quote (RFQ)' : 'Request For Quote (RFQ)' }}
-    </h1>
-    @if (!isRepeatMode) {
-      <p>
-        Complete the form section by section. Click on a section header to expand it - only one section can be open at a time.
-      </p>
-    }
-    @if (isRepeatMode) {
-      <div class="repeat-notice">
-        <mat-icon>refresh</mat-icon>
-        <p>
-          Creating new RFQ based on submission #{{ originalSubmissionId?.split('-')?.[1] || originalSubmissionId }}.
-          Review and update as needed.
-        </p>
-      </div>
-    }
+    <div class="header-content">
+      <div class="title-section">
+        <h1>
+          {{ isRepeatMode ? 'Repeat Request For Quote (RFQ)' : 'Request For Quote (RFQ)' }}
+        </h1>
 
-    <!-- Company Selection -->
-    @if (availableCompanies.length > 0) {
-      <mat-card class="company-selector-card">
-        <mat-card-content>
-          <div class="company-selector">
-            <mat-icon>business</mat-icon>
-            <mat-form-field appearance="outline" class="company-field">
-              <mat-label>Select Company Configuration</mat-label>
-              <mat-select
-                [value]="selectedCompanyId"
-                (selectionChange)="onCompanyChange($event.value)"
-                placeholder="Default Configuration">
-                <mat-option [value]="null">Default Configuration</mat-option>
-                @for (company of availableCompanies; track company) {
-                  <mat-option [value]="company">{{ company }}</mat-option>
-                }
-              </mat-select>
-              <mat-hint>Choose company-specific form configuration</mat-hint>
-            </mat-form-field>
-            @if (currentFormConfig) {
-              <div class="config-info">
-                <mat-chip-set>
-                  <mat-chip [disabled]="true">
-                    <mat-icon matChipAvatar>settings</mat-icon>
-                    {{ currentFormConfig.name }}
-                  </mat-chip>
-                  @if (currentFormConfig.companyId) {
-                    <mat-chip [disabled]="true" color="primary">
-                      <mat-icon matChipAvatar>business</mat-icon>
-                      {{ currentFormConfig.companyId }}
-                    </mat-chip>
-                  }
-                  @if (currentFormConfig.isDefault) {
-                    <mat-chip [disabled]="true" color="accent">
-                      <mat-icon matChipAvatar>star</mat-icon>
-                      Default
-                    </mat-chip>
-                  }
-                </mat-chip-set>
-              </div>
-            }
+        @if (!isRepeatMode) {
+          <p class="form-instructions">
+            Complete the form section by section. Click on a section header to expand it.
+          </p>
+        }
+
+        @if (isRepeatMode) {
+          <div class="repeat-notice">
+            <mat-icon>refresh</mat-icon>
+            <span>Based on submission #{{ originalSubmissionId?.split('-')?.[1] || originalSubmissionId }}</span>
           </div>
-        </mat-card-content>
-      </mat-card>
-    }
+        }
+      </div>
+
+      <!-- Compact Company Selection -->
+      @if (availableCompanies.length > 0) {
+        <div class="company-selector-inline">
+          <mat-form-field appearance="outline" class="company-field-compact">
+            <mat-label>Company Configuration</mat-label>
+            <mat-select
+              [value]="selectedCompanyId"
+              (selectionChange)="onCompanyChange($event.value)"
+              placeholder="Default">
+              <mat-option [value]="null">Default Configuration</mat-option>
+              @for (company of availableCompanies; track company) {
+                <mat-option [value]="company">{{ company }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          @if (currentFormConfig) {
+            <div class="config-chips">
+              <mat-chip-set>
+                <mat-chip [disabled]="true">
+                  <mat-icon matChipAvatar>settings</mat-icon>
+                  {{ currentFormConfig.name }}
+                </mat-chip>
+                @if (currentFormConfig.companyId) {
+                  <mat-chip [disabled]="true" color="primary">
+                    <mat-icon matChipAvatar>business</mat-icon>
+                    {{ currentFormConfig.companyId }}
+                  </mat-chip>
+                }
+                @if (currentFormConfig.isDefault) {
+                  <mat-chip [disabled]="true" color="accent">
+                    <mat-icon matChipAvatar>star</mat-icon>
+                    Default
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+        </div>
+      }
+    </div>
   </div>
 
-  <!-- Loading State -->
+  <!-- Loading State (Compact) -->
   @if (isLoadingConfig) {
-    <mat-card class="loading-card">
-      <mat-card-content>
-        <div class="loading-container">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Loading form configuration...</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="loading-container-compact">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Loading configuration...</span>
+    </div>
   }
 
-  <!-- Error State -->
+  <!-- Error State (Compact) -->
   @if (configLoadError && !isLoadingConfig) {
-    <mat-card class="error-card">
-      <mat-card-content>
-        <div class="error-container">
-          <mat-icon color="warn">error</mat-icon>
-          <h3>Configuration Error</h3>
-          <p>Unable to load form configuration. Using default configuration.</p>
-          <button mat-raised-button color="primary" (click)="loadFormConfiguration()">
-            <mat-icon>refresh</mat-icon>
-            Retry
-          </button>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="error-container-compact">
+      <mat-icon color="warn">error</mat-icon>
+      <span>Configuration error. Using default.</span>
+      <button mat-button class="get-started-btn" (click)="loadFormConfiguration()">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
   }
 
-  <!-- Form Content -->
+  <!-- Form Content (Direct Integration) -->
   @if (!isLoadingConfig && rfqSections.length > 0) {
-    <app-reusable-form
-      [sections]="rfqSections"
-      [multi]="false"
-      [formTitle]="isRepeatMode ? 'Repeat RFQ Form' : 'RFQ Form'"
-      [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
-      [initialData]="isRepeatMode ? repeatedSubmissionData : initialFormData"
-      (formSubmit)="onFormSubmit($event)"
-      (formValueChange)="onFormValueChange($event)">
-    </app-reusable-form>
+    <div class="form-content">
+      <app-reusable-form
+        [sections]="rfqSections"
+        [multi]="false"
+        [formTitle]=""
+        [submitButtonText]="isRepeatMode ? 'Submit Repeated RFQ' : 'Submit RFQ'"
+        [initialData]="isRepeatMode ? repeatedSubmissionData : initialFormData"
+        (formSubmit)="onFormSubmit($event)"
+        (formValueChange)="onFormValueChange($event)">
+      </app-reusable-form>
+    </div>
   }
 </div>

@@ -181,7 +181,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           <mat-card-content>
             <div class="action-buttons">
               @for (formType of availableFormTypes; track formType) {
-                <button mat-raised-button
+                <button mat-flat-button
                   color="primary"
                   [routerLink]="['/templates', formType]"
                   class="form-type-button">
@@ -367,7 +367,7 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
     .stat-card {
       text-align: center;
       padding: 16px;
-      background: linear-gradient(135deg, #1976d2, #42a5f5);
+      background: linear-gradient(135deg, var(--azure-primary), var(--azure-accent));
       color: white;
       border-radius: 8px;
       min-width: 80px;
@@ -509,6 +509,16 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
       display: flex;
       align-items: center;
       gap: 8px;
+      border-radius: 12px;
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0.25px;
+      transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+    }
+
+    .form-type-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.3);
     }
 
     .count-chip {

@@ -1,0 +1,153 @@
+<div class="form-builder-container">
+  <!-- Top Navigation Bar -->
+  <div class="top-nav">
+    <div class="nav-content">
+      <div class="nav-left">
+        <div class="logo-section">
+          <mat-icon class="nav-icon">architecture</mat-icon>
+          <div class="nav-title">
+            <h1>Form Builder</h1>
+            <span class="nav-subtitle">Design dynamic forms visually</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-right">
+        <div class="nav-actions">
+          <button mat-flat-button color="primary" class="primary-btn" (click)="createNewConfiguration()">
+            <mat-icon>add_circle</mat-icon>
+            New Form
+          </button>
+
+          <button mat-stroked-button class="secondary-btn" [matMenuTriggerFor]="templatesMenu">
+            <mat-icon>library_books</mat-icon>
+            Templates
+            <mat-icon>expand_more</mat-icon>
+          </button>
+
+          <mat-menu #templatesMenu="matMenu" class="template-menu">
+            <button mat-menu-item (click)="loadTemplate('rfq')" class="template-item">
+              <mat-icon class="template-icon rfq">home_work</mat-icon>
+              <div class="template-info">
+                <span class="template-name">RFQ Form</span>
+                <small class="template-desc">Request for Quote</small>
+              </div>
+            </button>
+            <button mat-menu-item (click)="loadTemplate('contact')" class="template-item">
+              <mat-icon class="template-icon contact">contact_mail</mat-icon>
+              <div class="template-info">
+                <span class="template-name">Contact Form</span>
+                <small class="template-desc">Basic contact information</small>
+              </div>
+            </button>
+            <button mat-menu-item (click)="loadTemplate('survey')" class="template-item">
+              <mat-icon class="template-icon survey">poll</mat-icon>
+              <div class="template-info">
+                <span class="template-name">Survey Form</span>
+                <small class="template-desc">Customer feedback</small>
+              </div>
+            </button>
+            <button mat-menu-item (click)="loadTemplate('application')" class="template-item">
+              <mat-icon class="template-icon application">description</mat-icon>
+              <div class="template-info">
+                <span class="template-name">Application Form</span>
+                <small class="template-desc">Job applications</small>
+              </div>
+            </button>
+            <button mat-menu-item (click)="loadTemplate('feedback')" class="template-item">
+              <mat-icon class="template-icon feedback">feedback</mat-icon>
+              <div class="template-info">
+                <span class="template-name">Feedback Form</span>
+                <small class="template-desc">General feedback</small>
+              </div>
+            </button>
+          </mat-menu>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Workspace -->
+  <div class="workspace">
+    <!-- Editor Mode (when editing a form) -->
+    @if (currentForm()) {
+      <!-- Editor Header -->
+      <div class="editor-header">
+        <div class="header-left">
+          <button mat-icon-button class="back-btn" (click)="onEditorCancelled()" matTooltip="Back to Management">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="form-info">
+            <h2 class="form-name">{{ currentForm()?.name }}</h2>
+            <div class="form-meta">
+              <mat-chip class="form-type-chip">{{ currentForm()?.formType | uppercase }}</mat-chip>
+              <span class="form-version">v{{ currentForm()?.version }}</span>
+              <span class="form-status" [class.active]="currentForm()?.isActive">
+                {{ currentForm()?.isActive ? 'Active' : 'Draft' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div class="editor-actions">
+            <button mat-stroked-button class="action-btn" (click)="previewForm()" matTooltip="Preview Form">
+              <mat-icon>visibility</mat-icon>
+              Preview
+            </button>
+            <button mat-flat-button color="primary" class="action-btn primary" matTooltip="Save Configuration">
+              <mat-icon>save</mat-icon>
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Visual Editor Area -->
+      <div class="editor-workspace">
+        <app-visual-form-editor
+          [configuration]="currentForm()"
+          (save)="onConfigurationSaved($event)"
+          (cancel)="onEditorCancelled()">
+        </app-visual-form-editor>
+      </div>
+    } @else {
+      <!-- Management Mode (default view) -->
+      <div class="management-mode">
+        <!-- Welcome Section -->
+        @if (!configurations().length) {
+          <div class="welcome-section">
+            <div class="welcome-content">
+              <mat-icon class="welcome-icon">architecture</mat-icon>
+              <h2>Welcome to Form Builder</h2>
+              <p>Create powerful, dynamic forms with our visual form designer. Start by creating a new form or loading a template.</p>
+
+              <div class="welcome-actions">
+                <button mat-flat-button color="primary" class="welcome-btn" (click)="createNewConfiguration()">
+                  <mat-icon>add_circle</mat-icon>
+                  Create Your First Form
+                </button>
+                <button mat-stroked-button class="welcome-btn" [matMenuTriggerFor]="templatesMenu">
+                  <mat-icon>library_books</mat-icon>
+                  Browse Templates
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+
+        <!-- Configuration Management -->
+        @if (configurations().length) {
+          <div class="config-management">
+            <div class="section-header">
+              <h2>Your Forms</h2>
+              <p>Manage and edit your form configurations</p>
+            </div>
+
+            <app-config-management></app-config-management>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</div>

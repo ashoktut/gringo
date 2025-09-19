@@ -331,7 +331,7 @@ export class PdfGenerationService {
       if (heading && content.trim()) {
         sections.push(`
           <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-            <h3 style="color: #1976d2; margin: 0 0 10px 0;">${heading.textContent}</h3>
+            <h3 style="color: #0b7ad4; margin: 0 0 10px 0;">${heading.textContent}</h3>
             <div style="line-height: 1.6;">${content.replace(heading.textContent || '', '').trim()}</div>
           </div>
         `);
@@ -352,9 +352,9 @@ export class PdfGenerationService {
               color: #333;
             }
             h1 {
-              color: #1976d2;
+              color: #0b7ad4;
               text-align: center;
-              border-bottom: 2px solid #1976d2;
+              border-bottom: 2px solid #0b7ad4;
               padding-bottom: 10px;
             }
             .section {
@@ -364,7 +364,7 @@ export class PdfGenerationService {
               border-radius: 5px;
             }
             .section h3 {
-              color: #1976d2;
+              color: #0b7ad4;
               margin: 0 0 10px 0;
             }
           </style>
@@ -601,12 +601,12 @@ export class PdfGenerationService {
 
     return `
       <div style="margin: 20px 0;">
-        <h3 style="color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 5px;">
+        <h3 style="color: #0b7ad4; border-bottom: 2px solid #0b7ad4; padding-bottom: 5px;">
           ${formType.toUpperCase()} Form Data
         </h3>
         <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd; font-family: Arial, sans-serif;">
           <thead>
-            <tr style="background-color: #1976d2; color: white;">
+            <tr style="background-color: #0b7ad4; color: white;">
               <th style="padding: 12px; border: 1px solid #ddd; text-align: left; width: 30%;">Field</th>
               <th style="padding: 12px; border: 1px solid #ddd; text-align: left;">Value</th>
             </tr>
@@ -671,14 +671,14 @@ export class PdfGenerationService {
               font-weight: bold;
             }
             h1, h2, h3 {
-              color: #1976d2;
+              color: #0b7ad4;
               margin-top: 20px;
               margin-bottom: 10px;
             }
             .header {
               text-align: center;
               margin-bottom: 30px;
-              border-bottom: 2px solid #1976d2;
+              border-bottom: 2px solid #0b7ad4;
               padding-bottom: 20px;
             }
             .footer {

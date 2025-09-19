@@ -52,7 +52,7 @@
             <p>{{ action.description }}</p>
           </mat-card-content>
           <mat-card-actions align="end">
-            <button mat-raised-button [color]="action.color" [routerLink]="action.routePath">
+            <button mat-button class="get-started-btn" [routerLink]="action.routePath">
               Get Started
               <mat-icon>arrow_forward</mat-icon>
             </button>
@@ -85,7 +85,7 @@
         </div>
       </mat-card-content>
       <mat-card-actions align="end">
-        <button mat-button [routerLink]="'/submissions'">
+        <button mat-button class="get-started-btn" [routerLink]="'/submissions'">
           View All
           <mat-icon>arrow_forward</mat-icon>
         </button>

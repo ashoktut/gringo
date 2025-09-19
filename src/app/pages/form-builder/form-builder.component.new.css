@@ -1,0 +1,339 @@
+.form-builder-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  margin: 0;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.header-section {
+  background: var(--azure-gradient-primary);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 20px rgba(11, 122, 212, 0.15);
+  z-index: 100;
+  position: relative;
+  color: white;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  max-width: none;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-title p {
+  margin: 4px 0 0 0;
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.header-icon {
+  font-size: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 12px;
+  padding: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.header-actions button {
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.header-actions button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.content-area {
+  flex: 1;
+  background: #fafafa;
+  position: relative;
+  overflow: hidden;
+}
+
+.full-width-tabs {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width-tabs ::ng-deep .mat-mdc-tab-group {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.full-width-tabs ::ng-deep .mat-mdc-tab-body-wrapper {
+  flex: 1;
+  height: 100%;
+}
+
+.full-width-tabs ::ng-deep .mat-mdc-tab-body {
+  height: 100%;
+}
+
+.full-width-tabs ::ng-deep .mat-mdc-tab-body-content {
+  height: 100%;
+  overflow: hidden;
+}
+
+.tab-content {
+  height: 100%;
+  overflow: auto;
+  padding: 0;
+}
+
+.manage-tab {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.editor-tab {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.editor-header {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  position: relative;
+}
+
+.editor-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.editor-info h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.form-type-badge {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.editor-actions button {
+  border-radius: 6px;
+}
+
+.visual-editor-wrapper {
+  flex: 1;
+  height: calc(100vh - 140px);
+  overflow: hidden;
+  background: #f8f9fa;
+}
+
+.visual-editor-wrapper ::ng-deep app-visual-form-editor {
+  height: 100%;
+  display: block;
+}
+
+/* Full width layout overrides */
+.visual-editor-wrapper ::ng-deep .visual-editor-container {
+  height: 100%;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.visual-editor-wrapper ::ng-deep .editor-layout {
+  height: 100%;
+  display: flex;
+  gap: 0;
+}
+
+.visual-editor-wrapper ::ng-deep .field-palette {
+  width: 280px;
+  min-width: 280px;
+  border-right: 1px solid #e0e0e0;
+  background: white;
+}
+
+.visual-editor-wrapper ::ng-deep .form-canvas {
+  flex: 1;
+  min-width: 0;
+  background: #fafafa;
+}
+
+.visual-editor-wrapper ::ng-deep .properties-panel {
+  width: 320px;
+  min-width: 320px;
+  border-left: 1px solid #e0e0e0;
+  background: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .visual-editor-wrapper ::ng-deep .field-palette {
+    width: 240px;
+    min-width: 240px;
+  }
+
+  .visual-editor-wrapper ::ng-deep .properties-panel {
+    width: 280px;
+    min-width: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .header-title h1 {
+    font-size: 1.4rem;
+  }
+
+  .header-actions {
+    flex-wrap: wrap;
+  }
+
+  .visual-editor-wrapper {
+    height: calc(100vh - 160px);
+  }
+
+  .visual-editor-wrapper ::ng-deep .editor-layout {
+    flex-direction: column;
+  }
+
+  .visual-editor-wrapper ::ng-deep .field-palette,
+  .visual-editor-wrapper ::ng-deep .properties-panel {
+    width: 100%;
+    min-width: auto;
+    border: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}
+
+/* Animation enhancements */
+.header-section {
+  animation: slideDown 0.3s ease-out;
+}
+
+.content-area {
+  animation: fadeIn 0.4s ease-out 0.1s both;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Tab styling improvements */
+.full-width-tabs ::ng-deep .mat-mdc-tab {
+  min-width: 160px;
+  font-weight: 500;
+}
+
+.full-width-tabs ::ng-deep .mat-mdc-tab .mdc-tab__text-label {
+  font-size: 0.95rem;
+}
+
+.full-width-tabs ::ng-deep .mat-mdc-tab-header {
+  background: white;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Scrollbar styling */
+.tab-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.tab-content::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.tab-content::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+.tab-content::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}

@@ -42,7 +42,7 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
             (searchChange)="onSearchChange($event)"
             (searchClear)="onSearchClear()">
           </app-search>
-          <button mat-raised-button color="primary" (click)="createNewRFQ()">
+          <button mat-flat-button color="primary" (click)="createNewRFQ()">
             <mat-icon>add</mat-icon>
             New RFQ
           </button>
@@ -155,7 +155,7 @@ import { SearchComponent, SearchConfig } from '../../sharedComponents/search/sea
         @if (isSearching) {
           <p>Try adjusting your search terms or clear the search to see all submissions.</p>
         }
-        <button mat-raised-button color="primary" (click)="createNewRFQ()">
+        <button mat-flat-button color="primary" (click)="createNewRFQ()">
           Create {{ isSearching ? 'New' : 'First' }} RFQ
         </button>
       </div>

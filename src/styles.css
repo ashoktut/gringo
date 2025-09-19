@@ -4,52 +4,162 @@
 /* MapLibre GL JS CSS - Required for proper map styling */
 @import 'maplibre-gl/dist/maplibre-gl.css';
 
-/* Material Design Custom Theme Variables */
+/* Angular Material Theme - Azure Blue Theme */
+@import '@angular/material/prebuilt-themes/azure-blue.css';
+
+/* MapLibre GL JS CSS - Required for proper map styling */
+@import 'maplibre-gl/dist/maplibre-gl.css';
+
+/* ===== AZURE BLUE DESIGN SYSTEM VARIABLES ===== */
 :root {
-  --primary-color: #1976d2;
-  --primary-variant: #1565c0;
-  --secondary-color: #03dac6;
-  --secondary-variant: #018786;
-  --background: #fafafa;
-  --surface: #ffffff;
-  --error: #b00020;
-  --on-primary: #ffffff;
-  --on-secondary: #000000;
-  --on-background: #000000;
-  --on-surface: #000000;
+  /* Primary Azure Blue Palette */
+  --azure-primary: #0b7ad4;
+  --azure-primary-dark: #0968c2;
+  --azure-primary-light: #1e88e5;
+  --azure-accent: #0ea5e9;
+  --azure-secondary: #64748b;
+
+  /* Azure Blue Gradients */
+  --azure-gradient-primary: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
+  --azure-gradient-light: linear-gradient(135deg, var(--azure-primary-light) 0%, var(--azure-primary) 100%);
+  --azure-gradient-accent: linear-gradient(135deg, var(--azure-accent) 0%, var(--azure-primary) 100%);
+  --azure-gradient-subtle: linear-gradient(135deg, rgba(11, 122, 212, 0.1) 0%, rgba(9, 104, 194, 0.05) 100%);
+
+  /* RGB Values for Transparency */
+  --azure-primary-rgb: 11, 122, 212;
+  --azure-primary-dark-rgb: 9, 104, 194;
+
+  /* Surface Colors */
+  --azure-surface: #ffffff;
+  --azure-surface-variant: #f8fafc;
+  --azure-surface-dim: #f1f5f9;
+  --azure-background: #fafafa;
+
+  /* Outline Colors */
+  --azure-outline: #e2e8f0;
+  --azure-outline-variant: #cbd5e1;
+
+  /* Text Colors */
+  --azure-on-primary: #ffffff;
+  --azure-on-surface: #1e293b;
+  --azure-on-surface-variant: #64748b;
+  --azure-on-background: #0f172a;
+
+  /* State Colors */
+  --azure-success: #10b981;
+  --azure-success-light: #34d399;
+  --azure-warning: #f59e0b;
+  --azure-warning-light: #fbbf24;
+  --azure-error: #ef4444;
+  --azure-error-light: #f87171;
+  --azure-info: #06b6d4;
+  --azure-info-light: #22d3ee;
+
+  /* Shadows */
+  --azure-shadow-sm: 0 1px 2px 0 rgba(11, 122, 212, 0.05);
+  --azure-shadow: 0 4px 6px -1px rgba(11, 122, 212, 0.1), 0 2px 4px -1px rgba(11, 122, 212, 0.06);
+  --azure-shadow-md: 0 10px 15px -3px rgba(11, 122, 212, 0.1), 0 4px 6px -2px rgba(11, 122, 212, 0.05);
+  --azure-shadow-lg: 0 20px 25px -5px rgba(11, 122, 212, 0.1), 0 10px 10px -5px rgba(11, 122, 212, 0.04);
+  --azure-shadow-xl: 0 25px 50px -12px rgba(11, 122, 212, 0.25);
+
+  /* Legacy Material Design Variables (for backward compatibility) */
+  --primary-color: var(--azure-primary);
+  --primary-variant: var(--azure-primary-dark);
+  --secondary-color: var(--azure-accent);
+  --secondary-variant: var(--azure-secondary);
+  --background: var(--azure-background);
+  --surface: var(--azure-surface);
+  --error: var(--azure-error);
+  --on-primary: var(--azure-on-primary);
+  --on-secondary: var(--azure-on-surface);
+  --on-background: var(--azure-on-background);
+  --on-surface: var(--azure-on-surface);
   --on-error: #ffffff;
 }
 
-/* Global Material Design Base Styles */
+/* ===== GLOBAL AZURE BLUE BASE STYLES ===== */
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
-  background-color: var(--background);
-  color: var(--on-background);
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--azure-background);
+  color: var(--azure-on-background);
   overflow-x: hidden;
 }
 
-/* Remove default margins and padding that can cause gaps */
+/* Global Box Model Reset */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* Ensure Angular Material components don't have unwanted spacing */
+/* Azure Blue Material Component Styling */
 .mat-drawer-container,
 .mat-sidenav-container,
 .mat-drawer-content,
 .mat-sidenav-content {
   margin: 0;
   padding: 0;
+  background-color: var(--azure-surface-variant);
 }
 
 .mat-toolbar {
   margin: 0;
   padding: 0 24px;
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
+  color: var(--azure-on-primary);
+  box-shadow: var(--azure-shadow-md);
+}
+
+/* Azure Blue Button Styling */
+.mat-mdc-raised-button.mat-primary {
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
+  box-shadow: var(--azure-shadow);
+  transition: all 0.3s ease;
+}
+
+.mat-mdc-raised-button.mat-primary:hover {
+  background: linear-gradient(135deg, var(--azure-primary-dark) 0%, var(--azure-primary) 100%);
+  box-shadow: var(--azure-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.mat-mdc-fab.mat-primary {
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-accent) 100%);
+  box-shadow: var(--azure-shadow-lg);
+}
+
+/* Get Started Button Style - Text Button with Azure Blue Theme */
+.get-started-btn {
+  color: var(--azure-primary) !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  letter-spacing: 0.25px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  padding: 8px 16px !important;
+}
+
+.get-started-btn:hover {
+  background-color: rgba(11, 122, 212, 0.08) !important;
+  color: var(--azure-primary-dark) !important;
+  transform: translateX(4px) !important;
+}
+
+.get-started-btn mat-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1) !important;
+}
+
+.get-started-btn:hover mat-icon {
+  transform: translateX(2px) !important;
 }
 
 /* Material Design Typography Scale */
@@ -184,30 +294,151 @@ html, body {
   background-color: rgba(25, 118, 210, 0.04) !important;
 }
 
-/* Custom Blue Gradient Utilities */
-.gradient-primary {
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
+/* ===== AZURE BLUE DESIGN PATTERN UTILITIES ===== */
+
+/* Gradient Utilities */
+.azure-gradient-primary {
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
 }
 
-.gradient-secondary {
-  background: linear-gradient(135deg, #03dac6 0%, #4fc3f7 100%);
+.azure-gradient-accent {
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-accent) 100%);
 }
 
-.gradient-surface {
-  background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%);
+.azure-gradient-surface {
+  background: linear-gradient(135deg, var(--azure-surface) 0%, var(--azure-surface-variant) 100%);
 }
 
-/* Enhanced Map Styling with Material Design */
+.azure-gradient-subtle {
+  background: linear-gradient(135deg, var(--azure-surface-variant) 0%, var(--azure-surface-dim) 100%);
+}
+
+/* Card Patterns */
+.azure-card {
+  background: var(--azure-surface);
+  border: 2px solid var(--azure-outline);
+  border-radius: 16px;
+  box-shadow: var(--azure-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.azure-card:hover {
+  border-color: var(--azure-primary);
+  box-shadow: var(--azure-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.azure-card-elevated {
+  background: linear-gradient(135deg, var(--azure-surface) 0%, var(--azure-surface-variant) 100%);
+  border: 2px solid rgba(11, 122, 212, 0.1);
+  border-radius: 20px;
+  box-shadow: var(--azure-shadow-md);
+}
+
+/* Button Patterns */
+.azure-button-primary {
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
+  color: var(--azure-on-primary);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  box-shadow: var(--azure-shadow);
+  transition: all 0.3s ease;
+}
+
+.azure-button-primary:hover {
+  background: linear-gradient(135deg, var(--azure-primary-dark) 0%, var(--azure-primary) 100%);
+  box-shadow: var(--azure-shadow-lg);
+  transform: translateY(-2px);
+}
+
+.azure-button-secondary {
+  background: var(--azure-surface);
+  color: var(--azure-primary);
+  border: 2px solid var(--azure-primary);
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.azure-button-secondary:hover {
+  background: var(--azure-primary);
+  color: var(--azure-on-primary);
+  box-shadow: var(--azure-shadow);
+}
+
+/* Icon Containers */
+.azure-icon-container {
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-accent) 100%);
+  color: var(--azure-on-primary);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--azure-shadow);
+  transition: all 0.3s ease;
+}
+
+.azure-icon-container:hover {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: var(--azure-shadow-lg);
+}
+
+/* Text Utilities */
+.azure-text-primary { color: var(--azure-primary); }
+.azure-text-secondary { color: var(--azure-secondary); }
+.azure-text-on-surface { color: var(--azure-on-surface); }
+.azure-text-on-surface-variant { color: var(--azure-on-surface-variant); }
+
+/* Background Utilities */
+.azure-bg-surface { background-color: var(--azure-surface); }
+.azure-bg-surface-variant { background-color: var(--azure-surface-variant); }
+.azure-bg-primary { background-color: var(--azure-primary); }
+
+/* Border Utilities */
+.azure-border { border: 1px solid var(--azure-outline); }
+.azure-border-2 { border: 2px solid var(--azure-outline); }
+.azure-border-primary { border: 2px solid var(--azure-primary); }
+
+/* Shadow Utilities */
+.azure-shadow-sm { box-shadow: var(--azure-shadow-sm); }
+.azure-shadow { box-shadow: var(--azure-shadow); }
+.azure-shadow-md { box-shadow: var(--azure-shadow-md); }
+.azure-shadow-lg { box-shadow: var(--azure-shadow-lg); }
+.azure-shadow-xl { box-shadow: var(--azure-shadow-xl); }
+
+/* Spacing Utilities */
+.azure-p-16 { padding: 16px; }
+.azure-p-20 { padding: 20px; }
+.azure-p-24 { padding: 24px; }
+.azure-m-16 { margin: 16px; }
+.azure-m-20 { margin: 20px; }
+.azure-mb-16 { margin-bottom: 16px; }
+.azure-mb-20 { margin-bottom: 20px; }
+
+/* Layout Utilities */
+.azure-flex { display: flex; }
+.azure-flex-column { flex-direction: column; }
+.azure-flex-center { align-items: center; justify-content: center; }
+.azure-gap-8 { gap: 8px; }
+.azure-gap-12 { gap: 12px; }
+.azure-gap-16 { gap: 16px; }
+
+/* Enhanced Map Styling with Azure Blue Theme */
 .maplibregl-popup-content {
   padding: 16px 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-  border: none;
-  font-family: Roboto, "Helvetica Neue", sans-serif;
+  border-radius: 16px;
+  box-shadow: var(--azure-shadow-xl);
+  border: 2px solid var(--azure-outline);
+  font-family: 'Roboto', sans-serif;
+  background: var(--azure-surface);
 }
 
 .maplibregl-popup-tip {
-  border-top-color: white;
+  border-top-color: var(--azure-surface);
 }
 
 .maplibregl-marker {
@@ -220,15 +451,23 @@ html, body {
 }
 
 .maplibregl-ctrl-group {
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  border: none;
+  border-radius: 12px;
+  box-shadow: var(--azure-shadow-md);
+  border: 2px solid var(--azure-outline);
+  background: var(--azure-surface);
 }
 
 .maplibregl-ctrl-group button {
   border-radius: 0;
-  transition: background-color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  background: var(--azure-surface);
+  color: var(--azure-on-surface);
 }
+
+.maplibregl-ctrl-group button:hover {
+  background: var(--azure-surface-variant);
+}
+
 
 .maplibregl-ctrl-group button:hover {
   background-color: rgba(25, 118, 210, 0.08);

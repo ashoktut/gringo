@@ -1,0 +1,169 @@
+<div class="universal-form-container">
+  <!-- Consolidated Page Header -->
+  @if (config().showHeader) {
+    <div class="consolidated-header">
+      <div class="header-content">
+        <div class="title-section">
+          <div class="form-icon-wrapper">
+            <mat-icon [fontIcon]="formIcon()" class="form-icon"></mat-icon>
+          </div>
+          <div class="title-info">
+            <h1 class="page-title">{{ pageTitle() }}</h1>
+            <p class="page-subtitle">{{ pageSubtitle() }}</p>
+          </div>
+        </div>
+
+        <!-- Inline Breadcrumb & Configuration -->
+        <div class="meta-section">
+          <!-- Breadcrumb Navigation -->
+          <div class="breadcrumb-nav">
+            <mat-chip-set>
+              <mat-chip [disabled]="true" class="breadcrumb-chip category-chip">
+                <mat-icon matChipAvatar>folder</mat-icon>
+                {{ breadcrumb().category }}
+              </mat-chip>
+              <mat-icon class="breadcrumb-separator">chevron_right</mat-icon>
+              <mat-chip [disabled]="true" class="breadcrumb-chip form-chip">
+                <mat-icon matChipAvatar [fontIcon]="formIcon()"></mat-icon>
+                {{ breadcrumb().formType }}
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+
+          <!-- Configuration Information - Inline -->
+          @if (currentConfiguration()) {
+            <div class="config-info-inline">
+              <mat-chip-set class="config-chips">
+                <mat-chip [disabled]="true" class="info-chip name-chip">
+                  <mat-icon matChipAvatar>label</mat-icon>
+                  {{ currentConfiguration()?.name }}
+                </mat-chip>
+
+                @if (currentConfiguration()?.companyId) {
+                  <mat-chip [disabled]="true" class="info-chip company-chip">
+                    <mat-icon matChipAvatar>business</mat-icon>
+                    {{ currentConfiguration()?.companyId }}
+                  </mat-chip>
+                }
+
+                @if (currentConfiguration()?.isDefault) {
+                  <mat-chip [disabled]="true" class="info-chip default-chip">
+                    <mat-icon matChipAvatar>star</mat-icon>
+                    Default
+                  </mat-chip>
+                }
+
+                <mat-chip [disabled]="true" class="info-chip version-chip">
+                  <mat-icon matChipAvatar>info</mat-icon>
+                  v{{ currentConfiguration()?.version }}
+                </mat-chip>
+              </mat-chip-set>
+            </div>
+          }
+        </div>
+
+        <!-- Company Selection - Inline -->
+        @if (config().allowCompanySelection && availableCompanies().length > 0) {
+          <div class="company-selection-inline">
+            <mat-form-field appearance="outline" class="company-selector">
+              <mat-label>
+                <mat-icon matPrefix>business</mat-icon>
+                Select Company Configuration
+              </mat-label>
+              <mat-select
+                [value]="selectedCompanyId()"
+                (selectionChange)="onCompanyChange($event.value)"
+                class="company-select">
+                <mat-option value="" class="default-option">
+                  <mat-icon>settings</mat-icon>
+                  Default Configuration
+                </mat-option>
+                @for (company of availableCompanies(); track company) {
+                  <mat-option [value]="company" class="company-option">
+                    <mat-icon>business_center</mat-icon>
+                    {{ company }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Loading State (Compact) -->
+  @if (isLoading()) {
+    <div class="loading-container-compact">
+      <mat-spinner diameter="32" color="primary"></mat-spinner>
+      <span>Loading {{ formType() }} form configuration...</span>
+    </div>
+  }
+
+  <!-- Error State (Compact) -->
+  @if (!isLoading() && !currentConfiguration()) {
+    <div class="error-container-compact">
+      <mat-icon color="warn">error</mat-icon>
+      <span>Unable to load form configuration</span>
+      <button mat-stroked-button color="primary" (click)="retryLoadConfiguration()">
+        <mat-icon>refresh</mat-icon>
+        Retry
+      </button>
+    </div>
+  }
+
+  <!-- Dynamic Form -->
+  @if (!isLoading() && formConfig() && currentConfiguration()) {
+    <div class="form-content-section">
+      <app-dynamic-form
+        [config]="formConfig()"
+        [companyId]="selectedCompanyId()"
+        [enableRepeatMode]="config().enableRepeatMode || false"
+        (formSubmitted)="onFormSubmitted($event)"
+        (formSaved)="onFormSaved($event)"
+        class="dynamic-form-wrapper">
+      </app-dynamic-form>
+    </div>
+  }
+
+  <!-- Footer Information -->
+  @if (!isLoading() && currentConfiguration()) {
+    <mat-card class="footer-info-card" appearance="outlined">
+      <mat-card-content>
+        <div class="footer-info">
+          <div class="form-metadata">
+            <span class="metadata-item">
+              <mat-icon>person</mat-icon>
+              Created by {{ currentConfiguration()?.metadata?.createdBy || 'Unknown' }}
+            </span>
+            <span class="metadata-item">
+              <mat-icon>schedule</mat-icon>
+              {{ currentConfiguration()?.metadata?.createdAt | date:'mediumDate' }}
+            </span>
+            @if (currentConfiguration()?.metadata?.industry) {
+              <span class="metadata-item">
+                <mat-icon>category</mat-icon>
+                {{ currentConfiguration()?.metadata?.industry }}
+              </span>
+            }
+          </div>
+
+          <div class="form-actions">
+            @if (config().enablePdfGeneration) {
+              <mat-chip class="action-chip pdf-chip">
+                <mat-icon matChipAvatar>picture_as_pdf</mat-icon>
+                PDF Generation Enabled
+              </mat-chip>
+            }
+            @if (config().enableRepeatMode) {
+              <mat-chip class="action-chip repeat-chip">
+                <mat-icon matChipAvatar>repeat</mat-icon>
+                Repeat Mode Available
+              </mat-chip>
+            }
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+</div>

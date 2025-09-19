@@ -5,8 +5,12 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCardModule } from '@angular/material/card';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
 
-import { FormConfiguration } from '../../services/form-config.service';
+import { FormConfiguration, FormConfigService } from '../../services/form-config.service';
+import { FormBuilderTemplateService } from './services/form-builder-template.service';
 import { VisualFormEditorComponent } from '../../sharedComponents/visual-form-editor/visual-form-editor.component';
 import { ConfigManagementComponent } from './config-management/config-management.component';
 
@@ -19,134 +23,50 @@ import { ConfigManagementComponent } from './config-management/config-management
     MatButtonModule,
     MatCardModule,
     MatIconModule,
+    MatMenuModule,
+    MatTooltipModule,
+    MatChipsModule,
     VisualFormEditorComponent,
     ConfigManagementComponent
   ],
-  template: `
-    <div class="form-builder-container">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="header-icon">build</mat-icon>
-            Form Configuration Builder
-          </mat-card-title>
-          <mat-card-subtitle>
-            Manage and design dynamic form configurations with the integrated visual editor
-          </mat-card-subtitle>
-        </mat-card-header>
-
-        <mat-card-content>
-          <mat-tab-group [selectedIndex]="activeTabIndex()" (selectedIndexChange)="activeTabIndex.set($event)">
-            <mat-tab label="Manage Configurations">
-              <div class="tab-content">
-                <app-config-management></app-config-management>
-              </div>
-            </mat-tab>
-
-            <mat-tab label="Visual Editor" [disabled]="!editingConfig()">
-              <div class="tab-content" *ngIf="editingConfig()">
-                <div class="editor-header">
-                  <h3>Editing: {{ editingConfig()?.name }}</h3>
-                  <button mat-raised-button color="primary" (click)="createNewConfiguration()">
-                    <mat-icon>add</mat-icon>
-                    Create New Configuration
-                  </button>
-                </div>
-
-                <app-visual-form-editor
-                  [configuration]="editingConfig()"
-                  (save)="onConfigurationSaved($event)"
-                  (cancel)="onEditorCancelled()">
-                </app-visual-form-editor>
-              </div>
-            </mat-tab>
-          </mat-tab-group>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  `,
-  styles: [`
-    .form-builder-container {
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .header-icon {
-      font-size: 2rem;
-      width: 2rem;
-      height: 2rem;
-      color: #667eea;
-      margin-right: 12px;
-    }
-
-    .tab-content {
-      padding: 20px 0;
-    }
-
-    .editor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .editor-header h3 {
-      margin: 0;
-      color: #333;
-    }
-
-    @media (max-width: 768px) {
-      .form-builder-container {
-        padding: 10px;
-      }
-
-      .editor-header {
-        flex-direction: column;
-        gap: 15px;
-        align-items: flex-start;
-      }
-    }
-  `]
+  templateUrl: './form-builder.component.html',
+  styleUrl: './form-builder.component.css'
 })
 export class FormBuilderComponent implements OnInit {
+  // Injected services
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly formConfigService = inject(FormConfigService);
+  private readonly templateService = inject(FormBuilderTemplateService);
 
-  editingConfig = signal<FormConfiguration | null>(null);
+  // Component state
+  currentMode = signal<string>('management');
+  currentForm = signal<FormConfiguration | null>(null);
   configurations = signal<FormConfiguration[]>([]);
-  activeTabIndex = signal<number>(0);
-  canEdit = computed(() => !!this.editingConfig());
 
-  ngOnInit() {
+  // Computed properties
+  canEdit = computed(() => !!this.currentForm());
+  availableTemplates = computed(() => this.templateService.getAllTemplates());
+
+  ngOnInit(): void {
+    this.initializeComponent();
+  }
+
+  // Initialization
+  private initializeComponent(): void {
     this.loadConfigurations();
     this.checkForEditMode();
   }
 
-  private loadConfigurations() {
-    const mockConfigurations: FormConfiguration[] = [
-      {
-        id: '1',
-        name: 'Contact Form',
-        formType: 'contact',
-        version: '1.0',
-        isDefault: true,
-        isActive: true,
-        sections: [],
-        metadata: {
-          createdBy: 'admin',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          description: 'Basic contact form with name, email, and message fields'
-        }
-      }
-    ];
-    this.configurations.set(mockConfigurations);
+  private loadConfigurations(): void {
+    // Load existing configurations from service
+    this.formConfigService.getAllFormConfigs().subscribe({
+      next: (configs) => this.configurations.set(configs),
+      error: (error) => console.error('Failed to load configurations:', error)
+    });
   }
 
-  private checkForEditMode() {
+  private checkForEditMode(): void {
     this.route.queryParams.subscribe(params => {
       if (params['edit']) {
         const configId = params['edit'];
@@ -158,56 +78,133 @@ export class FormBuilderComponent implements OnInit {
     });
   }
 
-  editConfiguration(config: FormConfiguration) {
-    this.editingConfig.set(config);
-    this.activeTabIndex.set(1);
+  // Mode management
+  switchMode(mode: string) {
+    this.currentMode.set(mode);
   }
 
-  createNewConfiguration() {
-    const newConfig: FormConfiguration = {
-      id: '',
-      name: 'New Configuration',
-      formType: 'custom',
-      version: '1.0',
-      isDefault: false,
-      isActive: true,
-      sections: [],
-      metadata: {
-        createdBy: 'user',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        description: ''
-      }
-    };
-    this.editingConfig.set(newConfig);
-    this.activeTabIndex.set(1);
+  newForm() {
+    this.currentForm.set(null);
+    this.currentMode.set('editor');
   }
 
-  onConfigurationSaved(config: FormConfiguration) {
-    if (!config.id) {
-      config.id = Date.now().toString();
-      this.configurations.update(configs => [...configs, config]);
-    } else {
-      this.configurations.update(configs =>
-        configs.map(c => c.id === config.id ? config : c)
-      );
+  // Form actions
+  previewForm() {
+    if (this.currentForm()) {
+      console.log('Previewing form:', this.currentForm());
+      // TODO: Implement preview functionality
     }
-    this.editingConfig.set(null);
-    this.activeTabIndex.set(0);
   }
 
-  onEditorCancelled() {
-    this.editingConfig.set(null);
-    this.activeTabIndex.set(0);
+  exportForm() {
+    if (this.currentForm()) {
+      const dataStr = JSON.stringify(this.currentForm(), null, 2);
+      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+      const exportFileDefaultName = `form-${Date.now()}.json`;
+
+      const linkElement = document.createElement('a');
+      linkElement.setAttribute('href', dataUri);
+      linkElement.setAttribute('download', exportFileDefaultName);
+      linkElement.click();
+    }
   }
 
-  deleteConfiguration(config: FormConfiguration) {
+  shareForm() {
+    if (this.currentForm()) {
+      console.log('Sharing form:', this.currentForm());
+      // TODO: Implement sharing logic
+    }
+  }
+
+  // Event handlers from visual editor
+  onFormSave(formData: any) {
+    console.log('Form saved:', formData);
+    this.saveConfiguration(formData);
+  }
+
+  onFormLoad(formData: any) {
+    console.log('Form loaded:', formData);
+    this.currentForm.set(formData);
+  }
+
+  onConfigChange(config: any) {
+    console.log('Config changed:', config);
+  }
+
+  // Configuration management
+  editConfiguration(config: FormConfiguration): void {
+    this.currentForm.set(config);
+    this.currentMode.set('editor');
+  }
+
+  createNewConfiguration(): void {
+    const newConfig = this.templateService.createCustomConfiguration();
+    this.currentForm.set(newConfig);
+    this.currentMode.set('editor');
+  }
+
+  loadTemplate(templateId: string): void {
+    if (templateId === 'rfq') {
+      // Special handling for RFQ template from FormConfigService
+      const rfqConfig = this.formConfigService.getComprehensiveRfqConfiguration();
+      this.currentForm.set(rfqConfig);
+    } else {
+      // Use template service for other templates
+      const config = this.templateService.templateToFormConfiguration(templateId);
+      if (config) {
+        this.currentForm.set(config);
+      }
+    }
+    this.currentMode.set('editor');
+  }
+
+  // Event handlers
+  onConfigurationSaved(config: FormConfiguration): void {
+    this.saveConfiguration(config);
+    this.exitEditor();
+  }
+
+  onEditorCancelled(): void {
+    this.exitEditor();
+  }
+
+  deleteConfiguration(config: FormConfiguration): void {
     this.configurations.update(configs =>
       configs.filter(c => c.id !== config.id)
     );
-    if (this.editingConfig()?.id === config.id) {
-      this.editingConfig.set(null);
-      this.activeTabIndex.set(0);
+
+    if (this.currentForm()?.id === config.id) {
+      this.exitEditor();
     }
+  }
+
+  // Private helpers
+  private saveConfiguration(config: FormConfiguration): void {
+    if (!config.id) {
+      // New configuration - assign ID
+      config.id = this.generateConfigId();
+    }
+
+    // Use saveFormConfig for both create and update
+    this.formConfigService.saveFormConfig(config).subscribe({
+      next: (savedConfig) => {
+        console.log('✅ Configuration saved successfully:', savedConfig);
+        this.loadConfigurations(); // Refresh the configurations list
+      },
+      error: (error) => {
+        console.error('❌ Error saving configuration:', error);
+        // TODO: Show error notification to user
+      }
+    });
+  }
+
+  private exitEditor(): void {
+    this.currentForm.set(null);
+    this.currentMode.set('management');
+  }
+
+  private generateConfigId(): string {
+    return `config_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 }

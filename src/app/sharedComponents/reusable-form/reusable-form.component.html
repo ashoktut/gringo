@@ -66,7 +66,7 @@
         <div class="validation-summary">
           <mat-icon color="warn">warning</mat-icon>
           <span>{{ validationErrors().length }} validation error(s)</span>
-          <button mat-button color="warn" (click)="validateAllFields()">
+          <button mat-button class="get-started-btn" (click)="validateAllFields()">
             Review Errors
           </button>
         </div>
@@ -117,7 +117,7 @@
         <div class="draft-actions">
           <button
             mat-button
-            color="accent"
+            class="get-started-btn"
             type="button"
             (click)="saveDraft()"
             [disabled]="!isDirty() || isLoading()">
@@ -129,11 +129,11 @@
 
       <!-- Primary Submit -->
       <button
-        mat-raised-button
+        mat-button
         color="primary"
         type="submit"
         [disabled]="!isFormValid() || isLoading()"
-        class="submit-button">
+        class="submit-button get-started-btn">
         @if (isLoading()) {
           <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
         }
@@ -143,7 +143,7 @@
       <!-- Reset Button -->
       <button
         mat-button
-        color="warn"
+        class="get-started-btn"
         type="button"
         (click)="resetForm()"
         [disabled]="!isDirty() || isLoading()">
@@ -155,8 +155,8 @@
       <div class="pdf-actions" style="margin-left: 16px; display: flex; gap: 8px;">
         <!-- Generate PDF from HTML -->
         <button
-          mat-stroked-button
-          color="accent"
+          mat-button
+          class="get-started-btn"
           type="button"
           (click)="generatePdfFromHtml()"
           [disabled]="!isFormValid() || isLoading()"
@@ -174,8 +174,8 @@
           (change)="onDocxFileSelected($event)">
 
         <button
-          mat-stroked-button
-          color="accent"
+          mat-button
+          class="get-started-btn"
           type="button"
           (click)="docxFileInput.click()"
           [disabled]="!isFormValid() || isLoading()"

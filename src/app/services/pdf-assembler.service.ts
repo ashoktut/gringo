@@ -157,8 +157,8 @@ export class PdfAssemblerService {
   private processCssForPdf(css: string): string {
     // Define the CSS variable values for PDF generation
     const cssVariables = {
-      '--primary-blue': '#1565C0',
-      '--secondary-blue': '#1976D2',
+      '--primary-blue': '#0b7ad4',
+      '--secondary-blue': '#0968c2',
       '--accent-blue': '#2196F3',
       '--light-blue': '#E3F2FD',
       '--success-green': '#388E3C',
@@ -206,7 +206,7 @@ export class PdfAssemblerService {
     }
 
     .lcp-header {
-      background: linear-gradient(135deg, #1565C0 0%, #1976D2 100%) !important;
+      background: linear-gradient(135deg, #0b7ad4 0%, #0968c2 100%) !important;
       color: white !important;
     }
 
@@ -216,7 +216,7 @@ export class PdfAssemblerService {
     }
 
     .rfq-section:nth-child(odd) {
-      border-left: 4px solid #1565C0 !important;
+      border-left: 4px solid #0b7ad4 !important;
     }
 
     .rfq-section:nth-child(even) {

@@ -1,0 +1,210 @@
+<div class="forms-dashboard-container">
+  <!-- Header -->
+  <mat-toolbar class="dashboard-header" color="primary">
+    <div class="header-content">
+      <div class="header-left">
+        <mat-icon class="header-icon">{{ roleIcon() }}</mat-icon>
+        <div class="header-title">
+          <h1>{{ roleTitle() }}</h1>
+          <span class="subtitle">Available Forms</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        @if (currentRole() === 'admin') {
+          <button mat-raised-button color="accent" (click)="navigateToFormBuilder()" class="action-btn">
+            <mat-icon>add</mat-icon>
+            Create Form
+          </button>
+
+          <button mat-stroked-button (click)="navigateToConfigManagement()" class="action-btn">
+            <mat-icon>settings</mat-icon>
+            Manage Configs
+          </button>
+        }
+
+        <button mat-icon-button (click)="refreshDashboard()" matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Filters Section -->
+  <div class="filters-section">
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <div class="filters-content">
+          <div class="filter-group">
+            <mat-form-field appearance="outline">
+              <mat-label>Company</mat-label>
+              <mat-select
+                [value]="selectedCompany()"
+                (selectionChange)="onCompanyChange($event.value)">
+                @for (company of companies; track company.id) {
+                  <mat-option [value]="company.id">{{ company.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="stats-chips">
+            <mat-chip-set>
+              <mat-chip>
+                <mat-icon matChipAvatar>assignment</mat-icon>
+                {{ filteredForms().length }} Forms Available
+              </mat-chip>
+              <mat-chip color="primary">
+                <mat-icon matChipAvatar>{{ roleIcon() }}</mat-icon>
+                {{ currentRole() | titlecase }} Access
+              </mat-chip>
+            </mat-chip-set>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading available forms...</p>
+    </div>
+  }
+
+  <!-- Forms Grid -->
+  @if (!isLoading() && filteredForms().length > 0) {
+    <div class="forms-grid">
+      @for (formCard of filteredForms(); track formCard.config.id) {
+        <mat-card class="form-card" [class.recently-used]="formCard.isRecentlyUsed">
+          <mat-card-header>
+            <div mat-card-avatar class="form-avatar">
+              <mat-icon [color]="getFormTypeColor(formCard.config.formType)">
+                {{ getFormTypeIcon(formCard.config.formType) }}
+              </mat-icon>
+            </div>
+
+            <mat-card-title class="form-title">
+              {{ formCard.config.name }}
+            </mat-card-title>
+
+            <mat-card-subtitle class="form-subtitle">
+              <div class="subtitle-content">
+                <span class="form-type">{{ formCard.config.formType | uppercase }}</span>
+                @if (formCard.isRecentlyUsed) {
+                  <mat-icon class="recent-badge" color="accent" matTooltip="Recently Used">
+                    schedule
+                  </mat-icon>
+                }
+              </div>
+            </mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content>
+            <div class="form-description">
+              {{ formCard.config.metadata.description || 'No description available' }}
+            </div>
+
+            <div class="form-metadata">
+              <div class="metadata-item">
+                <mat-icon class="metadata-icon">folder</mat-icon>
+                <span>{{ formCard.config.sections.length || 0 }} sections</span>
+              </div>
+
+              <div class="metadata-item">
+                <mat-icon class="metadata-icon">assessment</mat-icon>
+                <span matBadge="{{ formCard.submissionCount }}" matBadgeColor="accent">
+                  Submissions
+                </span>
+              </div>
+
+              <div class="metadata-item">
+                <mat-icon class="metadata-icon">access_time</mat-icon>
+                <span>{{ formatLastUsed(formCard.lastUsed) }}</span>
+              </div>
+            </div>
+
+            <!-- Company Badge -->
+            @if (formCard.config.companyId) {
+              <div class="company-badge">
+                <mat-chip color="primary">
+                  <mat-icon matChipAvatar>business</mat-icon>
+                  Company Specific
+                </mat-chip>
+              </div>
+            } @else {
+              <div class="company-badge">
+                <mat-chip>
+                  <mat-icon matChipAvatar>public</mat-icon>
+                  Default Template
+                </mat-chip>
+              </div>
+            }
+
+            <!-- Version & Status -->
+            <div class="form-status">
+              <div class="version-info">
+                <span class="version">v{{ formCard.config.version }}</span>
+                @if (formCard.config.isDefault) {
+                  <mat-chip color="accent">Default</mat-chip>
+                }
+              </div>
+            </div>
+          </mat-card-content>
+
+          <mat-card-actions align="end">
+            <button
+              mat-raised-button
+              [color]="getFormTypeColor(formCard.config.formType)"
+              (click)="navigateToForm(formCard)"
+              class="use-form-btn">
+              <mat-icon>launch</mat-icon>
+              Use Form
+            </button>
+
+            @if (currentRole() === 'admin') {
+              <button mat-icon-button matTooltip="Edit Configuration">
+                <mat-icon>edit</mat-icon>
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!isLoading() && filteredForms().length === 0) {
+    <div class="empty-state">
+      <mat-card class="empty-card">
+        <mat-card-content>
+          <div class="empty-content">
+            <mat-icon class="empty-icon">assignment_late</mat-icon>
+            <h2>No Forms Available</h2>
+            <p>
+              @if (selectedCompany() !== 'all') {
+                No forms are available for the selected company and your role.
+              } @else {
+                No forms are available for your role at this time.
+              }
+            </p>
+
+            @if (currentRole() === 'admin') {
+              <div class="empty-actions">
+                <button mat-raised-button color="primary" (click)="navigateToFormBuilder()">
+                  <mat-icon>add</mat-icon>
+                  Create Your First Form
+                </button>
+              </div>
+            } @else {
+              <p class="contact-admin">
+                Contact your administrator to create forms for your role.
+              </p>
+            }
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

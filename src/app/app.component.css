@@ -10,26 +10,26 @@
 
 .sidenav-container {
   height: 100%;
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
 }
 
 .sidenav {
   width: 280px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
-  border-right: 1px solid rgba(25, 118, 210, 0.12);
-  box-shadow: 0 0 20px rgba(0,0,0,0.05);
+  background: linear-gradient(180deg, var(--azure-surface) 0%, var(--azure-surface-variant) 100%);
+  border-right: 2px solid var(--azure-outline);
+  box-shadow: var(--azure-shadow-md);
 }
 
 .sidenav .mat-toolbar {
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-  color: white;
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
+  color: var(--azure-on-primary);
   display: flex;
   align-items: center;
   padding: 20px 24px;
   box-shadow: none;
   border-radius: 0;
   margin-bottom: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidenav-header .app-icon {
@@ -53,7 +53,7 @@
 
 .sidenav .mat-mdc-nav-list {
   padding: 16px 16px 0 16px;
-  background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+  background: linear-gradient(180deg, var(--azure-surface) 0%, var(--azure-surface-variant) 100%);
 }
 
 .sidenav .mat-mdc-list-item {
@@ -84,13 +84,13 @@
 
 .sidenav .mat-mdc-list-item:hover {
   transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
+  box-shadow: var(--azure-shadow);
 }
 
 .sidenav .mat-mdc-list-item.active-nav-item {
-  background: linear-gradient(135deg, #1976d2 0%, #42a5f5 100%);
-  color: white;
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.4);
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-accent) 100%);
+  color: var(--azure-on-primary);
+  box-shadow: var(--azure-shadow-lg);
   transform: translateX(8px);
 }
 
@@ -100,25 +100,25 @@
 }
 
 .sidenav .mat-mdc-list-item.active-nav-item .mat-icon {
-  color: white;
+  color: var(--azure-on-primary);
 }
 
 .sidenav .mat-mdc-list-item .mat-icon {
   margin-right: 16px;
-  color: var(--primary-color);
+  color: var(--azure-primary);
   transition: color 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 .sidenav .mat-mdc-list-item.active-nav-item .mat-icon {
-  color: white;
+  color: var(--azure-on-primary);
 }
 
 .main-toolbar {
   position: sticky;
   top: 0;
   z-index: 1000;
-  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
-  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.2);
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
+  box-shadow: var(--azure-shadow-md);
   backdrop-filter: blur(10px);
   margin: 0;
   border: none;
@@ -132,7 +132,7 @@
   font-size: 20px;
   font-weight: 500;
   letter-spacing: 0.25px;
-  color: white;
+  color: var(--azure-on-primary);
 }
 
 .toolbar-spacer {
@@ -140,7 +140,7 @@
 }
 
 .main-toolbar .mat-mdc-icon-button {
-  color: white;
+  color: var(--azure-on-primary);
   transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
@@ -152,7 +152,7 @@
 .main-content {
   padding: 0;
   min-height: calc(100vh - 64px);
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, var(--azure-surface-variant) 0%, var(--azure-surface-dim) 100%);
   position: relative;
 }
 
@@ -187,7 +187,7 @@
   }
 
   .main-toolbar {
-    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.15);
+    box-shadow: var(--azure-shadow);
   }
 }
 
@@ -218,13 +218,13 @@
 }
 
 .sidenav-container .mat-drawer-backdrop {
-  background-color: rgba(25, 118, 210, 0.6);
+  background-color: rgba(11, 122, 212, 0.6);
   backdrop-filter: blur(4px);
 }
 
 /* Material Design Focus States */
 .mat-mdc-list-item:focus {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--azure-primary);
   outline-offset: 2px;
 }
 
@@ -242,9 +242,9 @@
 
 /* Material Design State Layer Implementation */
 .mat-mdc-list-item {
-  --mdc-list-list-item-hover-state-layer-color: var(--primary-color);
+  --mdc-list-list-item-hover-state-layer-color: var(--azure-primary);
   --mdc-list-list-item-hover-state-layer-opacity: 0.04;
-  --mdc-list-list-item-focus-state-layer-color: var(--primary-color);
+  --mdc-list-list-item-focus-state-layer-color: var(--azure-primary);
   --mdc-list-list-item-focus-state-layer-opacity: 0.08;
 }
 
@@ -266,7 +266,7 @@
 
 /* Material Design Divider Enhancement */
 .nav-divider {
-  border-color: rgba(25, 118, 210, 0.12);
+  border-color: var(--azure-outline);
   margin: 8px 16px;
 }
 
@@ -276,15 +276,15 @@
 }
 
 .sidenav::-webkit-scrollbar-track {
-  background: rgba(25, 118, 210, 0.05);
+  background: rgba(11, 122, 212, 0.05);
   border-radius: 3px;
 }
 
 .sidenav::-webkit-scrollbar-thumb {
-  background: rgba(25, 118, 210, 0.3);
+  background: rgba(11, 122, 212, 0.3);
   border-radius: 3px;
 }
 
 .sidenav::-webkit-scrollbar-thumb:hover {
-  background: rgba(25, 118, 210, 0.5);
+  background: rgba(11, 122, 212, 0.5);
 }

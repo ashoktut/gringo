@@ -1,8 +1,9 @@
 <div class="picture-upload-container">
   <!-- Upload Button/Menu -->
-  <div class="upload-controls" *ngIf="!pictureData && !isCapturing">
-    <button
-      mat-raised-button
+  @if (!pictureData && !isCapturing) {
+    <div class="upload-controls">
+      <button
+        mat-flat-button
       type="button"
       color="primary"
       [matMenuTriggerFor]="uploadMenu"
@@ -17,10 +18,12 @@
         <mat-icon>upload</mat-icon>
         <span>Upload from Device</span>
       </button>
-  <button mat-menu-item type="button" (click)="startCamera()" *ngIf="isCameraSupported">
-        <mat-icon>camera_alt</mat-icon>
-        <span>Take Picture</span>
-      </button>
+  @if (isCameraSupported) {
+    <button mat-menu-item type="button" (click)="startCamera()">
+      <mat-icon>camera_alt</mat-icon>
+      <span>Take Picture</span>
+    </button>
+  }
     </mat-menu>
   </div>
 

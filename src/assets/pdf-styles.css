@@ -1,5 +1,15 @@
 /* ================= MODERN PROFESSIONAL PDF TEMPLATE STYLES ================= */
 
+/* Azure Blue Design System Variables for PDF */
+:root {
+  /* Azure Blue Gradients for PDF */
+  --azure-primary: #0b7ad4;
+  --azure-primary-dark: #0968c2;
+  --azure-gradient-primary: linear-gradient(135deg, #0b7ad4 0%, #0968c2 100%);
+  --azure-gradient-accent: linear-gradient(135deg, #0ea5e9 0%, #0b7ad4 100%);
+  --azure-gradient-light: linear-gradient(135deg, #1e88e5 0%, #0b7ad4 100%);
+}
+
 /* ================= PRINT AND PAGE BREAK STYLES ================= */
 /* Print-specific styles for headers and footers on every page */
 .print-header {
@@ -67,7 +77,7 @@
   .print-footer {
     display: none;
   }
-  
+
   .print-content {
     margin-top: 0;
     margin-bottom: 0;
@@ -82,28 +92,28 @@
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  
+
   .print-header,
   .print-footer {
     display: block;
   }
-  
+
   /* Ensure content doesn't overlap with fixed headers */
   .print-content {
     margin-top: 100px;
     margin-bottom: 80px;
   }
-  
+
   /* Page numbering */
   .page-number:after {
     content: counter(page);
   }
-  
+
   /* Optimize content for print */
   .lcp-header {
     page-break-inside: avoid;
   }
-  
+
   .lcp-footer {
     page-break-inside: avoid;
   }
@@ -156,7 +166,7 @@ body {
 
 /* ================= HEADER SECTION ================= */
 .lcp-header {
-  background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+  background: var(--azure-gradient-primary);
   border-radius: 12px;
   padding: 0;
   margin-bottom: 12px;
@@ -168,6 +178,7 @@ body {
 /* Print-specific header positioning */
 @media print {
   .lcp-header {
+    background: var(--azure-gradient-primary) !important;
     position: fixed;
     top: 0;
     left: 0;
@@ -175,7 +186,7 @@ body {
     z-index: 1000;
     margin: 0;
     border-radius: 0;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%) !important;
+    background: var(--azure-gradient-primary) !important;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
