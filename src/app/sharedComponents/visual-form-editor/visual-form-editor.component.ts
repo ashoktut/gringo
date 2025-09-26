@@ -18,7 +18,7 @@ import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FormSection, FormField, ReusableFormComponent } from '../reusable-form/reusable-form.component';
-import { FormConfiguration } from '../../services/form-config.service';
+import { FormConfiguration, FormConfigService } from '../../services/form-config.service';
 
 export interface FieldPaletteItem {
   type: string;
@@ -58,6 +58,7 @@ export interface FieldPaletteItem {
 export class VisualFormEditorComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly formConfigService = inject(FormConfigService);
 
   @Input() configuration: FormConfiguration | null = null;
   @Input() readonly = false;
@@ -70,6 +71,10 @@ export class VisualFormEditorComponent implements OnInit {
   selectedSectionIndex = signal(0);
   selectedFieldIndex = signal(-1);
   draggedField = signal<FormField | null>(null);
+
+  // Company-related state
+  availableCompanies = signal<string[]>([]);
+  selectedCompanyId = signal<string>('');
 
   // Mobile navigation state
   isMobileNavVisible = signal(true);
@@ -107,6 +112,18 @@ export class VisualFormEditorComponent implements OnInit {
 
   ngOnInit() {
     this.loadConfiguration();
+    this.loadAvailableCompanies();
+  }
+
+  private loadAvailableCompanies(): void {
+    this.formConfigService.getAvailableCompanies().subscribe({
+      next: (companies) => {
+        this.availableCompanies.set(companies);
+      },
+      error: (error) => {
+        console.error('Error loading companies:', error);
+      }
+    });
   }
 
   private initializeEditorForm(): void {
@@ -135,6 +152,7 @@ export class VisualFormEditorComponent implements OnInit {
   private loadConfiguration(): void {
     if (this.configuration?.sections) {
       this.sections.set([...this.configuration.sections]);
+      this.selectedCompanyId.set(this.configuration.companyId || '');
       this.buildSectionsFormArray();
     } else {
       // Create default section if none exists
@@ -435,11 +453,22 @@ export class VisualFormEditorComponent implements OnInit {
     return {
       ...this.configuration!,
       sections: this.sections(),
+      companyId: this.selectedCompanyId() || undefined,
       metadata: {
         ...this.configuration!.metadata,
         updatedAt: new Date()
       }
     };
+  }
+
+  // Company selection handler
+  onCompanySelectionChange(companyId: string): void {
+    this.selectedCompanyId.set(companyId);
+    this.snackBar.open(
+      companyId ? `Form assigned to: ${companyId}` : 'Form set as default (no company)',
+      'Dismiss',
+      { duration: 3000 }
+    );
   }
 
   saveConfiguration(): void {

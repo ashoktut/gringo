@@ -7,6 +7,7 @@ import { RfqComponent } from './pages/reps/rfq/rfq.component';
 import { RqrComponent } from './pages/reps/rqr/rqr.component';
 import { SubmissionsComponent } from './pages/submissions/submissions.component';
 import { TemplatesComponent } from './pages/templates/templates.component';
+import { EnhancedTemplatesComponent } from './pages/templates/enhanced-templates.component';
 import { StorageManagementComponent } from './pages/storage-management/storage-management.component';
 import { FormBuilderComponent } from './pages/form-builder/form-builder.component';
 import { ConfigManagementComponent } from './pages/form-builder/config-management/config-management.component';
@@ -51,6 +52,8 @@ export const routes: Routes = [
 
   { path: 'templates', component: TemplatesComponent },
   { path: 'templates/:formType', component: TemplatesComponent },
+  { path: 'enhanced-templates', component: EnhancedTemplatesComponent },
+  { path: 'admin/templates', component: EnhancedTemplatesComponent },
 
   // Management and configuration routes
   { path: 'storage-management', component: StorageManagementComponent },

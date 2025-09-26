@@ -19,6 +19,15 @@
             New Form
           </button>
 
+          <button
+            mat-stroked-button
+            class="secondary-btn"
+            (click)="toggleCompanyManagement()"
+            [class.active]="showCompanyManagement()">
+            <mat-icon>business</mat-icon>
+            {{ showCompanyManagement() ? 'Forms' : 'Companies' }}
+          </button>
+
           <button mat-stroked-button class="secondary-btn" [matMenuTriggerFor]="templatesMenu">
             <mat-icon>library_books</mat-icon>
             Templates
@@ -114,38 +123,43 @@
     } @else {
       <!-- Management Mode (default view) -->
       <div class="management-mode">
-        <!-- Welcome Section -->
-        @if (!configurations().length) {
-          <div class="welcome-section">
-            <div class="welcome-content">
-              <mat-icon class="welcome-icon">architecture</mat-icon>
-              <h2>Welcome to Form Builder</h2>
-              <p>Create powerful, dynamic forms with our visual form designer. Start by creating a new form or loading a template.</p>
+        @if (showCompanyManagement()) {
+          <!-- Company Management -->
+          <app-company-management></app-company-management>
+        } @else {
+          <!-- Welcome Section -->
+          @if (!configurations().length) {
+            <div class="welcome-section">
+              <div class="welcome-content">
+                <mat-icon class="welcome-icon">architecture</mat-icon>
+                <h2>Welcome to Form Builder</h2>
+                <p>Create powerful, dynamic forms with our visual form designer. Start by creating a new form or loading a template.</p>
 
-              <div class="welcome-actions">
-                <button mat-flat-button color="primary" class="welcome-btn" (click)="createNewConfiguration()">
-                  <mat-icon>add_circle</mat-icon>
-                  Create Your First Form
-                </button>
-                <button mat-stroked-button class="welcome-btn" [matMenuTriggerFor]="templatesMenu">
-                  <mat-icon>library_books</mat-icon>
-                  Browse Templates
-                </button>
+                <div class="welcome-actions">
+                  <button mat-flat-button color="primary" class="welcome-btn" (click)="createNewConfiguration()">
+                    <mat-icon>add_circle</mat-icon>
+                    Create Your First Form
+                  </button>
+                  <button mat-stroked-button class="welcome-btn" [matMenuTriggerFor]="templatesMenu">
+                    <mat-icon>library_books</mat-icon>
+                    Browse Templates
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        }
+          }
 
-        <!-- Configuration Management -->
-        @if (configurations().length) {
-          <div class="config-management">
-            <div class="section-header">
-              <h2>Your Forms</h2>
-              <p>Manage and edit your form configurations</p>
+          <!-- Configuration Management -->
+          @if (configurations().length) {
+            <div class="config-management">
+              <div class="section-header">
+                <h2>Your Forms</h2>
+                <p>Manage and edit your form configurations</p>
+              </div>
+
+              <app-config-management></app-config-management>
             </div>
-
-            <app-config-management></app-config-management>
-          </div>
+          }
         }
       </div>
     }

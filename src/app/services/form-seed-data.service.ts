@@ -19,7 +19,9 @@ export class FormSeedDataService {
       this.createSampleRqrConfiguration(),
       this.createSampleInspectionConfiguration(),
       this.createSampleContactConfiguration(),
-      this.createSampleAdminConfiguration()
+      this.createSampleAdminConfiguration(),
+      // Company-specific configurations
+      ...this.createCompanySpecificConfigurations()
     ];
   }
 
@@ -173,5 +175,135 @@ export class FormSeedDataService {
         tags: ['admin', 'user-management']
       }
     };
+  }
+
+  /**
+   * Create company-specific sample configurations for multi-tenant testing
+   */
+  private createCompanySpecificConfigurations(): FormConfiguration[] {
+    return [
+      // ABC Construction Company - Custom RFQ
+      {
+        id: 'rfq-abc-construction-2025',
+        name: 'ABC Construction - Custom RFQ',
+        formType: 'rfq',
+        version: '1.0',
+        companyId: 'ABC Construction',
+        isDefault: false,
+        isActive: true,
+        sections: [
+          {
+            title: 'ABC Construction - Project Details',
+            description: 'Custom RFQ form for ABC Construction projects',
+            expanded: true,
+            fields: [
+              { name: 'projectCode', label: 'ABC Project Code', type: 'text', required: true, placeholder: 'Enter ABC project code' },
+              { name: 'clientName', label: 'Client Name', type: 'text', required: true },
+              { name: 'projectType', label: 'Project Type', type: 'select', required: true, options: [
+                { value: 'residential', label: 'Residential' },
+                { value: 'commercial', label: 'Commercial - ABC Special' },
+                { value: 'industrial', label: 'Industrial - ABC Premium' }
+              ]},
+              { name: 'timeline', label: 'Expected Timeline', type: 'text', required: true },
+              { name: 'specialRequirements', label: 'ABC Special Requirements', type: 'textarea', placeholder: 'Any special ABC Construction requirements' }
+            ]
+          }
+        ],
+        metadata: {
+          createdBy: 'ABC Admin',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          description: 'Custom RFQ form tailored for ABC Construction workflows',
+          allowedRoles: ['rep', 'admin'],
+          category: 'reps',
+          tags: ['rfq', 'abc-construction', 'custom']
+        }
+      },
+
+      // XYZ Builders - Custom RFQ
+      {
+        id: 'rfq-xyz-builders-2025',
+        name: 'XYZ Builders - Premium RFQ',
+        formType: 'rfq',
+        version: '1.0',
+        companyId: 'XYZ Builders',
+        isDefault: false,
+        isActive: true,
+        sections: [
+          {
+            title: 'XYZ Builders - Premium Project Request',
+            description: 'Premium RFQ form for XYZ Builders high-end projects',
+            expanded: true,
+            fields: [
+              { name: 'xyzReferenceId', label: 'XYZ Reference ID', type: 'text', required: true, placeholder: 'XYZ-####' },
+              { name: 'premiumLevel', label: 'Premium Level', type: 'select', required: true, options: [
+                { value: 'gold', label: 'Gold Premium' },
+                { value: 'platinum', label: 'Platinum Premium' },
+                { value: 'diamond', label: 'Diamond Premium' }
+              ]},
+              { name: 'architectName', label: 'Architect Name', type: 'text', required: true },
+              { name: 'budgetRange', label: 'Budget Range', type: 'select', required: true, options: [
+                { value: '100k-250k', label: '$100k - $250k' },
+                { value: '250k-500k', label: '$250k - $500k' },
+                { value: '500k+', label: '$500k+' }
+              ]},
+              { name: 'designNotes', label: 'Design Notes', type: 'textarea', placeholder: 'Detailed design requirements and notes' }
+            ]
+          }
+        ],
+        metadata: {
+          createdBy: 'XYZ Admin',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          description: 'Premium RFQ form for XYZ Builders luxury projects',
+          allowedRoles: ['rep', 'admin'],
+          category: 'reps',
+          tags: ['rfq', 'xyz-builders', 'premium', 'luxury']
+        }
+      },
+
+      // DEF Corp - Inspection Form
+      {
+        id: 'inspection-def-corp-2025',
+        name: 'DEF Corp - Safety Inspection',
+        formType: 'inspection',
+        version: '1.0',
+        companyId: 'DEF Corp',
+        isDefault: false,
+        isActive: true,
+        sections: [
+          {
+            title: 'DEF Corp Safety Inspection',
+            description: 'Comprehensive safety inspection for DEF Corp standards',
+            expanded: true,
+            fields: [
+              { name: 'defSiteId', label: 'DEF Site ID', type: 'text', required: true },
+              { name: 'safetyOfficer', label: 'Safety Officer', type: 'text', required: true },
+              { name: 'inspectionLevel', label: 'Inspection Level', type: 'select', required: true, options: [
+                { value: 'level1', label: 'Level 1 - Basic' },
+                { value: 'level2', label: 'Level 2 - Comprehensive' },
+                { value: 'level3', label: 'Level 3 - Full Audit' }
+              ]},
+              { name: 'hazardAssessment', label: 'Hazard Assessment', type: 'textarea', required: true },
+              { name: 'complianceStatus', label: 'Compliance Status', type: 'radio', required: true, options: [
+                { value: 'compliant', label: 'Fully Compliant' },
+                { value: 'minor-issues', label: 'Minor Issues' },
+                { value: 'major-issues', label: 'Major Issues' },
+                { value: 'non-compliant', label: 'Non-Compliant' }
+              ]}
+            ]
+          }
+        ],
+        metadata: {
+          createdBy: 'DEF Safety Admin',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          description: 'DEF Corp safety inspection form with compliance tracking',
+          allowedRoles: ['rep', 'admin'],
+          category: 'reps',
+          tags: ['inspection', 'def-corp', 'safety', 'compliance']
+        }
+      }
+    ];
   }
 }

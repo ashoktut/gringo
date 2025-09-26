@@ -110,6 +110,38 @@
       }
     }
 
+    <!-- Validation Status Bar -->
+    <div class="validation-status-bar" *ngIf="showFormProgress || !isFormValid()">
+      <div class="validation-status-content">
+        <div class="validation-progress">
+          <span class="validation-text">
+            <ng-container *ngIf="isFormValid(); else invalidForm">
+              <mat-icon class="success-icon">check_circle</mat-icon>
+              Form is ready to submit
+            </ng-container>
+            <ng-template #invalidForm>
+              <span class="error-count">{{ getFormValidationStatus().invalidFields }}</span>
+              field(s) need attention
+            </ng-template>
+          </span>
+
+          <div class="progress-bar" *ngIf="showFormProgress">
+            <div class="progress-fill"
+                 [style.width.%]="(formProgress().completed / formProgress().total) * 100">
+            </div>
+          </div>
+        </div>
+
+        <button mat-button
+                class="show-errors-btn"
+                *ngIf="!isFormValid()"
+                (click)="showValidationSummary(); scrollToFirstInvalidField()">
+          <mat-icon>error_outline</mat-icon>
+          Show Issues
+        </button>
+      </div>
+    </div>
+
     <!-- Enhanced Form Actions -->
     <div class="form-actions">
       <!-- Draft Actions -->
@@ -128,17 +160,31 @@
       }
 
       <!-- Primary Submit -->
-      <button
-        mat-button
-        color="primary"
-        type="submit"
-        [disabled]="!isFormValid() || isLoading()"
-        class="submit-button get-started-btn">
-        @if (isLoading()) {
-          <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
-        }
-        {{ submitButtonText }}
-      </button>
+      <div class="submit-button-wrapper">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="!isFormValid() || isLoading()"
+          class="submit-button get-started-btn">
+          @if (isLoading()) {
+            <mat-spinner diameter="20" style="margin-right: 8px;"></mat-spinner>
+            Submitting...
+          } @else {
+            <mat-icon *ngIf="isFormValid()">check_circle</mat-icon>
+            <mat-icon *ngIf="!isFormValid()">error_outline</mat-icon>
+            {{ submitButtonText }}
+          }
+        </button>
+
+        <!-- Validation help text -->
+        <div class="validation-help" *ngIf="!isFormValid()">
+          <small>
+            <mat-icon class="help-icon">help_outline</mat-icon>
+            Complete {{ getFormValidationStatus().missingRequiredFields }} required field(s) to enable submission
+          </small>
+        </div>
+      </div>
 
       <!-- Reset Button -->
       <button
@@ -206,7 +252,16 @@
 <!-- NEW: Shared field template (moved all your existing field code here) -->
 <ng-template #fieldTemplate let-field>
   @if (shouldShowField(field)) {
-    <div [formGroup]="form">
+    <div class="form-field-wrapper"
+         [attr.data-field]="field.name"
+         [class.has-error]="hasFieldError(field.name)"
+         [formGroup]="form">
+
+      <!-- Add error highlight indicator -->
+      <div class="field-error-indicator" *ngIf="hasFieldError(field.name)">
+        <mat-icon class="error-icon">error</mat-icon>
+      </div>
+
       <!-- Input Fields (text, email, password, number, tel) -->
       @if (isInputField(field.type)) {
         <mat-form-field

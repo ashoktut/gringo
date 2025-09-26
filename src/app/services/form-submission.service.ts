@@ -58,6 +58,9 @@ export class FormSubmissionService {
     formData: any,
     formStructure: FormSection[]
   ): Observable<FormSubmission> {
+    alert('Form submission service called!'); // Temporary debug
+    console.log('Creating submission:', { formType, formTitle, formData });
+
     // Extract configuration metadata from form data
     const metadata = formData._metadata || {};
 
@@ -78,21 +81,17 @@ export class FormSubmissionService {
       configurationVersion: metadata.configurationVersion
     };
 
-    console.log('📝 Creating submission with configuration metadata:', {
-      configurationId: submission.configurationId,
-      configurationName: submission.configurationName,
-      companyId: submission.companyId
-    });
+    console.log('Created submission object:', submission);
 
     // Save submission first
     this.submissions.push(submission);
     this.saveSubmissionsToStorage().subscribe({
       next: () => {
+        console.log('Submission saved to IndexedDB:', submission.submissionId);
         this.submissionsSubject.next([...this.submissions]);
-        console.log('✅ Submission saved to IndexedDB:', submission.submissionId);
       },
       error: (error) => {
-        console.error('❌ Failed to save submission to IndexedDB:', error);
+        console.error('Failed to save submission to IndexedDB:', error);
         // Remove from memory if save failed
         const index = this.submissions.findIndex(s => s.submissionId === submission.submissionId);
         if (index > -1) {
@@ -300,7 +299,7 @@ export class FormSubmissionService {
       ).subscribe({
         next: () => {
           this.submissionsSubject.next([...this.submissions]);
-          console.log('✅ Submission updated in IndexedDB:', updatedSubmission.submissionId);
+
         },
         error: (error) => {
           console.error('❌ Failed to update submission in IndexedDB:', error);
@@ -380,7 +379,7 @@ export class FormSubmissionService {
       return this.indexedDbService.delete(this.indexedDbService.STORES.SUBMISSIONS, submissionId).pipe(
         tap(() => {
           this.submissionsSubject.next([...this.submissions]);
-          console.log('✅ Submission deleted from IndexedDB:', submissionId);
+
         }),
         catchError(error => {
           console.error('❌ Failed to delete submission from IndexedDB:', error);
@@ -515,7 +514,7 @@ export class FormSubmissionService {
         this.loadFromIndexedDB();
       },
       error: (error) => {
-        console.error('❌ Migration failed, loading from IndexedDB anyway:', error);
+
         this.loadFromIndexedDB();
       }
     });
@@ -530,7 +529,7 @@ export class FormSubmissionService {
           updatedAt: new Date(item.data.updatedAt)
         }));
         this.submissionsSubject.next([...this.submissions]);
-        console.log('✅ Loaded submissions from IndexedDB:', this.submissions.length);
+
       },
       error: (error) => {
         console.error('❌ Failed to load submissions from IndexedDB:', error);

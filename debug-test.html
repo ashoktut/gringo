@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test</title>
+</head>
+<body>
+    <h1>Debug Test</h1>
+    <p>This is a temporary test file to debug the form submission issue.</p>
+
+    <h2>Steps to test:</h2>
+    <ol>
+        <li>Open browser console (F12)</li>
+        <li>Navigate to http://localhost:4200/reps/rfq</li>
+        <li>Fill in some basic fields (not signature)</li>
+        <li>Check console for "Building form with fields" message</li>
+        <li>Try to submit and see console logs</li>
+        <li>Navigate to http://localhost:4200/submissions</li>
+        <li>Check console for "Loading submissions" message</li>
+    </ol>
+
+    <h2>Common issues to check:</h2>
+    <ul>
+        <li>Form validation preventing submission (signature field)</li>
+        <li>IndexedDB not storing data</li>
+        <li>Service not creating submissions properly</li>
+        <li>Submissions page not loading data</li>
+    </ul>
+</body>
+</html>

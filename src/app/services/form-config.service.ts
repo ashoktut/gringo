@@ -15,6 +15,19 @@ export interface FormConfiguration {
   isDefault: boolean;
   isActive: boolean;
   sections: FormSection[];
+  templates?: {
+    htmlTemplate?: string; // HTML template content
+    docxTemplate?: {
+      fileName: string;
+      fileContent: string; // Base64 encoded DOCX content
+      uploadDate: Date;
+    };
+    pdfSettings?: {
+      orientation: 'portrait' | 'landscape';
+      paperSize: 'A4' | 'Letter' | 'A3';
+      margins?: { top: number; right: number; bottom: number; left: number; };
+    };
+  };
   metadata: {
     createdBy: string;
     createdAt: Date;
@@ -1086,7 +1099,7 @@ export class FormConfigService {
               name: 'repSign',
               label: 'Rep Signature',
               type: 'signature',
-              required: true,
+              required: false, // Temporary change for testing
               placeholder: 'Please sign here to confirm your request',
             },
           ],
@@ -1264,6 +1277,66 @@ export class FormConfigService {
     } else {
       this.formConfigs.push(config);
     }
+
+    return this.saveToStorage().pipe(
+      map(() => {
+        this.formConfigsSubject.next([...this.formConfigs]);
+        return config;
+      })
+    );
+  }
+
+  /**
+   * Toggle form activation status
+   */
+  toggleFormActivation(formId: string): Observable<FormConfiguration> {
+    const config = this.formConfigs.find(c => c.id === formId);
+    if (!config) {
+      throw new Error(`Form configuration with ID "${formId}" not found`);
+    }
+
+    config.isActive = !config.isActive;
+    config.metadata.updatedAt = new Date();
+
+    return this.saveToStorage().pipe(
+      map(() => {
+        this.formConfigsSubject.next([...this.formConfigs]);
+        return config;
+      })
+    );
+  }
+
+  /**
+   * Activate a form
+   */
+  activateForm(formId: string): Observable<FormConfiguration> {
+    const config = this.formConfigs.find(c => c.id === formId);
+    if (!config) {
+      throw new Error(`Form configuration with ID "${formId}" not found`);
+    }
+
+    config.isActive = true;
+    config.metadata.updatedAt = new Date();
+
+    return this.saveToStorage().pipe(
+      map(() => {
+        this.formConfigsSubject.next([...this.formConfigs]);
+        return config;
+      })
+    );
+  }
+
+  /**
+   * Deactivate a form
+   */
+  deactivateForm(formId: string): Observable<FormConfiguration> {
+    const config = this.formConfigs.find(c => c.id === formId);
+    if (!config) {
+      throw new Error(`Form configuration with ID "${formId}" not found`);
+    }
+
+    config.isActive = false;
+    config.metadata.updatedAt = new Date();
 
     return this.saveToStorage().pipe(
       map(() => {

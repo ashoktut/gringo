@@ -17,6 +17,7 @@ import {
   FormBuilder,
   Validators,
   FormControl,
+  AbstractControl,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -264,7 +265,27 @@ export class ReusableFormComponent implements OnInit, OnChanges, OnDestroy {
   });
 
   isFormValid = computed(() => {
-    return this.form?.valid ?? false;
+    if (!this.form) return false;
+
+    const allFields = this.getAllFields();
+
+    // Check each field individually
+    for (const field of allFields) {
+      const control = this.form.get(field.name);
+      if (!control) continue;
+
+      // Skip validation for hidden conditional fields
+      if (field.conditional && !this.shouldShowField(field)) {
+        continue;
+      }
+
+      // Check if visible field is valid
+      if (control.invalid) {
+        return false;
+      }
+    }
+
+    return true;
   });
 
   autoSaveStatusText = computed(() => {
@@ -283,7 +304,6 @@ export class ReusableFormComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(private fb: FormBuilder) {}
 
-// ✅ Enhanced ngOnInit with enterprise features
 ngOnInit() {
   this.buildForm();
 
@@ -488,13 +508,19 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
     return company?.name || companyId;
   }
 
-  // Enhanced submit handling
   onSubmit(): void {
+    alert('Form submission started! Valid: ' + this.form.valid); // Temporary debug
+    console.log('Form submission started', this.form.valid);
+
     if (this.validationMode === 'onSubmit') {
       this.updateValidationState();
     }
 
+    // Mark all fields as touched to show validation errors
+    this.markFormGroupTouched();
+
     if (this.form.valid) {
+      alert('Form is valid! Proceeding with submission.'); // Temporary debug
       const formData = {
         ...this.form.value,
         companyId: this.currentCompanyId(),
@@ -506,6 +532,7 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
         }
       };
 
+      console.log('Emitting form data:', formData);
       this.formSubmit.emit(formData);
       this.isDirty.set(false);
 
@@ -516,13 +543,14 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
         });
       }
     } else {
+      alert('Form validation failed! Check console for errors.'); // Temporary debug
+      console.log('Form validation failed:', this.form.errors);
+      // Enhanced error handling for invalid form
       this.updateValidationState();
 
       if (this.enableValidationFeedback) {
-        this.snackBar.open('Please fix validation errors before submitting', 'Dismiss', {
-          duration: 4000,
-          panelClass: ['error-snackbar']
-        });
+        this.showValidationSummary();
+        this.scrollToFirstInvalidField();
       }
     }
   }
@@ -550,6 +578,9 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
     const group: { [key: string]: FormControl } = {};
     const allFields = this.getAllFields();
 
+    console.log('Building form with fields:', allFields.length);
+    console.log('Fields:', allFields.map(f => ({ name: f.name, type: f.type, required: f.required })));
+
     allFields.forEach((field) => {
       // Skip creating form controls for label fields (they're display-only)
       if (field.type === 'label') {
@@ -569,20 +600,31 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
         initialValue = 0;
       } else if (field.type === 'picture') {
         initialValue = null;
+      } else if (field.type === 'signature') {
+        initialValue = null; // Signature fields start as null
       } else {
         initialValue = '';
       }
+
+      if (field.name === 'repSign') {
+        console.log('Creating repSign FormControl:', { field, validators, initialValue });
+      }
+
       group[field.name] = new FormControl(initialValue, validators);
     });
+
+    console.log('Form controls created:', Object.keys(group));
+    console.log('RepSign control exists:', !!group['repSign']);
 
     this.form = this.fb.group(group);
 
     // Add value change listeners for conditional fields
     this.setupConditionalFields();
 
-    // ✅ ADD: Force initial validation update
+    // Force initial validation update
     setTimeout(() => {
       this.form.updateValueAndValidity();
+      console.log('Form after validation update - repSign exists:', !!this.form.get('repSign'));
     }, 0);
   }
 
@@ -744,10 +786,40 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
             }
 
             const value = control.value;
-           // ✅ UPDATED: Better validation for signature
-      if (!value || (typeof value === 'string' && value.trim().length === 0)) {
+            // ✅ ENHANCED: Better validation for signature
+
+            // Check if signature is empty or invalid
+            if (!value ||
+                (typeof value === 'string' && value.trim().length === 0)) {
               return { signatureRequired: true };
             }
+
+            // For data URLs, check if it's a valid signature
+            if (typeof value === 'string' && value.startsWith('data:image/')) {
+              // Split to get base64 part
+              const parts = value.split(',');
+              if (parts.length < 2) {
+                return { signatureRequired: true };
+              }
+
+              const base64Part = parts[1];
+              if (!base64Part || base64Part.length < 100) {
+                return { signatureRequired: true };
+              }
+
+              // Additional check: decode base64 and check if it's just blank canvas
+              try {
+                const decodedLength = atob(base64Part).length;
+
+                // If decoded data is too small, it's likely just a blank canvas
+                if (decodedLength < 500) { // Adjust threshold as needed
+                  return { signatureRequired: true };
+                }
+              } catch (e) {
+                return { signatureRequired: true };
+              }
+            }
+
             return null;
           });
         }
@@ -1127,6 +1199,140 @@ getFieldError(fieldName: string): string {
     if (control) {
       control.setErrors({ pictureError: error });
     }
+  }
+
+  // ===== VALIDATION ENHANCEMENT METHODS =====
+
+  /**
+   * Get all invalid fields with detailed information for user feedback
+   * @returns Array of invalid field objects with field, error message, and form control
+   */
+  getInvalidFields(): { field: FormField; error: string; control: AbstractControl }[] {
+    const invalidFields: { field: FormField; error: string; control: AbstractControl }[] = [];
+    const allFields = this.getAllFields();
+
+    allFields.forEach(field => {
+      if (field.type === 'label') return; // Skip label fields
+
+      const control = this.form.get(field.name);
+      if (!control) return;
+
+      // Skip validation for hidden conditional fields
+      if (field.conditional && !this.shouldShowField(field)) {
+        return;
+      }
+
+      if (control.invalid) {
+        const errorMessage = this.getFieldError(field.name) || `${field.label} is invalid`;
+        invalidFields.push({ field, error: errorMessage, control });
+      }
+    });
+
+    return invalidFields;
+  }
+
+  /**
+   * Show comprehensive validation summary to help users identify issues
+   */
+  showValidationSummary(): void {
+    const invalidFields = this.getInvalidFields();
+
+    if (invalidFields.length === 0) return;
+
+    const fieldsList = invalidFields
+      .map(item => `• ${item.field.label}: ${item.error}`)
+      .join('\n');
+
+    const message = `Please fix the following ${invalidFields.length} field(s) before submitting:\n\n${fieldsList}`;
+
+    this.snackBar.open(message, 'Dismiss', {
+      duration: 8000,
+      panelClass: ['error-snackbar', 'validation-summary-snackbar'],
+      verticalPosition: 'top'
+    });
+  }
+
+  /**
+   * Scroll to first invalid field and highlight it for better UX
+   */
+  scrollToFirstInvalidField(): void {
+    const invalidFields = this.getInvalidFields();
+
+    if (invalidFields.length === 0) return;
+
+    const firstInvalidField = invalidFields[0];
+    const fieldElement = document.querySelector(`[data-field="${firstInvalidField.field.name}"]`);
+
+    if (fieldElement) {
+      // Scroll to field smoothly
+      fieldElement.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center'
+      });
+
+      // Add highlight effect
+      fieldElement.classList.add('field-error-highlight');
+
+      // Remove highlight after animation
+      setTimeout(() => {
+        fieldElement.classList.remove('field-error-highlight');
+      }, 3000);
+
+      // Focus the field if it's an input
+      const inputElement = fieldElement.querySelector('input, select, textarea');
+      if (inputElement) {
+        setTimeout(() => {
+          (inputElement as HTMLElement).focus();
+        }, 500);
+      }
+    }
+  }
+
+  /**
+   * Get comprehensive form validation status for UI indicators
+   * @returns Object with validation statistics and status
+   */
+  getFormValidationStatus(): {
+    isValid: boolean;
+    totalFields: number;
+    validFields: number;
+    invalidFields: number;
+    missingRequiredFields: number;
+  } {
+    const allFields = this.getAllFields().filter(f => f.type !== 'label');
+    const visibleFields = allFields.filter(f => !f.conditional || this.shouldShowField(f));
+    const invalidFields = this.getInvalidFields();
+    const missingRequiredFields = invalidFields.filter(item =>
+      item.field.required && (
+        item.control.errors?.['required'] ||
+        item.control.errors?.['signatureRequired'] ||
+        item.control.errors?.['pictureRequired']
+      )
+    );
+
+    return {
+      isValid: this.isFormValid(),
+      totalFields: visibleFields.length,
+      validFields: visibleFields.length - invalidFields.length,
+      invalidFields: invalidFields.length,
+      missingRequiredFields: missingRequiredFields.length
+    };
+  }
+
+
+
+  // Helper method to get detailed form validation errors
+  private getFormValidationErrors(): any {
+    const errors: any = {};
+    if (!this.form) return errors;
+
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control && !control.valid && control.errors) {
+        errors[key] = control.errors;
+      }
+    });
+    return errors;
   }
 
   // Populate form with initial data (for repeat functionality)

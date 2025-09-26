@@ -326,8 +326,10 @@ export class SubmissionsComponent implements OnInit {
   }
 
   loadSubmissions() {
+    console.log('Loading submissions...');
     this.formSubmissionService.getAllSubmissions().subscribe({
       next: (submissions) => {
+        console.log('Loaded submissions:', submissions);
         this.submissions = submissions.sort((a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
@@ -337,9 +339,7 @@ export class SubmissionsComponent implements OnInit {
         console.error('Error loading submissions:', error);
       }
     });
-  }
-
-  // Search functionality
+  }  // Search functionality
   onSearchChange(searchTerm: string) {
     this.searchTerm = searchTerm;
     this.isSearching = searchTerm.length > 0;

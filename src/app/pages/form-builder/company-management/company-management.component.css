@@ -1,0 +1,418 @@
+.company-management-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header Styles */
+.header-section {
+  margin-bottom: 24px;
+}
+
+.header-card {
+  background: linear-gradient(135deg, var(--azure-primary) 0%, var(--azure-primary-dark) 100%);
+  color: white;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.title-section h1 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px 0;
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.title-section p {
+  margin: 0;
+  opacity: 0.9;
+  font-size: 1rem;
+}
+
+.action-section button {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.action-section button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Add Form Styles */
+.add-form-section {
+  margin-bottom: 24px;
+}
+
+.add-company-card {
+  border: 2px solid var(--azure-primary);
+  box-shadow: 0 4px 16px rgba(11, 122, 212, 0.1);
+}
+
+.add-company-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Companies Section */
+.companies-section {
+  margin-top: 24px;
+}
+
+.companies-card .mat-mdc-card-header {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  margin: -16px -16px 16px -16px;
+  padding: 16px;
+}
+
+.companies-card .mat-mdc-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--azure-primary);
+  font-weight: 600;
+}
+
+/* Loading and Empty States */
+.loading-state,
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--azure-on-surface-variant);
+}
+
+.loading-state mat-icon,
+.empty-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  color: var(--azure-primary);
+}
+
+.empty-state h3 {
+  margin: 16px 0 8px 0;
+  color: var(--azure-on-surface);
+}
+
+.empty-state p {
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+/* Companies Grid */
+.companies-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.company-card {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.company-card:hover {
+  box-shadow: 0 8px 24px rgba(11, 122, 212, 0.15);
+  transform: translateY(-2px);
+}
+
+.company-card .mat-mdc-card-header {
+  padding-bottom: 8px;
+}
+
+.company-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--azure-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.company-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--azure-on-surface-variant);
+  font-size: 0.9rem;
+}
+
+.stat-item mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--azure-primary);
+}
+
+/* Card Actions */
+.company-card .mat-mdc-card-actions {
+  padding-top: 16px;
+  border-top: 1px solid var(--azure-outline);
+  display: flex;
+  justify-content: space-between;
+}
+
+.company-card .mat-mdc-card-actions button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .company-management-container {
+    padding: 16px;
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .companies-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .company-card .mat-mdc-card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .company-card .mat-mdc-card-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Form Details Section */
+.form-details-section {
+  margin-top: 24px;
+}
+
+.form-details-card {
+  border: 2px solid var(--azure-primary);
+  box-shadow: 0 4px 16px rgba(11, 122, 212, 0.1);
+}
+
+.form-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.form-details-header .title-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--azure-primary);
+  font-weight: 600;
+}
+
+/* Forms List */
+.forms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.form-panel {
+  border: 1px solid var(--azure-outline);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.form-panel .mat-expansion-panel-header {
+  padding: 16px;
+}
+
+.form-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.form-title mat-icon {
+  color: var(--azure-primary);
+}
+
+.status-chip {
+  margin-left: auto;
+}
+
+/* Form Details Content */
+.form-details-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--azure-surface-variant);
+  border-radius: 8px;
+}
+
+.info-item mat-icon {
+  color: var(--azure-primary);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.info-item div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-item strong {
+  font-size: 0.9rem;
+  color: var(--azure-on-surface-variant);
+}
+
+.info-item span {
+  font-size: 1rem;
+  color: var(--azure-on-surface);
+}
+
+/* Form Actions Section */
+.form-actions-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.activation-control {
+  display: flex;
+  align-items: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+}
+
+/* Template Info */
+.template-info {
+  margin-top: 8px;
+}
+
+.template-info h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px 0;
+  color: var(--azure-primary);
+  font-weight: 600;
+}
+
+.template-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.template-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--azure-surface);
+  border-radius: 6px;
+  border-left: 3px solid var(--azure-primary);
+}
+
+.template-item mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--azure-primary);
+}
+
+.template-item span {
+  color: var(--azure-on-surface);
+  font-size: 0.9rem;
+}
+
+/* Mobile Responsiveness for Form Details */
+@media (max-width: 768px) {
+  .form-details-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .form-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions-section {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-buttons {
+    justify-content: center;
+  }
+
+  .action-buttons button {
+    flex: 1;
+    justify-content: center;
+    min-width: 0;
+  }
+}

@@ -1,0 +1,335 @@
+<div class="company-management-container">
+  <!-- Header -->
+  <div class="header-section">
+    <mat-card class="header-card">
+      <mat-card-content>
+        <div class="header-content">
+          <div class="title-section">
+            <h1>
+              <mat-icon>business</mat-icon>
+              Company Management
+            </h1>
+            <p>Manage companies and their form configurations</p>
+          </div>
+          <div class="action-section">
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="toggleAddForm()"
+              [class.active]="showAddForm()">
+              <mat-icon>{{ showAddForm() ? 'close' : 'add' }}</mat-icon>
+              {{ showAddForm() ? 'Cancel' : 'Add Company' }}
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Add Company Form -->
+  @if (showAddForm()) {
+    <div class="add-form-section">
+      <mat-card class="add-company-card">
+        <mat-card-header>
+          <mat-card-title>Add New Company</mat-card-title>
+          <mat-card-subtitle>Create a new company and its default form configuration</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <form [formGroup]="addCompanyForm" (ngSubmit)="addCompany()" class="add-company-form">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Company Name</mat-label>
+              <input matInput formControlName="companyName" placeholder="Enter company name">
+              <mat-icon matSuffix>business</mat-icon>
+              @if (addCompanyForm.get('companyName')?.hasError('required')) {
+                <mat-error>Company name is required</mat-error>
+              }
+              @if (addCompanyForm.get('companyName')?.hasError('minlength')) {
+                <mat-error>Company name must be at least 2 characters</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button
+                mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="addCompanyForm.invalid">
+                <mat-icon>add_business</mat-icon>
+                Add Company
+              </button>
+              <button
+                mat-stroked-button
+                type="button"
+                (click)="toggleAddForm()">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+
+  <!-- Companies List -->
+  <div class="companies-section">
+    <mat-card class="companies-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>business_center</mat-icon>
+          Registered Companies ({{ companies().length }})
+        </mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (isLoading()) {
+          <div class="loading-state">
+            <mat-icon>hourglass_empty</mat-icon>
+            <p>Loading companies...</p>
+          </div>
+        } @else if (companies().length === 0) {
+          <div class="empty-state">
+            <mat-icon>business_center</mat-icon>
+            <h3>No Companies Found</h3>
+            <p>Add your first company to get started with multi-tenant form management.</p>
+            <button mat-raised-button color="primary" (click)="toggleAddForm()">
+              <mat-icon>add</mat-icon>
+              Add Company
+            </button>
+          </div>
+        } @else {
+          <div class="companies-grid">
+            @for (company of companies(); track company.name) {
+              <mat-card class="company-card">
+                <mat-card-header>
+                  <mat-card-title class="company-name">
+                    <mat-icon>business</mat-icon>
+                    {{ company.name }}
+                  </mat-card-title>
+                  <mat-card-subtitle>
+                    @if (company.isActive) {
+                      <mat-chip color="primary">Active</mat-chip>
+                    } @else {
+                      <mat-chip>Inactive</mat-chip>
+                    }
+                  </mat-card-subtitle>
+                </mat-card-header>
+
+                <mat-card-content>
+                  <div class="company-stats">
+                    <div class="stat-item">
+                      <mat-icon>description</mat-icon>
+                      <span>{{ company.configCount }} Form(s)</span>
+                    </div>
+                    @if (company.lastUsed) {
+                      <div class="stat-item">
+                        <mat-icon>schedule</mat-icon>
+                        <span>Last used: {{ company.lastUsed | date:'short' }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+
+                <mat-card-actions>
+                  <button
+                    mat-button
+                    color="primary"
+                    (click)="viewCompanyForms(company.name)"
+                    matTooltip="View all forms for this company">
+                    <mat-icon>visibility</mat-icon>
+                    View Forms
+                  </button>
+                  <button
+                    mat-button
+                    color="accent"
+                    (click)="createFormForCompany(company.name)"
+                    matTooltip="Create a new form for this company">
+                    <mat-icon>add</mat-icon>
+                    New Form
+                  </button>
+                </mat-card-actions>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Form Details Section -->
+  @if (selectedCompany()) {
+    <div class="form-details-section">
+      <mat-card class="form-details-card">
+        <mat-card-header>
+          <mat-card-title>
+            <div class="form-details-header">
+              <div class="title-section">
+                <mat-icon>description</mat-icon>
+                Forms for {{ selectedCompany() }}
+              </div>
+              <button mat-icon-button (click)="closeFormDetails()" matTooltip="Close">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          </mat-card-title>
+          <mat-card-subtitle>
+            Manage forms, templates, and activation status
+          </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content>
+          @if (isLoadingForms()) {
+            <div class="loading-state">
+              <mat-icon>hourglass_empty</mat-icon>
+              <p>Loading forms...</p>
+            </div>
+          } @else if (selectedCompanyForms().length === 0) {
+            <div class="empty-state">
+              <mat-icon>description</mat-icon>
+              <h3>No Forms Found</h3>
+              <p>This company doesn't have any forms yet.</p>
+              <button mat-raised-button color="primary" (click)="createFormForCompany(selectedCompany()!)">
+                <mat-icon>add</mat-icon>
+                Create First Form
+              </button>
+            </div>
+          } @else {
+            <div class="forms-list">
+              @for (form of selectedCompanyForms(); track form.id) {
+                <mat-expansion-panel class="form-panel">
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      <div class="form-title">
+                        <mat-icon>{{ form.formType === 'rfq' ? 'request_quote' : 'description' }}</mat-icon>
+                        <span>{{ form.name }}</span>
+                        @if (form.isActive) {
+                          <mat-chip color="primary" class="status-chip">Active</mat-chip>
+                        } @else {
+                          <mat-chip class="status-chip">Inactive</mat-chip>
+                        }
+                      </div>
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      {{ form.formType | titlecase }} • {{ form.metadata.description || 'No description' }}
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <div class="form-details-content">
+                    <div class="form-info-grid">
+                      <div class="info-item">
+                        <mat-icon>info</mat-icon>
+                        <div>
+                          <strong>Form Type:</strong>
+                          <span>{{ form.formType | titlecase }}</span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <mat-icon>schedule</mat-icon>
+                        <div>
+                          <strong>Last Updated:</strong>
+                          <span>{{ form.metadata.updatedAt | date:'medium' }}</span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <mat-icon>person</mat-icon>
+                        <div>
+                          <strong>Created By:</strong>
+                          <span>{{ form.metadata.createdBy }}</span>
+                        </div>
+                      </div>
+                      <div class="info-item">
+                        <mat-icon>{{ form.isActive ? 'visibility' : 'visibility_off' }}</mat-icon>
+                        <div>
+                          <strong>Status:</strong>
+                          <span>{{ form.isActive ? 'Active' : 'Inactive' }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <mat-divider></mat-divider>
+
+                    <div class="form-actions-section">
+                      <div class="activation-control">
+                        <mat-slide-toggle
+                          [checked]="form.isActive"
+                          (change)="toggleFormActivation(form)"
+                          color="primary">
+                          {{ form.isActive ? 'Deactivate' : 'Activate' }} Form
+                        </mat-slide-toggle>
+                      </div>
+
+                      <div class="action-buttons">
+                        <button
+                          mat-button
+                          color="primary"
+                          (click)="editFormTemplate(form)"
+                          matTooltip="Edit form template">
+                          <mat-icon>edit</mat-icon>
+                          Template
+                        </button>
+                        <button
+                          mat-button
+                          color="accent"
+                          (click)="generateSamplePdf(form)"
+                          [disabled]="!form.templates || (!form.templates.htmlTemplate && !form.templates.docxTemplate)"
+                          matTooltip="Generate sample PDF from template">
+                          <mat-icon>picture_as_pdf</mat-icon>
+                          Generate PDF
+                        </button>
+                        <button
+                          mat-button
+                          color="accent"
+                          (click)="duplicateForm(form)"
+                          matTooltip="Duplicate this form">
+                          <mat-icon>content_copy</mat-icon>
+                          Duplicate
+                        </button>
+                        <button
+                          mat-button
+                          color="warn"
+                          (click)="deleteForm(form)"
+                          matTooltip="Delete this form">
+                          <mat-icon>delete</mat-icon>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+
+                    @if (form.templates) {
+                      <mat-divider></mat-divider>
+                      <div class="template-info">
+                        <h4>
+                          <mat-icon>description</mat-icon>
+                          Templates
+                        </h4>
+                        <div class="template-list">
+                          @if (form.templates.htmlTemplate) {
+                            <div class="template-item">
+                              <mat-icon>code</mat-icon>
+                              <span>HTML Template Available</span>
+                            </div>
+                          }
+                          @if (form.templates.docxTemplate) {
+                            <div class="template-item">
+                              <mat-icon>description</mat-icon>
+                              <span>DOCX Template: {{ form.templates.docxTemplate.fileName }}</span>
+                            </div>
+                          }
+                          @if (form.templates.pdfSettings) {
+                            <div class="template-item">
+                              <mat-icon>picture_as_pdf</mat-icon>
+                              <span>PDF Settings: {{ form.templates.pdfSettings.paperSize }} {{ form.templates.pdfSettings.orientation }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </mat-expansion-panel>
+              }
+            </div>
+          }
+        </mat-card-content>
+      </mat-card>
+    </div>
+  }
+</div>

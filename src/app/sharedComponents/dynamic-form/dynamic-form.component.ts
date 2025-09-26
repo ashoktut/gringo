@@ -276,15 +276,19 @@ export class DynamicFormComponent implements OnInit {
   }
 
   onFormSubmit(formData: any): void {
-    console.log('📝 Form submitted with data:', formData);
+    alert('Dynamic form received submission data!'); // Temporary debug
+    console.log('Dynamic form received data:', formData);
 
     if (!this.validateSubmission(formData)) {
+      alert('Dynamic form validation failed!'); // Temporary debug
+      console.log('Validation failed');
       return;
     }
 
     const currentConfig = this.currentConfiguration();
     if (!currentConfig) {
       this.showErrorMessage('No configuration available for submission');
+      console.log('No configuration available');
       return;
     }
 
@@ -306,6 +310,9 @@ export class DynamicFormComponent implements OnInit {
       }
     };
 
+    console.log('Submitting to service:', submissionData);
+    alert('Calling form submission service now!'); // Temporary debug
+
     // Submit to service
     this.formSubmissionService.createSubmission(
       this.config.formType,
@@ -314,7 +321,8 @@ export class DynamicFormComponent implements OnInit {
       this.formSections()
     ).subscribe({
       next: (submission) => {
-        console.log('✅ Form submitted successfully:', submission.submissionId);
+        alert('Submission service returned success!'); // Temporary debug
+        console.log('Submission successful:', submission);
 
         const result: FormSubmissionResult = {
           success: true,
@@ -327,7 +335,7 @@ export class DynamicFormComponent implements OnInit {
         this.isDirty.set(false);
       },
       error: (error) => {
-        console.error('❌ Error submitting form:', error);
+        console.error('Submission failed:', error);
 
         const result: FormSubmissionResult = {
           success: false,
@@ -398,7 +406,7 @@ export class DynamicFormComponent implements OnInit {
 
   autoSaveForm(formData: any): void {
     // Implement auto-save functionality
-    console.log('💾 Auto-saving form data...');
+
     // This could save to localStorage or send to server
   }
 

@@ -13,6 +13,7 @@ import { FormConfiguration, FormConfigService } from '../../services/form-config
 import { FormBuilderTemplateService } from './services/form-builder-template.service';
 import { VisualFormEditorComponent } from '../../sharedComponents/visual-form-editor/visual-form-editor.component';
 import { ConfigManagementComponent } from './config-management/config-management.component';
+import { CompanyManagementComponent } from './company-management/company-management.component';
 
 @Component({
   selector: 'app-form-builder',
@@ -27,7 +28,8 @@ import { ConfigManagementComponent } from './config-management/config-management
     MatTooltipModule,
     MatChipsModule,
     VisualFormEditorComponent,
-    ConfigManagementComponent
+    ConfigManagementComponent,
+    CompanyManagementComponent
   ],
   templateUrl: './form-builder.component.html',
   styleUrl: './form-builder.component.css'
@@ -43,6 +45,7 @@ export class FormBuilderComponent implements OnInit {
   currentMode = signal<string>('management');
   currentForm = signal<FormConfiguration | null>(null);
   configurations = signal<FormConfiguration[]>([]);
+  showCompanyManagement = signal<boolean>(false);
 
   // Computed properties
   canEdit = computed(() => !!this.currentForm());
@@ -85,7 +88,16 @@ export class FormBuilderComponent implements OnInit {
 
   newForm() {
     this.currentForm.set(null);
+    this.showCompanyManagement.set(false);
     this.currentMode.set('editor');
+  }
+
+  // Company management
+  toggleCompanyManagement() {
+    this.showCompanyManagement.update(show => !show);
+    if (this.showCompanyManagement()) {
+      this.currentForm.set(null);
+    }
   }
 
   // Form actions

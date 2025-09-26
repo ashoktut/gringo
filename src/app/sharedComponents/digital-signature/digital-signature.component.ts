@@ -139,7 +139,10 @@ export class DigitalSignatureComponent implements OnInit, AfterViewInit, OnDestr
     if (this.isDisabled) return;
 
     this.isDrawing = true;
-    this.onTouched();
+    // ✅ Add safety check for onTouched callback
+    if (this.onTouched && typeof this.onTouched === 'function') {
+      this.onTouched();
+    }
 
     const rect = this.canvas.getBoundingClientRect();
     this.lastX = event.clientX - rect.left;
@@ -162,8 +165,10 @@ export class DigitalSignatureComponent implements OnInit, AfterViewInit, OnDestr
     this.lastY = currentY;
     this.isEmpty = false;
 
-    // Emit change
-    this.onChange(this.getSignatureDataURL());
+    // Emit change with safety check
+    if (this.onChange && typeof this.onChange === 'function') {
+      this.onChange(this.getSignatureDataURL());
+    }
   }
 
   private stopDrawing() {
@@ -178,7 +183,10 @@ export class DigitalSignatureComponent implements OnInit, AfterViewInit, OnDestr
     const rect = this.canvas.getBoundingClientRect();
 
     this.isDrawing = true;
-    this.onTouched();
+    // ✅ Add safety check for onTouched callback
+    if (this.onTouched && typeof this.onTouched === 'function') {
+      this.onTouched();
+    }
     this.lastX = touch.clientX - rect.left;
     this.lastY = touch.clientY - rect.top;
   }
@@ -201,8 +209,10 @@ export class DigitalSignatureComponent implements OnInit, AfterViewInit, OnDestr
     this.lastY = currentY;
     this.isEmpty = false;
 
-    // Emit change
-    this.onChange(this.getSignatureDataURL());
+    // Emit change with safety check
+    if (this.onChange && typeof this.onChange === 'function') {
+      this.onChange(this.getSignatureDataURL());
+    }
   }
 
   clearSignature() {
@@ -213,7 +223,10 @@ export class DigitalSignatureComponent implements OnInit, AfterViewInit, OnDestr
 
     this.clearCanvas();
     this.isEmpty = true;
-    this.onChange(null);
+    // ✅ Add safety check for onChange callback
+    if (this.onChange && typeof this.onChange === 'function') {
+      this.onChange(null);
+    }
   }
 
   private clearCanvas() {

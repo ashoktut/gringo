@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Template, TemplateGenerationRequest, PdfGenerationOptions } from '../models/template.models';
+import { FormConfiguration } from './form-config.service';
 import { DocxProcessingService } from './docx-processing.service';
 
 declare var html2pdf: any;
@@ -782,5 +783,378 @@ export class PdfGenerationService {
           notes: 'This is a test document generated from template'
         };
     }
+  }
+
+  /**
+   * Generate PDF from FormConfiguration template
+   * Supports both HTML and DOCX templates with form data injection
+   */
+  generatePdfFromFormTemplate(
+    formConfig: FormConfiguration,
+    formData: Record<string, any>,
+    filename?: string
+  ): Observable<void> {
+    console.log('🎯 Generating PDF from form template:', formConfig.name);
+
+    if (!formConfig.templates) {
+      console.error('❌ No templates found in form configuration');
+      return of();
+    }
+
+    // Determine which template to use (priority: HTML > DOCX)
+    if (formConfig.templates.htmlTemplate) {
+      return this.generatePdfFromHtmlTemplate(
+        formConfig.templates.htmlTemplate,
+        formData,
+        formConfig.templates.pdfSettings,
+        filename || `${formConfig.name}_${new Date().getTime()}.pdf`
+      );
+    } else if (formConfig.templates.docxTemplate) {
+      return this.generatePdfFromDocxTemplate(
+        formConfig.templates.docxTemplate,
+        formData,
+        formConfig.templates.pdfSettings,
+        filename || `${formConfig.name}_${new Date().getTime()}.pdf`
+      );
+    } else {
+      console.error('❌ No HTML or DOCX template found in form configuration');
+      return of();
+    }
+  }
+
+  /**
+   * Generate PDF from HTML template with data injection
+   */
+  generatePdfFromHtmlTemplate(
+    htmlTemplate: string,
+    formData: Record<string, any>,
+    pdfSettings?: any,
+    filename?: string
+  ): Observable<void> {
+    console.log('📄 Generating PDF from HTML template');
+
+    try {
+      // Process the HTML template with form data
+      const processedHtml = this.injectDataIntoHtmlTemplate(htmlTemplate, formData);
+
+      // Apply PDF settings if provided
+      const pdfOptions = this.buildPdfOptions(pdfSettings);
+
+      // Generate PDF
+      this.generatePdfWithHtml2PdfAdvanced(
+        processedHtml,
+        filename || `document_${new Date().getTime()}.pdf`,
+        pdfOptions
+      );
+
+      return of();
+    } catch (error) {
+      console.error('❌ Error generating PDF from HTML template:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate PDF from DOCX template (converts to HTML first)
+   */
+  generatePdfFromDocxTemplate(
+    docxTemplate: any,
+    formData: Record<string, any>,
+    pdfSettings?: any,
+    filename?: string
+  ): Observable<void> {
+    console.log('📄 Generating PDF from DOCX template:', docxTemplate.fileName);
+
+    try {
+      // First, extract text content from DOCX (simplified approach)
+      const htmlContent = this.convertDocxTemplateToHtml(docxTemplate, formData);
+
+      // Apply PDF settings if provided
+      const pdfOptions = this.buildPdfOptions(pdfSettings);
+
+      // Generate PDF
+      this.generatePdfWithHtml2PdfAdvanced(
+        htmlContent,
+        filename || `document_${new Date().getTime()}.pdf`,
+        pdfOptions
+      );
+
+      return of();
+    } catch (error) {
+      console.error('❌ Error generating PDF from DOCX template:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Inject form data into HTML template using placeholder replacement
+   */
+  private injectDataIntoHtmlTemplate(htmlTemplate: string, formData: Record<string, any>): string {
+    let processedHtml = htmlTemplate;
+
+    // Add system-generated fields
+    const enhancedData: Record<string, any> = {
+      ...formData,
+      currentDate: new Date().toLocaleDateString(),
+      currentTime: new Date().toLocaleTimeString(),
+      timestamp: new Date().toLocaleString(),
+      submissionId: formData['submissionId'] || this.generateSubmissionId(),
+      year: new Date().getFullYear(),
+      month: new Date().toLocaleDateString('en-US', { month: 'long' }),
+      day: new Date().getDate()
+    };
+
+    // Replace placeholders in format {{ fieldName }}
+    Object.keys(enhancedData).forEach(key => {
+      const value = enhancedData[key];
+      const regex = new RegExp(`\\{\\{\\s*${key}\\s*\\}\\}`, 'g');
+      processedHtml = processedHtml.replace(regex, value ? String(value) : '');
+    });
+
+    // Handle special formatting placeholders
+    processedHtml = this.processSpecialPlaceholders(processedHtml, enhancedData);
+
+    // Clean up any remaining unmatched placeholders
+    processedHtml = processedHtml.replace(/\{\{\s*\w+\s*\}\}/g, '');
+
+    console.log('✅ HTML template processed with form data');
+    return processedHtml;
+  }
+
+  /**
+   * Convert DOCX template to HTML (simplified implementation)
+   */
+  private convertDocxTemplateToHtml(docxTemplate: any, formData: Record<string, any>): string {
+    console.log('🔄 Converting DOCX template to HTML for PDF generation');
+
+    // This is a simplified implementation
+    // In a production environment, you would use a library like mammoth.js or docx-preview
+    // to properly convert DOCX to HTML while preserving formatting
+
+    const baseHtml = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Document - ${docxTemplate.fileName}</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 20mm;
+            line-height: 1.6;
+            color: #333;
+          }
+          .document-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #0b7ad4;
+            padding-bottom: 20px;
+          }
+          .document-title {
+            font-size: 24px;
+            color: #0b7ad4;
+            margin-bottom: 10px;
+          }
+          .field-value {
+            background: #f0f9ff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            display: inline-block;
+            margin: 2px;
+          }
+          .section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #0b7ad4;
+            background: #f8fafc;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="document-header">
+          <h1 class="document-title">Document from ${docxTemplate.fileName}</h1>
+          <p>Generated on: {{ currentDate }} at {{ currentTime }}</p>
+        </div>
+
+        <div class="section">
+          <h2>Form Data</h2>
+          ${this.generateFormDataHtml(formData)}
+        </div>
+
+        <div class="section">
+          <h2>Document Information</h2>
+          <p><strong>Original File:</strong> ${docxTemplate.fileName}</p>
+          <p><strong>Upload Date:</strong> ${new Date(docxTemplate.uploadDate).toLocaleString()}</p>
+          <p><strong>Submission ID:</strong> {{ submissionId }}</p>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Process with form data
+    return this.injectDataIntoHtmlTemplate(baseHtml, formData);
+  }
+
+  /**
+   * Generate HTML representation of form data
+   */
+  private generateFormDataHtml(formData: Record<string, any>): string {
+    let html = '<div class="form-data">';
+
+    Object.keys(formData).forEach(key => {
+      const value = formData[key];
+      if (value !== null && value !== undefined && value !== '') {
+        html += `
+          <div class="field-row" style="margin: 10px 0;">
+            <strong>${this.formatFieldName(key)}:</strong>
+            <span class="field-value">${this.formatFieldValue(value)}</span>
+          </div>
+        `;
+      }
+    });
+
+    html += '</div>';
+    return html;
+  }
+
+  /**
+   * Format field names for display
+   */
+  private formatFieldName(fieldName: string): string {
+    return fieldName
+      .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+      .replace(/^./, str => str.toUpperCase()) // Capitalize first letter
+      .replace(/_/g, ' '); // Replace underscores with spaces
+  }
+
+  /**
+   * Format field values for display
+   */
+  private formatFieldValue(value: any): string {
+    if (Array.isArray(value)) {
+      return value.join(', ');
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value, null, 2);
+    }
+    return String(value);
+  }
+
+  /**
+   * Build PDF options from template settings
+   */
+  private buildPdfOptions(pdfSettings?: any): any {
+    const defaultOptions = {
+      margin: [20, 20, 20, 20],
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
+      },
+      pagebreak: {
+        mode: ['avoid-all', 'css', 'legacy'],
+        before: '.page-break-before',
+        after: '.page-break-after'
+      }
+    };
+
+    if (pdfSettings) {
+      // Apply custom PDF settings
+      if (pdfSettings.paperSize) {
+        defaultOptions.jsPDF.format = pdfSettings.paperSize.toLowerCase();
+      }
+      if (pdfSettings.orientation) {
+        defaultOptions.jsPDF.orientation = pdfSettings.orientation;
+      }
+      if (pdfSettings.margins) {
+        defaultOptions.margin = [
+          pdfSettings.margins.top || 20,
+          pdfSettings.margins.right || 20,
+          pdfSettings.margins.bottom || 20,
+          pdfSettings.margins.left || 20
+        ];
+      }
+    }
+
+    return defaultOptions;
+  }
+
+  /**
+   * Advanced PDF generation with custom options
+   */
+  private generatePdfWithHtml2PdfAdvanced(htmlContent: string, filename: string, options: any): void {
+    console.log('🎨 Generating PDF with advanced options...');
+
+    // Create temporary element
+    const tempElement = document.createElement('div');
+    tempElement.innerHTML = htmlContent;
+    tempElement.style.position = 'absolute';
+    tempElement.style.left = '-9999px';
+    tempElement.style.top = '-9999px';
+    tempElement.style.width = '210mm'; // A4 width
+    document.body.appendChild(tempElement);
+
+    if (typeof html2pdf !== 'undefined') {
+      html2pdf()
+        .set(options)
+        .from(tempElement)
+        .toPdf()
+        .get('pdf')
+        .then((pdf: any) => {
+          const totalPages = pdf.internal.getNumberOfPages();
+          console.log(`📄 Advanced PDF generated with ${totalPages} pages`);
+          return pdf;
+        })
+        .save(filename)
+        .then(() => {
+          console.log('✅ Advanced PDF saved successfully!');
+          document.body.removeChild(tempElement);
+        })
+        .catch((error: any) => {
+          console.error('❌ Error generating advanced PDF:', error);
+          document.body.removeChild(tempElement);
+        });
+    } else {
+      console.error('❌ html2pdf library not found.');
+      document.body.removeChild(tempElement);
+    }
+  }
+
+  /**
+   * Process special placeholders like dates, formatting, etc.
+   */
+  private processSpecialPlaceholders(html: string, data: Record<string, any>): string {
+    // Date formatting placeholders
+    html = html.replace(/\{\{\s*currentDate:(\w+)\s*\}\}/g, (match, format) => {
+      const date = new Date();
+      switch (format) {
+        case 'short': return date.toLocaleDateString();
+        case 'long': return date.toLocaleDateString('en-US', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+        case 'iso': return date.toISOString().split('T')[0];
+        default: return date.toLocaleDateString();
+      }
+    });
+
+    // Currency formatting placeholders
+    html = html.replace(/\{\{\s*(\w+):currency\s*\}\}/g, (match, field) => {
+      const value = data[field];
+      if (value && !isNaN(value)) {
+        return new Intl.NumberFormat('en-ZA', {
+          style: 'currency',
+          currency: 'ZAR'
+        }).format(value);
+      }
+      return value || '';
+    });
+
+    return html;
   }
 }
