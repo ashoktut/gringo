@@ -1,0 +1,76 @@
+<div class="company-branding-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Company Branding</mat-card-title>
+      <mat-card-subtitle>Customize your company's appearance and branding</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="brandingForm" (ngSubmit)="onSaveBranding()">
+        <div class="form-section">
+          <h3>Colors</h3>
+          <div class="color-controls">
+            <mat-form-field appearance="outline">
+              <mat-label>Primary Color</mat-label>
+              <input matInput type="color" formControlName="primaryColor">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Secondary Color</mat-label>
+              <input matInput type="color" formControlName="secondaryColor">
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Logo & Images</h3>
+          <div class="image-uploads">
+            <div class="upload-section">
+              <label>Company Logo</label>
+              <input type="file" (change)="onLogoUpload($event)" accept="image/*">
+              @if (currentLogo()) {
+                <img [src]="currentLogo()" alt="Current Logo" class="preview-image">
+              }
+            </div>
+
+            <div class="upload-section">
+              <label>Favicon</label>
+              <input type="file" (change)="onFaviconUpload($event)" accept="image/*">
+              @if (currentFavicon()) {
+                <img [src]="currentFavicon()" alt="Current Favicon" class="preview-favicon">
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Preview</h3>
+          <div class="branding-preview" [style.--primary-color]="brandingForm.get('primaryColor')?.value" [style.--secondary-color]="brandingForm.get('secondaryColor')?.value">
+            <div class="preview-header">
+              @if (currentLogo()) {
+                <img [src]="currentLogo()" alt="Logo Preview" class="preview-logo">
+              }
+              <h2 style="color: var(--primary-color)">Your Company Name</h2>
+            </div>
+            <div class="preview-content">
+              <button mat-raised-button color="primary">Primary Button</button>
+              <button mat-stroked-button color="accent">Secondary Button</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+
+    <mat-card-actions>
+      <button mat-raised-button color="primary" (click)="onSaveBranding()" [disabled]="brandingForm.invalid || isSaving">
+        @if (isSaving()) {
+          <mat-spinner diameter="20"></mat-spinner>
+          Saving...
+        } @else {
+          Save Branding
+        }
+      </button>
+      <button mat-button (click)="resetBranding()">Reset</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

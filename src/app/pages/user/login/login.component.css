@@ -1,17 +1,210 @@
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.login-card mat-card-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.login-card mat-card-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.login-card mat-card-subtitle {
+  color: #666;
+  font-size: 14px;
+}
+
 .login-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 400px;
-  margin: auto;
+  gap: 16px;
 }
 
-.button-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.full-width {
   width: 100%;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 0 16px 0;
+}
+
+.forgot-password-link {
+  min-width: auto;
+  padding: 0;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 6px;
+  color: #c62828;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.error-message mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.login-button {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.loading-spinner {
+  position: absolute;
+  left: 16px;
+}
+
+.register-link {
+  text-align: center;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.register-link span {
+  color: #666;
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.register-link button {
+  font-size: 14px;
+  min-width: auto;
+  padding: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .login-container {
+    padding: 10px;
+  }
+
+  .login-card {
+    padding: 16px;
+  }
+
+  .login-card mat-card-title {
+    font-size: 20px;
+  }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+
+/* Material Theme Overrides */
+.login-card .mat-mdc-form-field {
+  margin-bottom: 0;
+}
+
+.login-card .mat-mdc-form-field-error {
+  font-size: 12px;
+}
+
+.login-card .mat-mdc-checkbox {
+  margin-right: 0;
+}
+
+/* Loading State */
+.login-button[disabled] {
+  opacity: 0.7;
+}
+
+/* Focus States */
+.login-form input:focus {
+  outline: none;
+}
+
+/* Company Selector Styling */
+.mat-mdc-select-panel {
+  max-height: 300px;
+}
+
+.mat-mdc-option {
+  font-size: 14px;
+}
+
+/* Animation */
+.login-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Error state animations */
+.error-message {
+  animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Form field validation styling */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+  border-color: #f44336;
+}
+
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-floating-label {
+  color: #f44336;
+}
+
+/* Success feedback */
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+}
+
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
 }

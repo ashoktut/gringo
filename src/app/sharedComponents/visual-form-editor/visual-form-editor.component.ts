@@ -93,16 +93,22 @@ export class VisualFormEditorComponent implements OnInit {
     { type: 'number', label: 'Number', icon: 'numbers', description: 'Numeric input with validation', category: 'basic' },
     { type: 'textarea', label: 'Text Area', icon: 'notes', description: 'Multi-line text input', category: 'basic' },
     { type: 'date', label: 'Date Picker', icon: 'calendar_today', description: 'Date selection with picker', category: 'basic' },
+    { type: 'file', label: 'File Upload', icon: 'attach_file', description: 'File upload with drag-drop', category: 'basic' },
 
     // Advanced Fields
     { type: 'select', label: 'Dropdown', icon: 'arrow_drop_down', description: 'Single or multi-select dropdown', category: 'advanced' },
     { type: 'checkbox', label: 'Checkbox', icon: 'check_box', description: 'Boolean checkbox input', category: 'advanced' },
     { type: 'radio', label: 'Radio Group', icon: 'radio_button_checked', description: 'Single selection from options', category: 'advanced' },
+    { type: 'datetime-local', label: 'Date & Time', icon: 'schedule', description: 'Date and time picker', category: 'advanced' },
 
-    // Special Fields
-    { type: 'map', label: 'Map Location', icon: 'location_on', description: 'Interactive map location picker', category: 'special' },
+    // Special Fields - Enhanced Media Capture
+    { type: 'picture', label: 'Photo Capture', icon: 'photo_camera', description: 'Camera photo capture with preview', category: 'special' },
+    { type: 'video', label: 'Video Recording', icon: 'videocam', description: 'Video recording with playback controls', category: 'special' },
+    { type: 'audio', label: 'Audio Recording', icon: 'mic', description: 'Audio recording with waveform visualization', category: 'special' },
+    { type: 'barcode', label: 'Barcode Scanner', icon: 'qr_code_scanner', description: 'Barcode/QR code scanning capability', category: 'special' },
+    { type: 'sketch', label: 'Drawing Pad', icon: 'brush', description: 'Digital drawing and sketching canvas', category: 'special' },
     { type: 'signature', label: 'Digital Signature', icon: 'draw', description: 'Digital signature capture', category: 'special' },
-    { type: 'picture', label: 'Picture Upload', icon: 'photo_camera', description: 'Image upload with preview', category: 'special' },
+    { type: 'location', label: 'GPS Location', icon: 'location_on', description: 'GPS coordinate capture with map', category: 'special' },
     { type: 'label', label: 'Display Label', icon: 'label', description: 'Read-only text or information display', category: 'special' }
   ];
 

@@ -1,0 +1,347 @@
+.company-dialog {
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.dialog-header mat-icon {
+  color: #666;
+}
+
+/* Content */
+.dialog-content {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.tab-content {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Form Layouts */
+.company-form,
+.subscription-form,
+.features-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.full-width {
+  flex: 1;
+}
+
+.half-width {
+  flex: 1;
+}
+
+.quarter-width {
+  flex: 0.5;
+}
+
+/* Section Titles */
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 24px 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e3f2fd;
+}
+
+.section-title mat-icon {
+  color: #1976d2;
+}
+
+.section-title:first-child {
+  margin-top: 0;
+}
+
+/* Form Field Styling */
+.mat-mdc-form-field {
+  width: 100%;
+}
+
+.mat-mdc-form-field + .mat-mdc-form-field {
+  margin-left: 0;
+}
+
+/* Subscription Specific */
+.subscription-active {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+/* Features Grid */
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.feature-item {
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.feature-item:hover {
+  border-color: #1976d2;
+  background-color: #f8f9fa;
+}
+
+.feature-item.feature-disabled {
+  opacity: 0.6;
+  background-color: #f5f5f5;
+}
+
+.feature-item.feature-disabled:hover {
+  border-color: #e0e0e0;
+  background-color: #f5f5f5;
+}
+
+.feature-checkbox {
+  width: 100%;
+}
+
+.feature-content {
+  margin-left: 32px;
+  flex: 1;
+}
+
+.feature-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.feature-label {
+  font-weight: 600;
+  color: #333;
+}
+
+.feature-lock {
+  color: #999;
+  font-size: 1.2rem;
+}
+
+.feature-description {
+  font-size: 0.875rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+/* Plan Notice */
+.plan-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #e3f2fd;
+  border-radius: 8px;
+  color: #1976d2;
+  font-size: 0.875rem;
+  margin-top: 16px;
+}
+
+.plan-notice mat-icon {
+  color: #1976d2;
+}
+
+/* Dialog Actions */
+.dialog-actions {
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.button-spinner {
+  margin-right: 8px;
+}
+
+/* Material Design Overrides */
+.mat-mdc-tab-group {
+  height: 100%;
+}
+
+.mat-mdc-tab-body-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+.mat-mdc-tab-body-content {
+  overflow: visible;
+}
+
+.mat-mdc-dialog-container {
+  padding: 0;
+}
+
+/* Error States */
+.mat-mdc-form-field.mat-form-field-invalid .mat-mdc-text-field-wrapper {
+  border-color: #f44336;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .company-dialog {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+  }
+
+  .dialog-header {
+    padding: 16px;
+  }
+
+  .tab-content {
+    padding: 16px;
+    max-height: none;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .half-width,
+  .quarter-width {
+    flex: none;
+    width: 100%;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dialog-actions {
+    padding: 16px;
+    flex-direction: column-reverse;
+  }
+
+  .dialog-actions button {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .dialog-header h2 {
+    font-size: 1.25rem;
+  }
+
+  .section-title {
+    font-size: 1rem;
+  }
+
+  .feature-content {
+    margin-left: 24px;
+  }
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Tab Animation */
+.mat-mdc-tab-body {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Focus States */
+.mat-mdc-form-field:focus-within {
+  .mat-mdc-text-field-wrapper {
+    border-color: #1976d2;
+    box-shadow: 0 0 0 1px rgba(25, 118, 210, 0.2);
+  }
+}
+
+/* Checkbox Styling */
+.mat-mdc-checkbox {
+  margin-bottom: 0;
+}
+
+.mat-mdc-checkbox .mat-mdc-checkbox-ripple {
+  border-radius: 8px;
+}
+
+/* Date Picker Styling */
+.mat-mdc-form-field .mat-datepicker-toggle {
+  color: #666;
+}
+
+.mat-mdc-form-field .mat-datepicker-toggle:hover {
+  color: #1976d2;
+}
+
+/* Loading State */
+.mat-mdc-button[disabled] {
+  opacity: 0.7;
+}
+
+.button-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Validation States */
+.mat-mdc-form-field.ng-invalid.ng-touched {
+  .mat-mdc-text-field-wrapper {
+    border-color: #f44336;
+  }
+}
+
+.mat-mdc-form-field .mat-mdc-form-field-error {
+  color: #f44336;
+  font-size: 0.75rem;
+}

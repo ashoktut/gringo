@@ -1,0 +1,427 @@
+.barcode-reader-container {
+  width: 100%;
+}
+
+.barcode-reader-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.required-asterisk {
+  color: #dc3545;
+  margin-left: 4px;
+}
+
+.barcode-reader-area {
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.barcode-reader-area.has-barcode {
+  border-color: #28a745;
+  background: white;
+}
+
+.barcode-reader-area.scanning {
+  border-color: #0b7ad4;
+  background: #000;
+}
+
+.barcode-reader-area.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Barcode Display */
+.barcode-display {
+  padding: 20px;
+}
+
+.barcode-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.barcode-icon {
+  font-size: 32px;
+  color: #28a745;
+}
+
+.barcode-info {
+  flex: 1;
+}
+
+.barcode-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-family: monospace;
+  word-break: break-all;
+  margin-bottom: 4px;
+}
+
+.barcode-format {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.barcode-metadata {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.metadata-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.metadata-row:last-child {
+  margin-bottom: 0;
+}
+
+.metadata-label {
+  font-weight: 600;
+  color: #495057;
+}
+
+.metadata-value {
+  color: #6c757d;
+}
+
+.barcode-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Scanner View */
+.scanner-view {
+  position: relative;
+  background: #000;
+}
+
+.camera-container {
+  position: relative;
+  height: 300px;
+  overflow: hidden;
+}
+
+.scanner-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scanning-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  pointer-events: none;
+}
+
+.scanning-frame {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.corner {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #00ff00;
+}
+
+.corner.top-left {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner.top-right {
+  top: -3px;
+  right: -3px;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner.bottom-left {
+  bottom: -3px;
+  left: -3px;
+  border-right: none;
+  border-top: none;
+}
+
+.corner.bottom-right {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+}
+
+.scanning-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00ff00, transparent);
+  animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+  0% { top: 0; }
+  100% { top: 100%; }
+}
+
+.scanning-hint {
+  text-align: center;
+  color: white;
+  padding: 0 20px;
+}
+
+.scanning-hint p {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.scanning-formats {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.scanner-controls {
+  padding: 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Manual Input View */
+.manual-input-view {
+  padding: 24px;
+}
+
+.manual-input-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.manual-input-header h4 {
+  color: #2c3e50;
+  margin: 0 0 8px 0;
+}
+
+.manual-input-header p {
+  color: #6c757d;
+  margin: 0;
+}
+
+.manual-input-form {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #0b7ad4;
+  box-shadow: 0 0 0 3px rgba(11, 122, 212, 0.1);
+}
+
+.manual-input-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Scan Options */
+.scan-options {
+  padding: 40px 20px;
+}
+
+.scan-prompt {
+  text-align: center;
+}
+
+.scan-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.scan-text {
+  color: #6c757d;
+  margin-bottom: 24px;
+  font-size: 16px;
+}
+
+.scan-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.scan-info {
+  color: #6c757d;
+  font-size: 12px;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: #0b7ad4;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0a6bc7;
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+/* Error Message */
+.error-message {
+  margin-top: 8px;
+  color: #dc3545;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .scan-buttons,
+  .barcode-actions,
+  .manual-input-actions,
+  .scanner-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn {
+    min-width: 150px;
+    justify-content: center;
+  }
+
+  .barcode-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+
+  .scanning-frame {
+    width: 150px;
+    height: 150px;
+  }
+
+  .scanning-hint {
+    font-size: 14px;
+  }
+
+  .camera-container {
+    height: 250px;
+  }
+}

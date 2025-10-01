@@ -1,0 +1,296 @@
+<div class="user-dialog">
+  <h2 mat-dialog-title>{{ getDialogTitle() }}</h2>
+
+  <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <mat-tab-group>
+        <!-- Basic Information Tab -->
+        <mat-tab label="Basic Information">
+          <div class="tab-content">
+            <div class="form-row">
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Full Name</mat-label>
+                <input matInput
+                       formControlName="name"
+                       placeholder="Enter full name"
+                       [class.mat-form-field-invalid]="isFieldInvalid('name')">
+                <mat-error>{{ getFieldError('name') }}</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Email Address</mat-label>
+                <input matInput
+                       formControlName="email"
+                       type="email"
+                       placeholder="Enter email address"
+                       [class.mat-form-field-invalid]="isFieldInvalid('email')">
+                <mat-error>{{ getFieldError('email') }}</mat-error>
+                @if (data.mode === 'edit') {
+                  <mat-hint>Email cannot be changed for existing users</mat-hint>
+                }
+              </mat-form-field>
+            </div>
+
+            @if (canSelectCompany()) {
+              <div class="form-row">
+                <mat-form-field appearance="fill" class="full-width">
+                  <mat-label>Company</mat-label>
+                  <mat-select formControlName="companyId">
+                    @for (company of companyOptions(); track company.id) {
+                      <mat-option [value]="company.id">
+                        {{ company.name }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  <mat-error>{{ getFieldError('companyId') }}</mat-error>
+                </mat-form-field>
+              </div>
+            }
+
+            <div class="form-row">
+              <div class="form-section">
+                <h4>User Status</h4>
+                <mat-checkbox formControlName="isActive">
+                  Active User
+                </mat-checkbox>
+                <p class="form-hint">
+                  Inactive users cannot log in to the system
+                </p>
+              </div>
+            </div>
+
+            @if (isCreating()) {
+              <div class="form-row">
+                <div class="form-section">
+                  <h4>Welcome Email</h4>
+                  <mat-checkbox formControlName="sendWelcomeEmail">
+                    Send welcome email with login instructions
+                  </mat-checkbox>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Profile Information Tab -->
+        <mat-tab label="Profile">
+          <div class="tab-content" formGroupName="profile">
+            <div class="form-row-group">
+              <mat-form-field appearance="fill">
+                <mat-label>First Name</mat-label>
+                <input matInput formControlName="firstName">
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Last Name</mat-label>
+                <input matInput formControlName="lastName">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="fill" class="full-width">
+                <mat-label>Phone Number</mat-label>
+                <input matInput formControlName="phone" type="tel">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row-group">
+              <mat-form-field appearance="fill">
+                <mat-label>Job Title</mat-label>
+                <input matInput formControlName="title">
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Department</mat-label>
+                <input matInput formControlName="department">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row-group">
+              <mat-form-field appearance="fill">
+                <mat-label>Timezone</mat-label>
+                <mat-select formControlName="timezone">
+                  @for (tz of timezoneOptions; track tz.value) {
+                    <mat-option [value]="tz.value">{{ tz.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="fill">
+                <mat-label>Language</mat-label>
+                <mat-select formControlName="language">
+                  @for (lang of languageOptions; track lang.value) {
+                    <mat-option [value]="lang.value">{{ lang.label }}</mat-option>
+                  }
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Roles Tab -->
+        <mat-tab label="Roles & Permissions">
+          <div class="tab-content">
+            <div class="roles-section">
+              <p class="section-description">
+                Select the roles to assign to this user. Users will inherit all permissions
+                from their assigned roles.
+              </p>
+
+              <!-- System Roles -->
+              @if (getRolesByScope('system').length > 0) {
+                <div class="role-group">
+                  <h4>
+                    <mat-icon>admin_panel_settings</mat-icon>
+                    System Roles
+                  </h4>
+                  <div class="role-cards">
+                    @for (role of getRolesByScope('system'); track role.id) {
+                      <mat-card class="role-card"
+                                [class.selected]="isRoleSelected(role.id)"
+                                (click)="toggleRole(role.id)">
+                        <mat-card-header>
+                          <div mat-card-avatar class="role-avatar">
+                            <mat-icon>{{ role.scope === 'system' ? 'security' : 'business' }}</mat-icon>
+                          </div>
+                          <mat-card-title>{{ role.name }}</mat-card-title>
+                          <mat-card-subtitle>
+                            {{ getRolePermissionCount(role) }} permissions
+                          </mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <p>{{ getRoleDescription(role) }}</p>
+                        </mat-card-content>
+                        <mat-card-actions align="end">
+                          <mat-checkbox [checked]="isRoleSelected(role.id)"
+                                        (click)="$event.stopPropagation()"
+                                        (change)="toggleRole(role.id)">
+                          </mat-checkbox>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Company Roles -->
+              @if (getRolesByScope('company').length > 0) {
+                <div class="role-group">
+                  <h4>
+                    <mat-icon>business</mat-icon>
+                    Company Roles
+                  </h4>
+                  <div class="role-cards">
+                    @for (role of getRolesByScope('company'); track role.id) {
+                      <mat-card class="role-card"
+                                [class.selected]="isRoleSelected(role.id)"
+                                (click)="toggleRole(role.id)">
+                        <mat-card-header>
+                          <div mat-card-avatar class="role-avatar">
+                            <mat-icon>business</mat-icon>
+                          </div>
+                          <mat-card-title>{{ role.name }}</mat-card-title>
+                          <mat-card-subtitle>
+                            {{ getRolePermissionCount(role) }} permissions
+                          </mat-card-subtitle>
+                        </mat-card-header>
+                        <mat-card-content>
+                          <p>{{ getRoleDescription(role) }}</p>
+                        </mat-card-content>
+                        <mat-card-actions align="end">
+                          <mat-checkbox [checked]="isRoleSelected(role.id)"
+                                        (click)="$event.stopPropagation()"
+                                        (change)="toggleRole(role.id)">
+                          </mat-checkbox>
+                        </mat-card-actions>
+                      </mat-card>
+                    }
+                  </div>
+                </div>
+              }
+
+              @if (availableRoles().length === 0) {
+                <div class="no-roles">
+                  <mat-icon>info</mat-icon>
+                  <p>No roles available for assignment</p>
+                </div>
+              }
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Settings Tab -->
+        <mat-tab label="Settings">
+          <div class="tab-content" formGroupName="settings">
+            <div class="settings-section">
+              <h4>Notification Preferences</h4>
+              <div class="settings-group">
+                <mat-checkbox formControlName="emailNotifications">
+                  Email Notifications
+                </mat-checkbox>
+                <p class="setting-description">
+                  Receive notifications and updates via email
+                </p>
+              </div>
+
+              <div class="settings-group">
+                <mat-checkbox formControlName="smsNotifications">
+                  SMS Notifications
+                </mat-checkbox>
+                <p class="setting-description">
+                  Receive important alerts via SMS (requires phone number)
+                </p>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="settings-section">
+              <h4>Security Settings</h4>
+              <div class="settings-group">
+                <mat-checkbox formControlName="twoFactorEnabled">
+                  Two-Factor Authentication
+                </mat-checkbox>
+                <p class="setting-description">
+                  Require additional verification when logging in
+                </p>
+              </div>
+            </div>
+
+            <mat-divider></mat-divider>
+
+            <div class="settings-section">
+              <h4>Appearance</h4>
+              <div class="settings-group">
+                <mat-checkbox formControlName="darkMode">
+                  Dark Mode
+                </mat-checkbox>
+                <p class="setting-description">
+                  Use dark theme for the application interface
+                </p>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()" [disabled]="isLoading()">
+        Cancel
+      </button>
+
+      <button mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="!canSave">
+        @if (isLoading()) {
+          <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
+        }
+        {{ isCreating() ? 'Create User' : 'Save Changes' }}
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

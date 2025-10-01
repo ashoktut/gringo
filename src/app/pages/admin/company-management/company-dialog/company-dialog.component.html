@@ -1,0 +1,279 @@
+<div class="company-dialog">
+  <div class="dialog-header">
+    <h2 mat-dialog-title>
+      <mat-icon>{{ isEdit ? 'edit' : 'add_business' }}</mat-icon>
+      {{ isEdit ? 'Edit Company' : 'Create New Company' }}
+    </h2>
+    <button mat-icon-button mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <mat-tab-group animationDuration="300ms">
+      
+      <!-- Basic Information Tab -->
+      <mat-tab label="Basic Information">
+        <div class="tab-content">
+          <form [formGroup]="companyForm" class="company-form">
+            
+            <!-- Company Name and Domain -->
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Company Name *</mat-label>
+                <input matInput formControlName="name" placeholder="Enter company name">
+                <mat-error>{{ getFormError(companyForm, 'name') }}</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Domain</mat-label>
+                <input matInput formControlName="domain" placeholder="company.com">
+                <mat-hint>Optional: Company's primary domain</mat-hint>
+                <mat-error>{{ getFormError(companyForm, 'domain') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Status *</mat-label>
+                <mat-select formControlName="status">
+                  <mat-option *ngFor="let status of statusOptions" [value]="status">
+                    {{ status | titlecase }}
+                  </mat-option>
+                </mat-select>
+                <mat-error>{{ getFormError(companyForm, 'status') }}</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="section-title">
+              <mat-icon>contact_mail</mat-icon>
+              Contact Information
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Contact Email *</mat-label>
+                <input matInput formControlName="contactEmail" type="email" placeholder="contact@company.com">
+                <mat-error>{{ getFormError(companyForm, 'contactEmail') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Contact Phone</mat-label>
+                <input matInput formControlName="contactPhone" placeholder="+1 (555) 123-4567">
+                <mat-error>{{ getFormError(companyForm, 'contactPhone') }}</mat-error>
+              </mat-form-field>
+            </div>
+
+            <!-- Address Information -->
+            <div class="section-title">
+              <mat-icon>location_on</mat-icon>
+              Address Information
+            </div>
+
+            <div formGroupName="address">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Street Address</mat-label>
+                  <input matInput formControlName="street" placeholder="123 Main Street">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>City</mat-label>
+                  <input matInput formControlName="city" placeholder="City">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="quarter-width">
+                  <mat-label>State</mat-label>
+                  <input matInput formControlName="state" placeholder="State">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="quarter-width">
+                  <mat-label>ZIP Code</mat-label>
+                  <input matInput formControlName="zipCode" placeholder="12345">
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="half-width">
+                  <mat-label>Country</mat-label>
+                  <input matInput formControlName="country" placeholder="Country">
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Additional Information -->
+            <div class="section-title">
+              <mat-icon>info</mat-icon>
+              Additional Information
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Website</mat-label>
+                <input matInput formControlName="website" placeholder="https://company.com">
+                <mat-error>{{ getFormError(companyForm, 'website') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Industry</mat-label>
+                <input matInput formControlName="industry" placeholder="Technology, Healthcare, etc.">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Tax ID</mat-label>
+                <input matInput formControlName="taxId" placeholder="12-3456789">
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="3" placeholder="Brief description of the company"></textarea>
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Subscription Tab -->
+      <mat-tab label="Subscription">
+        <div class="tab-content">
+          <form [formGroup]="subscriptionForm" class="subscription-form">
+            
+            <div class="section-title">
+              <mat-icon>card_membership</mat-icon>
+              Subscription Plan
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Plan *</mat-label>
+                <mat-select formControlName="plan" (selectionChange)="onPlanChange($event.value)">
+                  <mat-option *ngFor="let plan of planOptions" [value]="plan">
+                    {{ plan | titlecase }}
+                  </mat-option>
+                </mat-select>
+                <mat-error>{{ getFormError(subscriptionForm, 'plan') }}</mat-error>
+              </mat-form-field>
+
+              <mat-checkbox formControlName="isActive" class="half-width subscription-active">
+                Subscription Active
+              </mat-checkbox>
+            </div>
+
+            <div class="section-title">
+              <mat-icon>settings</mat-icon>
+              Plan Limits
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Maximum Users *</mat-label>
+                <input matInput formControlName="maxUsers" type="number" min="1">
+                <mat-hint>Maximum number of users allowed</mat-hint>
+                <mat-error>{{ getFormError(subscriptionForm, 'maxUsers') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Storage Limit (MB) *</mat-label>
+                <input matInput formControlName="maxStorage" type="number" min="100">
+                <mat-hint>Storage limit in megabytes</mat-hint>
+                <mat-error>{{ getFormError(subscriptionForm, 'maxStorage') }}</mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="section-title">
+              <mat-icon>schedule</mat-icon>
+              Subscription Period
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>Start Date *</mat-label>
+                <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+                <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+                <mat-datepicker #startPicker></mat-datepicker>
+                <mat-error>{{ getFormError(subscriptionForm, 'startDate') }}</mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="half-width">
+                <mat-label>End Date</mat-label>
+                <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+                <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+                <mat-datepicker #endPicker></mat-datepicker>
+                <mat-hint>Leave empty for no expiration</mat-hint>
+              </mat-form-field>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Features Tab -->
+      <mat-tab label="Features">
+        <div class="tab-content">
+          <form [formGroup]="featuresForm" class="features-form">
+            
+            <div class="section-title">
+              <mat-icon>extension</mat-icon>
+              Available Features
+            </div>
+
+            <div class="features-grid">
+              <div 
+                *ngFor="let feature of availableFeatures" 
+                class="feature-item"
+                [class.feature-disabled]="!isFeatureAvailableForPlan(feature.key, selectedPlan)">
+                
+                <mat-checkbox 
+                  [formControlName]="feature.key"
+                  [disabled]="!isFeatureAvailableForPlan(feature.key, selectedPlan)"
+                  class="feature-checkbox">
+                  
+                  <div class="feature-content">
+                    <div class="feature-header">
+                      <span class="feature-label">{{ feature.label }}</span>
+                      <mat-icon 
+                        *ngIf="!isFeatureAvailableForPlan(feature.key, selectedPlan)" 
+                        class="feature-lock"
+                        matTooltip="Not available for current plan">
+                        lock
+                      </mat-icon>
+                    </div>
+                    <div class="feature-description">{{ feature.description }}</div>
+                  </div>
+                </mat-checkbox>
+              </div>
+            </div>
+
+            <div class="plan-notice" *ngIf="selectedPlan !== 'enterprise'">
+              <mat-icon>info</mat-icon>
+              <span>Upgrade to a higher plan to unlock more features</span>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button (click)="onCancel()" [disabled]="isLoading()">
+      Cancel
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="onSubmit()"
+      [disabled]="isLoading()">
+      
+      <mat-spinner *ngIf="isLoading()" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!isLoading()">{{ isEdit ? 'save' : 'add' }}</mat-icon>
+      {{ isEdit ? 'Update Company' : 'Create Company' }}
+    </button>
+  </mat-dialog-actions>
+</div>

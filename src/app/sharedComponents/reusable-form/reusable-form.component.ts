@@ -41,6 +41,10 @@ import { PdfTemplateService, Template } from '../../services/pdf-template.servic
 import { PdfGenerationService } from '../../services/pdf-generation.service';
 import { DocxProcessingService } from '../../services/docx-processing.service';
 import { Template as DocxTemplate, DocumentType } from '../../models/template.models';
+
+// Import new services for Device Magic parity
+import { OfflineSyncService } from '../../services/offline-sync.service';
+import { EmailDeliveryService } from '../../services/email-delivery.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import {
@@ -54,6 +58,10 @@ import { Subscription, debounceTime, distinctUntilChanged } from 'rxjs';
 import { MapLibrePickerComponent } from '../map-libre-picker/map-libre-picker.component';
 import { DigitalSignatureComponent } from '../digital-signature/digital-signature.component';
 import { PictureUploadComponent } from '../picture-upload/picture-upload.component';
+import { VideoUploadComponent } from '../video-upload/video-upload.component';
+import { AudioRecorderComponent } from '../audio-recorder/audio-recorder.component';
+import { BarcodeReaderComponent } from '../barcode-reader/barcode-reader.component';
+import { SketchPadComponent } from '../sketch-pad/sketch-pad.component';
 
 // Custom Date Adapter for DD/MM/YYYY format
 @Injectable()
@@ -118,6 +126,10 @@ export interface FormField {
     | 'signature'
     | 'label'
     | 'picture'
+    | 'video'
+    | 'audio'
+    | 'barcode'
+    | 'sketch'
 
 
   required?: boolean;
@@ -215,6 +227,8 @@ export class ReusableFormComponent implements OnInit, OnChanges, OnDestroy {
   private readonly pdfTemplateService = inject(PdfTemplateService);
   private readonly pdfGenerationService = inject(PdfGenerationService);
   private readonly docxProcessingService = inject(DocxProcessingService);
+  private readonly offlineSyncService = inject(OfflineSyncService);
+  private readonly emailDeliveryService = inject(EmailDeliveryService);
 
   // Standard inputs
   @Input() fields: FormField[] = [];
@@ -426,18 +440,29 @@ private updateValidationState() {
   });
 }
 
-private performAutoSave(value: any) {
+private async performAutoSave(value: any): Promise<void> {
   this.autoSaveStatus.set('saving');
 
-  // Emit auto-save event with current form data
-  this.autoSaveTriggered.emit({
+  const draftData = {
     formData: value,
     timestamp: new Date(),
-    companyId: this.currentCompanyId()
-  });
+    companyId: this.currentCompanyId(),
+    formType: this.formTitle || 'General Form',
+    isDraft: true,
+    autoSaveVersion: Date.now()
+  };
 
-  // Simulate auto-save completion (in real app, this would be handled by parent component)
-  setTimeout(() => {
+  try {
+    // Add draft to offline sync queue for cross-device synchronization
+    await this.offlineSyncService.addToSyncQueue(
+      'form_draft',
+      draftData,
+      'low' // Low priority for drafts
+    );
+
+    // Emit auto-save event with current form data
+    this.autoSaveTriggered.emit(draftData);
+
     this.autoSaveStatus.set('saved');
     this.isDirty.set(false);
 
@@ -452,7 +477,23 @@ private performAutoSave(value: any) {
     setTimeout(() => {
       this.autoSaveStatus.set('idle');
     }, 3000);
-  }, 1000);
+
+  } catch (error) {
+    console.error('Auto-save failed:', error);
+    this.autoSaveStatus.set('error');
+    
+    if (this.enableValidationFeedback) {
+      this.snackBar.open('Auto-save failed. Changes will sync when online.', 'Dismiss', {
+        duration: 3000,
+        panelClass: ['warning-snackbar']
+      });
+    }
+
+    // Reset status after error
+    setTimeout(() => {
+      this.autoSaveStatus.set('idle');
+    }, 3000);
+  }
 }
 
 private getErrorMessage(errorKey: string, errorValue: any): string {
@@ -508,8 +549,7 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
     return company?.name || companyId;
   }
 
-  onSubmit(): void {
-    alert('Form submission started! Valid: ' + this.form.valid); // Temporary debug
+  async onSubmit(): Promise<void> {
     console.log('Form submission started', this.form.valid);
 
     if (this.validationMode === 'onSubmit') {
@@ -520,11 +560,11 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
     this.markFormGroupTouched();
 
     if (this.form.valid) {
-      alert('Form is valid! Proceeding with submission.'); // Temporary debug
       const formData = {
         ...this.form.value,
         companyId: this.currentCompanyId(),
         submittedAt: new Date(),
+        formType: this.formTitle || 'General Form',
         formMetadata: {
           isDraft: this.enableDraftMode,
           validationErrors: this.validationErrors(),
@@ -532,15 +572,48 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
         }
       };
 
-      console.log('Emitting form data:', formData);
-      this.formSubmit.emit(formData);
-      this.isDirty.set(false);
+      try {
+        // Add to offline sync queue for reliable delivery
+        const syncId = await this.offlineSyncService.addToSyncQueue(
+          'form_submission',
+          formData,
+          'high' // High priority for form submissions
+        );
 
-      if (this.enableValidationFeedback) {
-        this.snackBar.open('Form submitted successfully', 'Dismiss', {
-          duration: 3000,
-          panelClass: ['success-snackbar']
-        });
+        console.log('Form added to sync queue:', syncId);
+
+        // Trigger email notifications
+        if (formData.companyId && formData.formType) {
+          await this.emailDeliveryService.sendFormSubmissionNotification(
+            formData,
+            formData.formType,
+            formData.companyId
+          );
+        }
+
+        // Emit form data for immediate handling
+        this.formSubmit.emit(formData);
+        this.isDirty.set(false);
+
+        if (this.enableValidationFeedback) {
+          this.snackBar.open('Form submitted successfully and queued for sync', 'Dismiss', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+        }
+
+      } catch (error) {
+        console.error('Error during form submission:', error);
+        
+        // Still emit the form data for local handling even if sync fails
+        this.formSubmit.emit(formData);
+        
+        if (this.enableValidationFeedback) {
+          this.snackBar.open('Form submitted locally. Sync will retry when online.', 'Dismiss', {
+            duration: 5000,
+            panelClass: ['warning-snackbar']
+          });
+        }
       }
     } else {
       alert('Form validation failed! Check console for errors.'); // Temporary debug

@@ -1,0 +1,330 @@
+<div class="role-management-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-section">
+      <h1>Role Management</h1>
+      <p class="subtitle">Manage roles and permissions across the system</p>
+    </div>
+
+    <div class="header-actions">
+      @if (canCreateRole()) {
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openCreateRoleDialog()">
+          <mat-icon>add</mat-icon>
+          Create Role
+        </button>
+      }
+
+      @if (canManagePermissions()) {
+        <button
+          mat-stroked-button
+          (click)="openPermissionManagement()">
+          <mat-icon>security</mat-icon>
+          Manage Permissions
+        </button>
+      }
+
+      <button
+        mat-stroked-button
+        (click)="exportRoles()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+
+      <button
+        mat-icon-button
+        matTooltip="Refresh"
+        (click)="refreshRoles()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalRoles() }}</div>
+          <div class="stat-label">Total Roles</div>
+        </div>
+        <mat-icon class="stat-icon">account_box</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card primary">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ systemRoles() }}</div>
+          <div class="stat-label">System Roles</div>
+        </div>
+        <mat-icon class="stat-icon">admin_panel_settings</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card accent">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ companyRoles() }}</div>
+          <div class="stat-label">Company Roles</div>
+        </div>
+        <mat-icon class="stat-icon">business</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card success">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ activeRoles() }}</div>
+          <div class="stat-label">Active Roles</div>
+        </div>
+        <mat-icon class="stat-icon">check_circle</mat-icon>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Company Selection (for System Admins) -->
+  @if (isSystemAdmin()) {
+    <mat-card class="company-selector-card">
+      <mat-card-content>
+        <div class="company-selector">
+          <mat-form-field appearance="outline">
+            <mat-label>Filter by Company</mat-label>
+            <mat-select
+              [value]="selectedCompany()"
+              (selectionChange)="onCompanyChange($event.value)">
+              <mat-option [value]="null">All Companies</mat-option>
+              @for (company of companies(); track company.id) {
+                <mat-option [value]="company">
+                  {{ company.name }}
+                </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  }
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search roles</mat-label>
+          <input
+            matInput
+            [value]="searchTerm()"
+            (input)="onSearchChange($event.target.value || '')"
+            placeholder="Search by name, description, or permissions">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Scope</mat-label>
+          <mat-select
+            [value]="scopeFilter()"
+            (selectionChange)="onScopeFilterChange($event.value)">
+            @for (option of scopeOptions; track option.value) {
+              <mat-option [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Roles Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      @if (!isLoading()) {
+        <div class="table-container">
+        <table mat-table [dataSource]="filteredRoles()" class="roles-table">
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Role Name</th>
+            <td mat-cell *matCellDef="let role">
+              <div class="role-name-cell">
+                <div class="role-name">
+                  <mat-icon class="role-icon">{{ getScopeIcon(role.scope) }}</mat-icon>
+                  {{ role.name }}
+                </div>
+                @if (!role.isActive) {
+                  <div class="role-status">
+                    <mat-chip color="warn">Inactive</mat-chip>
+                  </div>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Description Column -->
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let role">
+              <span class="role-description">
+                {{ role.description || 'No description' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Scope Column -->
+          <ng-container matColumnDef="scope">
+            <th mat-header-cell *matHeaderCellDef>Scope</th>
+            <td mat-cell *matCellDef="let role">
+              <mat-chip-set>
+                <mat-chip
+                  [color]="getScopeColor(role.scope)">
+                  {{ role.scope | titlecase }}
+                </mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+
+          <!-- Company Column -->
+          <ng-container matColumnDef="company">
+            <th mat-header-cell *matHeaderCellDef>Company</th>
+            <td mat-cell *matCellDef="let role">
+              <span class="company-name">
+                {{ getCompanyName(role.companyId) }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- Permissions Column -->
+          <ng-container matColumnDef="permissions">
+            <th mat-header-cell *matHeaderCellDef>Permissions</th>
+            <td mat-cell *matCellDef="let role">
+              <div class="permissions-cell">
+                <mat-chip-set>
+                  @for (permission of role.permissions.slice(0, 3); track permission.id) {
+                    <mat-chip class="permission-chip">
+                      {{ permission.name }}
+                    </mat-chip>
+                  }
+                  @if (role.permissions.length > 3) {
+                    <mat-chip
+                      class="more-permissions"
+                      matTooltip="Click to view all permissions">
+                      +{{ role.permissions.length - 3 }} more
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- User Count Column -->
+          <ng-container matColumnDef="userCount">
+            <th mat-header-cell *matHeaderCellDef>Users</th>
+            <td mat-cell *matCellDef="let role">
+              <div class="user-count">
+                <mat-icon class="count-icon">people</mat-icon>
+                {{ role.userCount || 0 }}
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Created At Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Created</th>
+            <td mat-cell *matCellDef="let role">
+              {{ formatDate(role.createdAt) }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let role">
+              <div class="action-buttons">
+                <button
+                  mat-icon-button
+                  [matMenuTriggerFor]="roleMenu"
+                  matTooltip="More actions">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+
+                <mat-menu #roleMenu="matMenu">
+                  @if (canEditRole(role)) {
+                    <button
+                      mat-menu-item
+                      (click)="openEditRoleDialog(role)">
+                      <mat-icon>edit</mat-icon>
+                      <span>Edit Role</span>
+                    </button>
+                  }
+
+                  @if (canCreateRole()) {
+                    <button
+                      mat-menu-item
+                      (click)="duplicateRole(role)">
+                      <mat-icon>content_copy</mat-icon>
+                      <span>Duplicate Role</span>
+                    </button>
+                  }
+
+                  @if (canAssignRoles()) {
+                    <button
+                      mat-menu-item
+                      (click)="openRoleAssignment(role)">
+                      <mat-icon>person_add</mat-icon>
+                      <span>Assign Users</span>
+                    </button>
+                  }
+
+                  <mat-divider></mat-divider>
+
+                  @if (canEditRole(role)) {
+                    <button
+                      mat-menu-item
+                      (click)="toggleRoleStatus(role)">
+                      <mat-icon [color]="role.isActive ? 'warn' : 'primary'">
+                        {{ role.isActive ? 'block' : 'play_arrow' }}
+                      </mat-icon>
+                      <span>{{ role.isActive ? 'Deactivate' : 'Activate' }}</span>
+                    </button>
+                  }
+
+                  @if (canDeleteRole(role)) {
+                    <button
+                      mat-menu-item
+                      (click)="deleteRole(role)"
+                      class="delete-action">
+                      <mat-icon color="warn">delete</mat-icon>
+                      <span>Delete Role</span>
+                    </button>
+                  }
+                </mat-menu>
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- No Data Message -->
+        @if (filteredRoles().length === 0) {
+          <div class="no-data">
+            <mat-icon class="no-data-icon">account_box</mat-icon>
+            <h3>No roles found</h3>
+            <p>Try adjusting your search criteria or create a new role.</p>
+          </div>
+        }
+        </div>
+      } @else {
+        <!-- Loading Template -->
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading roles...</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

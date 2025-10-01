@@ -20,7 +20,7 @@ export class FormAuthorizationService {
   canAccessForm(form: FormConfiguration, userRole?: UserRole, companyId?: string): boolean {
     // Check role-based access
     if (form.metadata.allowedRoles && form.metadata.allowedRoles.length > 0) {
-      const currentRole = userRole || this.authService.getCurrentUserSync()?.role || 'public';
+      const currentRole = userRole || this.authService.getCurrentUserSync()?.roles?.[0]?.name || 'public';
       if (!form.metadata.allowedRoles.includes(currentRole)) {
         return false;
       }
@@ -71,7 +71,7 @@ export class FormAuthorizationService {
    * Check if user has permission for specific action
    */
   hasPermission(action: string, resource: string, userRole?: UserRole): boolean {
-    const currentRole = userRole || this.authService.getCurrentUserSync()?.role || 'public';
+    const currentRole = userRole || this.authService.getCurrentUserSync()?.roles?.[0]?.name || 'public';
 
     // Define permission matrix
     const permissions: Record<UserRole, string[]> = {
@@ -82,7 +82,7 @@ export class FormAuthorizationService {
       guest: ['read:public-forms']
     };
 
-    const userPermissions = permissions[currentRole] || [];
+    const userPermissions = permissions[currentRole as UserRole] || [];
 
     // Check for wildcard permission
     if (userPermissions.includes('*')) {

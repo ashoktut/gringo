@@ -1,48 +1,128 @@
-<h2>Login</h2>
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <mat-card-title>Sign In</mat-card-title>
+      <mat-card-subtitle>Access your account</mat-card-subtitle>
+    </mat-card-header>
 
-<form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>User email</mat-label>
-    <input matInput type="email" formControlName="usermail" required />
-    @if (loginForm.get('usermail')?.errors?.['required']) {
-      <mat-error>
-        <small>User email is required.</small>
-      </mat-error>
-    }
-    @if (loginForm.get('usermail')?.errors?.['email']) {
-      <mat-error>
-        <small>Enter a valid email address.</small>
-      </mat-error>
-    }
-  </mat-form-field>
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
 
-  <br />
+        <!-- Email Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Email Address</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email"
+            (input)="onEmailChange()"
+            autocomplete="email"
+          >
+          <mat-icon matSuffix>email</mat-icon>
+          <mat-error *ngIf="hasFieldError('email')">
+            {{ getFieldError('email') }}
+          </mat-error>
+        </mat-form-field>
 
-  <mat-form-field appearance="fill" class="full-width">
-    <mat-label>Password</mat-label>
-    <input matInput type="password" formControlName="password" required />
-    @if (loginForm.get('password')?.errors?.['required']) {
-      <mat-error>
-        <small>Password is required.</small>
-      </mat-error>
-    }
-    @if (loginForm.get('password')?.errors?.['minlength']) {
-      <mat-error>
-        <small>Enter atleast 8 characters.</small>
-      </mat-error>
-    }
-  </mat-form-field>
-</form>
+        <!-- Company Domain Field (shown when multiple companies exist) -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width"
+          *ngIf="showCompanySelector()">
+          <mat-label>Company Domain</mat-label>
+          <mat-select formControlName="companyDomain">
+            <mat-option value="">Select Company</mat-option>
+            <mat-option
+              *ngFor="let company of availableCompanies()"
+              [value]="company.domain">
+              {{ company.name }} ({{ company.domain }})
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>business</mat-icon>
+          <mat-error *ngIf="hasFieldError('companyDomain')">
+            {{ getFieldError('companyDomain') }}
+          </mat-error>
+        </mat-form-field>
 
-<div class="button-group">
-  <button mat-button class="get-started-btn" type="submit" (click)="onSubmit()" [routerLink]="['/home']">Login</button>
-  <br>
+        <!-- Password Field -->
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          >
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="hidePassword()">
+            <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          <mat-error *ngIf="hasFieldError('password')">
+            {{ getFieldError('password') }}
+          </mat-error>
+        </mat-form-field>
 
-    <small>Forgot Password?
-      <button mat-button class="get-started-btn" type="button" [routerLink]="['/forgot-password']">Reset here</button>
-    </small>
+        <!-- Remember Me Checkbox -->
+        <div class="form-options">
+          <mat-checkbox formControlName="rememberMe">
+            Remember me
+          </mat-checkbox>
 
-    <small>Not a member?
-      <button mat-button class="get-started-btn" type="button" [routerLink]="['/register']">Register here</button>
-    </small>
-  </div>
+          <button
+            type="button"
+            mat-button
+            color="primary"
+            class="forgot-password-link"
+            (click)="navigateToForgotPassword()">
+            Forgot Password?
+          </button>
+        </div>
+
+        <!-- Error Message -->
+        <div class="error-message" *ngIf="loginError()">
+          <mat-icon color="warn">error</mat-icon>
+          <span>{{ loginError() }}</span>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="full-width login-button"
+          [disabled]="isLoading() || loginForm.invalid">
+
+          <mat-spinner
+            *ngIf="isLoading()"
+            diameter="20"
+            color="accent"
+            class="loading-spinner">
+          </mat-spinner>
+
+          <span *ngIf="!isLoading()">Sign In</span>
+          <span *ngIf="isLoading()">Signing In...</span>
+        </button>
+
+        <!-- Registration Link -->
+        <div class="register-link">
+          <span>Don't have an account?</span>
+          <button
+            type="button"
+            mat-button
+            color="primary"
+            (click)="navigateToRegister()">
+            Create Account
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

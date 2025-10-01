@@ -1,0 +1,345 @@
+<div class="company-details-dialog" *ngIf="company() as company">
+  <div class="dialog-header">
+    <div class="company-header">
+      <div class="company-info">
+        <h2>{{ company.name }}</h2>
+        <div class="company-meta">
+          <mat-chip-set>
+            <mat-chip [color]="getStatusColor(company.status)">
+              {{ company.status | titlecase }}
+            </mat-chip>
+            <mat-chip [color]="getPlanColor(company.subscription.plan)">
+              {{ company.subscription.plan | titlecase }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+      </div>
+    </div>
+    <button mat-icon-button (click)="onClose()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="dialog-content">
+    <mat-tab-group animationDuration="300ms">
+
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+
+          <!-- Basic Information Card -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>business</mat-icon>
+                Basic Information
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Company Name</label>
+                  <span>{{ company.name }}</span>
+                </div>
+
+                <div class="info-item" *ngIf="company.domain">
+                  <label>Domain</label>
+                  <span class="domain-value">{{ company.domain }}</span>
+                </div>
+
+                <div class="info-item">
+                  <label>Contact Email</label>
+                  <a [href]="'mailto:' + company.contactEmail" class="email-link">
+                    {{ company.contactEmail }}
+                  </a>
+                </div>
+
+                <div class="info-item" *ngIf="company.contactPhone">
+                  <label>Contact Phone</label>
+                  <a [href]="'tel:' + company.contactPhone" class="phone-link">
+                    {{ company.contactPhone }}
+                  </a>
+                </div>
+
+                <div class="info-item" *ngIf="company.website">
+                  <label>Website</label>
+                  <a [href]="company.website" target="_blank" class="website-link">
+                    {{ company.website }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </a>
+                </div>
+
+                <div class="info-item" *ngIf="company.industry">
+                  <label>Industry</label>
+                  <span>{{ company.industry }}</span>
+                </div>
+
+                <div class="info-item" *ngIf="company.taxId">
+                  <label>Tax ID</label>
+                  <span>{{ company.taxId }}</span>
+                </div>
+
+                <div class="info-item">
+                  <label>Created</label>
+                  <span>{{ formatDateOnly(company.createdAt) }}</span>
+                </div>
+              </div>
+
+              <div class="description-section" *ngIf="company.description">
+                <label>Description</label>
+                <p class="description-text">{{ company.description }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Address Card -->
+          <mat-card class="info-card" *ngIf="hasAddress()">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>location_on</mat-icon>
+                Address
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="address-content">
+                <mat-icon>place</mat-icon>
+                <span>{{ getFullAddress() }}</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Features Card -->
+          <mat-card class="info-card" *ngIf="getCompanyFeatures().length > 0">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>extension</mat-icon>
+                Enabled Features
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="features-grid">
+                <mat-chip-set>
+                  <mat-chip *ngFor="let feature of getCompanyFeatures()">
+                    {{ feature }}
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Subscription Tab -->
+      <mat-tab label="Subscription">
+        <div class="tab-content">
+
+          <!-- Subscription Details Card -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>card_membership</mat-icon>
+                Subscription Details
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <label>Plan</label>
+                  <mat-chip [color]="getPlanColor(company.subscription.plan)">
+                    {{ company.subscription.plan | titlecase }}
+                  </mat-chip>
+                </div>
+
+                <div class="info-item">
+                  <label>Status</label>
+                  <mat-chip [color]="company.subscription.isActive ? 'success' : 'warn'">
+                    {{ company.subscription.isActive ? 'Active' : 'Inactive' }}
+                  </mat-chip>
+                </div>
+
+                <div class="info-item">
+                  <label>Start Date</label>
+                  <span>{{ formatDateOnly(company.subscription.startDate) }}</span>
+                </div>
+
+                <div class="info-item" *ngIf="company.subscription.endDate">
+                  <label>End Date</label>
+                  <span>{{ formatDateOnly(company.subscription.endDate) }}</span>
+                </div>
+
+                <div class="info-item">
+                  <label>Maximum Users</label>
+                  <span>{{ company.subscription.maxUsers }}</span>
+                </div>
+
+                <div class="info-item">
+                  <label>Storage Limit</label>
+                  <span>{{ formatStorageSize(company.subscription.maxStorage) }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Usage Statistics Card -->
+          <mat-card class="info-card" *ngIf="companyStats() as stats">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>analytics</mat-icon>
+                Usage Statistics
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <div class="stat-value">{{ stats.userCount || 0 }}</div>
+                  <div class="stat-label">Active Users</div>
+                  <div class="stat-progress">
+                    <div class="progress-bar">
+                      <div
+                        class="progress-fill primary"
+                        [style.width.%]="((stats.userCount || 0) / company.subscription.maxUsers) * 100">
+                      </div>
+                    </div>
+                    <span class="progress-text">
+                      {{ stats.userCount || 0 }} / {{ company.subscription.maxUsers }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-value">{{ formatStorageSize(stats.storageUsed || 0) }}</div>
+                  <div class="stat-label">Storage Used</div>
+                  <div class="stat-progress">
+                    <div class="progress-bar">
+                      <div
+                        class="progress-fill"
+                        [class]="getStorageUsageColor()"
+                        [style.width.%]="getStorageUsagePercentage()">
+                      </div>
+                    </div>
+                    <span class="progress-text">
+                      {{ getStorageUsagePercentage() }}% of {{ formatStorageSize(company.subscription.maxStorage) }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-value">{{ stats.formCount || 0 }}</div>
+                  <div class="stat-label">Forms Created</div>
+                </div>
+
+                <div class="stat-item">
+                  <div class="stat-value">{{ stats.submissionCount || 0 }}</div>
+                  <div class="stat-label">Submissions</div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Loading Stats -->
+          <mat-card class="info-card" *ngIf="isLoadingStats()">
+            <mat-card-content>
+              <div class="loading-container">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading statistics...</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Users Tab -->
+      <mat-tab label="Users">
+        <div class="tab-content">
+
+          <!-- Users Table Card -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>people</mat-icon>
+                Company Users ({{ companyUsers().length }})
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+
+              <!-- Users Table -->
+              <div class="table-container" *ngIf="!isLoadingUsers() && companyUsers().length > 0">
+                <table mat-table [dataSource]="companyUsers()" class="users-table">
+
+                  <!-- Name Column -->
+                  <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>Name</th>
+                    <td mat-cell *matCellDef="let user">
+                      <div class="user-info">
+                        <div class="user-name">{{ user.name }}</div>
+                      </div>
+                    </td>
+                  </ng-container>
+
+                  <!-- Email Column -->
+                  <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef>Email</th>
+                    <td mat-cell *matCellDef="let user">
+                      <a [href]="'mailto:' + user.email" class="user-email">
+                        {{ user.email }}
+                      </a>
+                    </td>
+                  </ng-container>
+
+                  <!-- Role Column -->
+                  <ng-container matColumnDef="role">
+                    <th mat-header-cell *matHeaderCellDef>Role</th>
+                    <td mat-cell *matCellDef="let user">
+                      <mat-chip-set>
+                        <mat-chip
+                          *ngFor="let role of user.roles"
+                          [color]="getRoleColor(role.name)">
+                          {{ role.name | titlecase }}
+                        </mat-chip>
+                      </mat-chip-set>
+                    </td>
+                  </ng-container>
+
+                  <!-- Status Column -->
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Status</th>
+                    <td mat-cell *matCellDef="let user">
+                      <mat-chip
+                        [color]="getUserStatusColor(user.isActive ? 'active' : 'inactive')">
+                        {{ user.isActive ? 'Active' : 'Inactive' }}
+                      </mat-chip>
+                    </td>
+                  </ng-container>
+
+                  <!-- Last Login Column -->
+                  <ng-container matColumnDef="lastLogin">
+                    <th mat-header-cell *matHeaderCellDef>Last Login</th>
+                    <td mat-cell *matCellDef="let user">
+                      {{ formatDate(user.lastLogin) }}
+                    </td>
+                  </ng-container>
+
+                  <tr mat-header-row *matHeaderRowDef="userDisplayedColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: userDisplayedColumns;"></tr>
+                </table>
+              </div>
+
+              <!-- No Users Message -->
+              <div class="no-data" *ngIf="!isLoadingUsers() && companyUsers().length === 0">
+                <mat-icon class="no-data-icon">person_off</mat-icon>
+                <h3>No users found</h3>
+                <p>This company doesn't have any users yet.</p>
+              </div>
+
+              <!-- Loading Users -->
+              <div class="loading-container" *ngIf="isLoadingUsers()">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Loading users...</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>

@@ -1,0 +1,267 @@
+.user-dialog {
+  max-width: 800px;
+  min-height: 600px;
+}
+
+.tab-content {
+  padding: 24px 0;
+  min-height: 400px;
+}
+
+.form-row {
+  margin-bottom: 16px;
+}
+
+.form-row-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+.form-section h4 {
+  margin: 0 0 12px 0;
+  color: var(--mat-color-primary);
+  font-weight: 500;
+}
+
+.form-hint {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 8px 0 0 0;
+}
+
+/* Roles Section */
+.roles-section {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.section-description {
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+
+.role-group {
+  margin-bottom: 32px;
+}
+
+.role-group h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px 0;
+  color: var(--mat-color-primary);
+  font-weight: 500;
+}
+
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.role-card {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.role-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.role-card.selected {
+  border-color: var(--mat-color-primary);
+  background-color: rgba(var(--mat-color-primary-rgb), 0.05);
+}
+
+.role-avatar {
+  background-color: var(--mat-color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-avatar mat-icon {
+  font-size: 20px;
+}
+
+.role-card mat-card-header {
+  padding-bottom: 8px;
+}
+
+.role-card mat-card-content {
+  padding-top: 0;
+}
+
+.role-card mat-card-content p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.7);
+  line-height: 1.4;
+}
+
+.role-card mat-card-actions {
+  padding-top: 8px;
+}
+
+.no-roles {
+  text-align: center;
+  color: rgba(0, 0, 0, 0.6);
+  padding: 48px 24px;
+}
+
+.no-roles mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  color: rgba(0, 0, 0, 0.4);
+}
+
+/* Settings Section */
+.settings-section {
+  margin-bottom: 24px;
+}
+
+.settings-section h4 {
+  margin: 0 0 16px 0;
+  color: var(--mat-color-primary);
+  font-weight: 500;
+}
+
+.settings-group {
+  margin-bottom: 20px;
+}
+
+.setting-description {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin: 4px 0 0 32px;
+  line-height: 1.4;
+}
+
+mat-divider {
+  margin: 24px 0;
+}
+
+/* Dialog Actions */
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.inline-spinner {
+  margin-right: 8px;
+}
+
+/* Form Validation */
+.mat-form-field-invalid .mat-form-field-outline-thick {
+  color: var(--mat-color-warn) !important;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .user-dialog {
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .form-row-group {
+    grid-template-columns: 1fr;
+  }
+
+  .role-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-content {
+    padding: 16px 0;
+  }
+}
+
+/* Tab Content Spacing */
+::ng-deep .mat-mdc-tab-body-content {
+  overflow: visible !important;
+}
+
+::ng-deep .mat-mdc-tab-body-wrapper {
+  overflow: visible !important;
+}
+
+/* Checkbox Styling */
+mat-checkbox {
+  margin: 4px 0;
+}
+
+mat-checkbox .mdc-checkbox {
+  padding: 8px;
+}
+
+/* Select Field Styling */
+mat-select {
+  min-width: 120px;
+}
+
+/* Card hover effects */
+.role-card mat-card-header .mat-card-title {
+  color: var(--mat-color-primary);
+  font-weight: 500;
+}
+
+.role-card.selected mat-card-header .mat-card-title {
+  color: var(--mat-color-primary);
+  font-weight: 600;
+}
+
+/* Loading state */
+.inline-spinner {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+button[disabled] {
+  cursor: not-allowed;
+}
+
+/* Focus styles */
+.role-card:focus {
+  outline: 2px solid var(--mat-color-primary);
+  outline-offset: 2px;
+}
+
+/* Animation for role selection */
+.role-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.role-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.role-card.selected::before {
+  left: 100%;
+}

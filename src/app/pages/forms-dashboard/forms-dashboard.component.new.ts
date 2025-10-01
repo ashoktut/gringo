@@ -124,7 +124,7 @@ export class FormsDashboardComponent implements OnInit, OnDestroy {
     // Get user context from route or auth service
     const user = this.authService.getCurrentUserSync();
     if (user) {
-      this.currentRole.set(user.role);
+      this.currentRole.set((user.roles?.[0]?.name || 'public') as UserRole);
       this.currentCompanyId.set(user.companyId || null);
     }
 

@@ -4,6 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start:dev": "concurrently \"npm run server\" \"ng serve --proxy-config proxy.conf.json\"",
+    "server": "node server.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -22,8 +24,11 @@
     "@google-cloud/storage": "^7.17.0",
     "@mapbox/maki": "^8.2.0",
     "@types/maplibre-gl": "^1.14.0",
+    "concurrently": "^9.2.1",
+    "cors": "^2.8.5",
     "docx": "^9.5.1",
     "docxtemplater": "^3.65.3",
+    "express": "^4.21.2",
     "file-saver": "^2.0.5",
     "googleapis": "^157.0.0",
     "html2pdf": "^0.0.11",

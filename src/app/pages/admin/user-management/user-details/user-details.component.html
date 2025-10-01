@@ -1,0 +1,402 @@
+<div class="user-details-dialog">
+  <div class="dialog-header">
+    <div class="user-avatar">
+      {{ getUserInitials(user()) }}
+    </div>
+    <div class="user-header-info">
+      <h2>{{ user().name }}</h2>
+      <p class="user-email">{{ user().email }}</p>
+      <div class="user-status">
+        <mat-chip [color]="userStatus().color" selected>
+          <mat-icon>{{ userStatus().icon }}</mat-icon>
+          {{ userStatus().text }}
+        </mat-chip>
+      </div>
+    </div>
+    <div class="header-actions">
+      @if (canEdit()) {
+        <button mat-icon-button
+                matTooltip="Edit User"
+                (click)="onEdit()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      }
+      <button mat-icon-button
+              matTooltip="Close"
+              (click)="onClose()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <mat-dialog-content>
+    <mat-tab-group>
+      <!-- Overview Tab -->
+      <mat-tab label="Overview">
+        <div class="tab-content">
+          <!-- Quick Stats Cards -->
+          <div class="stats-grid">
+            <mat-card>
+              <mat-card-content>
+                <div class="stat-item">
+                  <mat-icon color="primary">schedule</mat-icon>
+                  <div class="stat-info">
+                    <span class="stat-label">Last Login</span>
+                    <span class="stat-value">{{ lastLoginText() }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <mat-card>
+              <mat-card-content>
+                <div class="stat-item">
+                  <mat-icon color="accent">cake</mat-icon>
+                  <div class="stat-info">
+                    <span class="stat-label">Account Age</span>
+                    <span class="stat-value">{{ accountAge() }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            @if (userStats()) {
+              <mat-card>
+                <mat-card-content>
+                  <div class="stat-item">
+                    <mat-icon color="primary">login</mat-icon>
+                    <div class="stat-info">
+                      <span class="stat-label">Total Logins</span>
+                      <span class="stat-value">{{ userStats()?.totalLogins || 0 }}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card>
+                <mat-card-content>
+                  <div class="stat-item">
+                    <mat-icon color="accent">timer</mat-icon>
+                    <div class="stat-info">
+                      <span class="stat-label">Avg Session</span>
+                      <span class="stat-value">{{ getSessionDuration() }}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+
+          <!-- Basic Information -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>person</mat-icon>
+                Basic Information
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Full Name</span>
+                  <span class="info-value">{{ user().name }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Email</span>
+                  <span class="info-value">{{ user().email }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Company</span>
+                  <span class="info-value">{{ getCompanyName() }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Status</span>
+                  <span class="info-value">
+                    <mat-chip [color]="userStatus().color" selected>
+                      {{ userStatus().text }}
+                    </mat-chip>
+                  </span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Created</span>
+                  <span class="info-value">{{ formatDateOnly(user().createdAt) }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Updated</span>
+                  <span class="info-value">{{ formatDateOnly(user().updatedAt) }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Roles and Permissions -->
+          <mat-card class="info-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>admin_panel_settings</mat-icon>
+                Roles & Permissions
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              @if (user().roles && user().roles!.length > 0) {
+                <div class="roles-list">
+                  @for (role of user().roles!; track role.id) {
+                    <mat-chip [color]="getRoleColor(role)" selected>
+                      <mat-icon>
+                        {{ role.scope === 'system' ? 'security' : 'business' }}
+                      </mat-icon>
+                      {{ role.name }}
+                    </mat-chip>
+                  }
+                </div>
+
+                <mat-divider class="divider"></mat-divider>
+
+                <div class="permissions-summary">
+                  <h4>Permission Summary</h4>
+                  @for (role of user().roles!; track role.id) {
+                    <div class="role-permissions">
+                      <strong>{{ role.name }}:</strong>
+                      <span class="permission-count">
+                        {{ role.permissions?.length || 0 }} permissions
+                      </span>
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="no-roles">
+                  <mat-icon>info</mat-icon>
+                  <p>No roles assigned to this user</p>
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Profile Tab -->
+      <mat-tab label="Profile">
+        <div class="tab-content">
+          @if (user().profile) {
+            <mat-card class="info-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>badge</mat-icon>
+                  Profile Information
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="info-grid">
+                  @if (user().profile!.firstName || user().profile!.lastName) {
+                    <div class="info-item">
+                      <span class="info-label">First Name</span>
+                      <span class="info-value">{{ user().profile!.firstName || 'Not set' }}</span>
+                    </div>
+                    <div class="info-item">
+                      <span class="info-label">Last Name</span>
+                      <span class="info-value">{{ user().profile!.lastName || 'Not set' }}</span>
+                    </div>
+                  }
+
+                  @if (user().profile!.phone) {
+                    <div class="info-item">
+                      <span class="info-label">Phone</span>
+                      <span class="info-value">{{ user().profile!.phone }}</span>
+                    </div>
+                  }
+
+                  @if (user().profile!.title) {
+                    <div class="info-item">
+                      <span class="info-label">Job Title</span>
+                      <span class="info-value">{{ user().profile!.title }}</span>
+                    </div>
+                  }
+
+                  @if (user().profile!.department) {
+                    <div class="info-item">
+                      <span class="info-label">Department</span>
+                      <span class="info-value">{{ user().profile!.department }}</span>
+                    </div>
+                  }
+
+                  @if (user().profile!.timezone) {
+                    <div class="info-item">
+                      <span class="info-label">Timezone</span>
+                      <span class="info-value">{{ user().profile!.timezone }}</span>
+                    </div>
+                  }
+
+                  @if (user().profile!.language) {
+                    <div class="info-item">
+                      <span class="info-label">Language</span>
+                      <span class="info-value">{{ user().profile!.language }}</span>
+                    </div>
+                  }
+                </div>
+              </mat-card-content>
+            </mat-card>
+          } @else {
+            <mat-card class="info-card">
+              <mat-card-content>
+                <div class="no-profile">
+                  <mat-icon>account_circle</mat-icon>
+                  <p>No profile information available</p>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+
+          <!-- Settings -->
+          @if (user().settings) {
+            <mat-card class="info-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>settings</mat-icon>
+                  User Settings
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="settings-list">
+                  <div class="setting-item">
+                    <span class="setting-label">Email Notifications</span>
+                    <mat-icon class="setting-icon"
+                              [color]="user().settings!.emailNotifications ? 'primary' : ''">
+                      {{ user().settings!.emailNotifications ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </div>
+
+                  <div class="setting-item">
+                    <span class="setting-label">SMS Notifications</span>
+                    <mat-icon class="setting-icon"
+                              [color]="user().settings!.smsNotifications ? 'primary' : ''">
+                      {{ user().settings!.smsNotifications ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </div>
+
+                  <div class="setting-item">
+                    <span class="setting-label">Two-Factor Authentication</span>
+                    <mat-icon class="setting-icon"
+                              [color]="user().settings!.twoFactorEnabled ? 'primary' : ''">
+                      {{ user().settings!.twoFactorEnabled ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </div>
+
+                  <div class="setting-item">
+                    <span class="setting-label">Dark Mode</span>
+                    <mat-icon class="setting-icon"
+                              [color]="user().settings!.darkMode ? 'primary' : ''">
+                      {{ user().settings!.darkMode ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </mat-tab>
+
+      <!-- Activity Tab -->
+      @if (canViewActivity()) {
+        <mat-tab label="Activity">
+          <div class="tab-content">
+            @if (userStats()) {
+              <mat-card class="stats-card">
+                <mat-card-header>
+                  <mat-card-title>
+                    <mat-icon>analytics</mat-icon>
+                    Activity Statistics
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="activity-stats">
+                    <div class="activity-stat">
+                      <span class="stat-number">{{ userStats()?.totalLogins || 0 }}</span>
+                      <span class="stat-label">Total Logins</span>
+                    </div>
+                    <div class="activity-stat">
+                      <span class="stat-number">{{ getLoginFrequency() }}</span>
+                      <span class="stat-label">Login Frequency</span>
+                    </div>
+                    <div class="activity-stat">
+                      <span class="stat-number">{{ getSessionDuration() }}</span>
+                      <span class="stat-label">Avg Session</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+
+            <mat-card class="activity-card">
+              <mat-card-header>
+                <mat-card-title>
+                  <mat-icon>history</mat-icon>
+                  Recent Activity
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                @if (isLoadingActivity()) {
+                  <div class="loading-activity">
+                    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                    <p>Loading activity log...</p>
+                  </div>
+                } @else if (activityLog().length > 0) {
+                  <mat-list>
+                    @for (activity of activityLog(); track activity.id) {
+                      <mat-list-item>
+                        <mat-icon matListItemIcon
+                                  [color]="getActivityColor(activity)">
+                          {{ getActivityIcon(activity) }}
+                        </mat-icon>
+                        <div matListItemTitle>{{ getActivityDescription(activity) }}</div>
+                        <div matListItemLine>
+                          {{ formatDate(activity.createdAt) }}
+                          @if (activity.ipAddress) {
+                            • {{ activity.ipAddress }}
+                          }
+                          @if (activity.userAgent) {
+                            • {{ activity.userAgent }}
+                          }
+                        </div>
+                      </mat-list-item>
+                      <mat-divider></mat-divider>
+                    }
+                  </mat-list>
+                } @else {
+                  <div class="no-activity">
+                    <mat-icon>history_toggle_off</mat-icon>
+                    <p>No activity recorded for this user</p>
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+      }
+    </mat-tab-group>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    @if (canEdit()) {
+      <button mat-button (click)="sendPasswordReset()">
+        <mat-icon>lock_reset</mat-icon>
+        Send Password Reset
+      </button>
+
+      <button mat-button
+              [color]="user().isActive ? 'warn' : 'primary'"
+              (click)="toggleUserStatus()">
+        <mat-icon>{{ user().isActive ? 'block' : 'check_circle' }}</mat-icon>
+        {{ user().isActive ? 'Deactivate' : 'Activate' }}
+      </button>
+
+      <button mat-raised-button color="primary" (click)="onEdit()">
+        <mat-icon>edit</mat-icon>
+        Edit User
+      </button>
+    }
+
+    <button mat-button (click)="onClose()">
+      Close
+    </button>
+  </mat-dialog-actions>
+</div>

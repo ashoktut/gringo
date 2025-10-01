@@ -1,0 +1,201 @@
+<div class="bulk-actions-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>edit</mat-icon>
+    Bulk User Actions
+    <mat-chip class="user-count-chip">{{ userCount() }} users selected</mat-chip>
+  </h2>
+
+  <mat-dialog-content>
+    <div class="bulk-actions-content">
+      <!-- Step 1: Select Action -->
+      <div class="action-selection">
+        <h3>Select Action</h3>
+        <p class="section-description">
+          Choose the action to perform on the selected users.
+        </p>
+        
+        <div class="actions-grid">
+          @for (action of bulkActions; track action.type) {
+            <mat-card class="action-card" 
+                      [class.selected]="selectedAction() === action.type"
+                      [class.dangerous]="action.dangerous"
+                      (click)="onActionSelect(action.type)">
+              <mat-card-content>
+                <div class="action-icon">
+                  <mat-icon [color]="action.dangerous ? 'warn' : 'primary'">
+                    {{ action.icon }}
+                  </mat-icon>
+                </div>
+                <div class="action-info">
+                  <h4 [class.dangerous-text]="action.dangerous">{{ action.label }}</h4>
+                  <p>{{ action.description }}</p>
+                </div>
+                @if (action.dangerous) {
+                  <mat-icon class="warning-indicator" color="warn">warning</mat-icon>
+                }
+              </mat-card-content>
+            </mat-card>
+          }
+        </div>
+      </div>
+
+      @if (selectedAction()) {
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Step 2: Configure Action -->
+        <div class="action-configuration">
+          <h3>Configure Action</h3>
+          
+          <!-- Role Selection (if required) -->
+          @if (requiresRoles()) {
+            <div class="role-selection">
+              <h4>Select Roles</h4>
+              <p class="field-description">
+                @switch (selectedAction()) {
+                  @case ('addRoles') {
+                    Select roles to add to the selected users.
+                  }
+                  @case ('removeRoles') {
+                    Select roles to remove from the selected users.
+                  }
+                  @case ('replaceRoles') {
+                    Select roles that will replace all current roles for the selected users.
+                  }
+                }
+              </p>
+              
+              <div class="roles-grid">
+                @for (role of availableRoles(); track role.id) {
+                  <mat-card class="role-card" 
+                            [class.selected]="isRoleSelected(role.id)"
+                            (click)="toggleRole(role.id)">
+                    <mat-card-content>
+                      <div class="role-header">
+                        <mat-checkbox [checked]="isRoleSelected(role.id)"
+                                      (click)="$event.stopPropagation()"
+                                      (change)="toggleRole(role.id)">
+                        </mat-checkbox>
+                        <div class="role-info">
+                          <span class="role-name">{{ role.name }}</span>
+                          <mat-chip [color]="getRoleColor(role)" selected>
+                            {{ role.scope }}
+                          </mat-chip>
+                        </div>
+                      </div>
+                      @if (role.description) {
+                        <p class="role-description">{{ role.description }}</p>
+                      }
+                    </mat-card-content>
+                  </mat-card>
+                }
+              </div>
+              
+              @if (affectedRolesCount() === 0) {
+                <div class="no-roles-selected">
+                  <mat-icon>info</mat-icon>
+                  <p>Please select at least one role to continue.</p>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Dangerous Action Confirmation -->
+          @if (isDangerous()) {
+            <div class="danger-warning">
+              <mat-icon color="warn">warning</mat-icon>
+              <div class="warning-content">
+                <h4>Confirmation Required</h4>
+                <p>{{ getDangerousActionWarning() }}</p>
+                <mat-checkbox formControlName="confirmDangerous">
+                  I understand the consequences and want to proceed
+                </mat-checkbox>
+              </div>
+            </div>
+          }
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Step 3: Preview -->
+        <div class="action-preview">
+          <h3>Preview</h3>
+          
+          <div class="preview-summary">
+            <div class="preview-action">
+              <mat-icon [color]="isDangerous() ? 'warn' : 'primary'">
+                {{ currentAction()?.icon }}
+              </mat-icon>
+              <div class="preview-text">
+                <h4>{{ getActionPreview() }}</h4>
+                @if (requiresRoles() && affectedRolesCount() > 0) {
+                  <div class="selected-roles">
+                    <span class="roles-label">Roles:</span>
+                    @for (role of getSelectedRoles(); track role.id) {
+                      <mat-chip [color]="getRoleColor(role)" selected>
+                        {{ role.name }}
+                      </mat-chip>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Affected Users List -->
+          <div class="affected-users">
+            <h4>Affected Users ({{ userCount() }})</h4>
+            <div class="users-list">
+              @for (user of selectedUsers() | slice:0:10; track user.id) {
+                <div class="user-item">
+                  <div class="user-info">
+                    <mat-icon [color]="getUserStatusColor(user)">
+                      {{ getUserStatusIcon(user) }}
+                    </mat-icon>
+                    <div class="user-details">
+                      <span class="user-name">{{ getUserDisplayName(user) }}</span>
+                      <span class="user-email">{{ user.email }}</span>
+                    </div>
+                  </div>
+                  <div class="user-roles">
+                    @for (roleName of getUserRoleNames(user) | slice:0:3; track roleName) {
+                      <mat-chip>{{ roleName }}</mat-chip>
+                    }
+                    @if (getUserRoleNames(user).length > 3) {
+                      <span class="more-roles">+{{ getUserRoleNames(user).length - 3 }} more</span>
+                    }
+                  </div>
+                </div>
+              }
+              
+              @if (userCount() > 10) {
+                <div class="more-users">
+                  <mat-icon>more_horiz</mat-icon>
+                  <span>and {{ userCount() - 10 }} more users</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end" class="dialog-actions">
+    <button mat-button (click)="onCancel()" [disabled]="isLoading()">
+      Cancel
+    </button>
+    
+    <button mat-raised-button 
+            [color]="isDangerous() ? 'warn' : 'primary'"
+            (click)="onExecute()"
+            [disabled]="!canExecute()">
+      @if (isLoading()) {
+        <mat-spinner diameter="20" class="inline-spinner"></mat-spinner>
+      }
+      @if (isDangerous()) {
+        <mat-icon>warning</mat-icon>
+      }
+      Execute {{ currentAction()?.label || 'Action' }}
+    </button>
+  </mat-dialog-actions>
+</div>

@@ -1,0 +1,255 @@
+.video-upload-container {
+  width: 100%;
+}
+
+.video-upload-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.required-asterisk {
+  color: #dc3545;
+  margin-left: 4px;
+}
+
+.video-upload-area {
+  border: 2px dashed #dee2e6;
+  border-radius: 12px;
+  background: #f8f9fa;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.video-upload-area.has-video {
+  border-color: #28a745;
+  background: white;
+}
+
+.video-upload-area.recording {
+  border-color: #dc3545;
+  background: #000;
+}
+
+.video-upload-area.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Video Preview */
+.video-preview {
+  position: relative;
+}
+
+.preview-video {
+  width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+}
+
+.video-info {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.video-metadata {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.video-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 8px;
+}
+
+/* Recording View */
+.recording-view {
+  position: relative;
+  background: #000;
+}
+
+.live-video {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.recording-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.recording-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.recording-dot {
+  width: 12px;
+  height: 12px;
+  background: #dc3545;
+  border-radius: 50%;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.recording-controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Upload Options */
+.upload-options {
+  padding: 40px 20px;
+}
+
+.upload-prompt {
+  text-align: center;
+}
+
+.upload-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.upload-text {
+  color: #6c757d;
+  margin-bottom: 24px;
+  font-size: 16px;
+}
+
+.upload-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.upload-constraints {
+  color: #6c757d;
+  font-size: 12px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: #0b7ad4;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #0a6bc7;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+/* Error Message */
+.error-message {
+  margin-top: 8px;
+  color: #dc3545;
+  font-size: 14px;
+  padding: 8px 12px;
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  border-radius: 4px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .upload-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn {
+    min-width: 150px;
+    justify-content: center;
+  }
+  
+  .video-actions {
+    position: static;
+    justify-content: center;
+    margin-top: 8px;
+    padding: 8px;
+  }
+  
+  .recording-controls {
+    flex-direction: column;
+    align-items: center;
+  }
+}

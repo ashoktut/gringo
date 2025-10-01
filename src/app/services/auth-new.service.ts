@@ -1,8 +1,8 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, BehaviorSubject, throwError, of } from 'rxjs';
-import { map, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, switchMap } from 'rxjs/operators';
 import {
   User,
   Company,
@@ -18,20 +18,6 @@ import {
   SystemRole
 } from '../models/auth.models';
 
-// Legacy types for backward compatibility
-export type UserRole = 'admin' | 'rep' | 'client' | 'public' | 'guest';
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface AuthState {
-  isAuthenticated: boolean;
-  user: User | null;
-  token: string | null;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -44,25 +30,18 @@ export class AuthService {
   private readonly REFRESH_TOKEN_KEY = 'refresh_token';
   private readonly USER_KEY = 'current_user';
   private readonly COMPANY_KEY = 'current_company';
-  private readonly AUTH_STORAGE_KEY = 'gringo_auth_state';
 
-  // Reactive state using signals and subjects
+  // Reactive state using signals
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private currentCompanySubject = new BehaviorSubject<Company | null>(null);
   private permissionsSubject = new BehaviorSubject<string[]>([]);
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
-  private authState = new BehaviorSubject<AuthState>({
-    isAuthenticated: false,
-    user: null,
-    token: null
-  });
 
   // Public observables
   currentUser$ = this.currentUserSubject.asObservable();
   currentCompany$ = this.currentCompanySubject.asObservable();
   permissions$ = this.permissionsSubject.asObservable();
   isLoading$ = this.isLoadingSubject.asObservable();
-  authState$ = this.authState.asObservable();
 
   // Signals for reactive UI
   currentUser = signal<User | null>(null);
@@ -73,10 +52,10 @@ export class AuthService {
   // Computed properties
   isAuthenticated = computed(() => !!this.currentUser());
   isSuperAdmin = computed(() =>
-    this.hasRoleByName('super_admin')
+    this.hasRole('super_admin')
   );
   isCompanyAdmin = computed(() =>
-    this.hasRoleByName('company_admin') || this.isSuperAdmin()
+    this.hasRole('company_admin') || this.isSuperAdmin()
   );
   canManageUsers = computed(() =>
     this.hasPermission('users:manage') || this.isCompanyAdmin()
@@ -84,20 +63,6 @@ export class AuthService {
   canManageForms = computed(() =>
     this.hasPermission('forms:manage') || this.isCompanyAdmin()
   );
-
-  // Legacy computed properties for backward compatibility
-  public isAdmin = computed(() => {
-    const user = this.currentUser();
-    return user?.roles?.some(role => role.name === 'admin') || false;
-  });
-  public isRep = computed(() => {
-    const user = this.currentUser();
-    return user?.roles?.some(role => role.name === 'rep') || false;
-  });
-  public isClient = computed(() => {
-    const user = this.currentUser();
-    return user?.roles?.some(role => role.name === 'client') || false;
-  });
 
   constructor() {
     this.initializeAuth();
@@ -125,12 +90,10 @@ export class AuthService {
     }
   }
 
-
-
   /**
-   * Login user with credentials
+   * Login user with email/password
    */
-  login(credentials: LoginRequest | LoginCredentials): Observable<LoginResponse | AuthState> {
+  login(credentials: LoginRequest): Observable<LoginResponse> {
     this.isLoading.set(true);
     this.isLoadingSubject.next(true);
 
@@ -194,7 +157,6 @@ export class AuthService {
     return this.http.post<ApiResponse<void>>(`${this.API_BASE}/logout`, {
       refreshToken
     }).pipe(
-      map(() => void 0),
       tap(() => {
         this.clearAuthState();
         this.router.navigate(['/login']);
@@ -203,7 +165,7 @@ export class AuthService {
         // Even if logout API fails, clear local state
         this.clearAuthState();
         this.router.navigate(['/login']);
-        return of(void 0);
+        return of(undefined);
       })
     );
   }
@@ -239,6 +201,48 @@ export class AuthService {
   }
 
   /**
+   * Request password reset
+   */
+  requestPasswordReset(request: PasswordResetRequest): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${this.API_BASE}/password-reset`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Password reset request failed');
+          }
+        })
+      );
+  }
+
+  /**
+   * Confirm password reset with token
+   */
+  confirmPasswordReset(request: PasswordResetConfirmRequest): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${this.API_BASE}/password-reset/confirm`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Password reset failed');
+          }
+        })
+      );
+  }
+
+  /**
+   * Change user password
+   */
+  changePassword(request: ChangePasswordRequest): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${this.API_BASE}/change-password`, request)
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Password change failed');
+          }
+        })
+      );
+  }
+
+  /**
    * Get current authentication token
    */
   getToken(): string | null {
@@ -246,9 +250,9 @@ export class AuthService {
   }
 
   /**
-   * Check if user has specific role by name
+   * Check if user has specific role
    */
-  hasRoleByName(roleName: string): boolean {
+  hasRole(roleName: string): boolean {
     const user = this.currentUser();
     return user?.roles?.some(role => role.name === roleName) || false;
   }
@@ -262,37 +266,92 @@ export class AuthService {
   }
 
   /**
-   * Legacy method - Check if user has any of the specified roles
+   * Check if user can access resource with specific action
    */
-  hasRole(roles: UserRole[]): boolean {
-    const user = this.currentUser();
-    if (!user?.roles) return false;
+  canAccess(resource: string, action: string): boolean {
+    return this.hasPermission(`${resource}:${action}`);
+  }
 
-    return roles.some(role =>
-      user.roles?.some(userRole => userRole.name === role)
+  /**
+   * Get user's system role (highest priority role)
+   */
+  getSystemRole(): SystemRole | null {
+    const user = this.currentUser();
+    if (!user?.roles) return null;
+
+    // Priority order: super_admin > company_admin > user
+    if (user.roles.some(role => role.name === 'super_admin')) {
+      return 'super_admin';
+    }
+    if (user.roles.some(role => role.name === 'company_admin')) {
+      return 'company_admin';
+    }
+    return 'user';
+  }
+
+  /**
+   * Switch to different company (for super admin)
+   */
+  switchCompany(companyId: string): Observable<LoginResponse> {
+    return this.http.post<ApiResponse<LoginResponse>>(`${this.API_BASE}/switch-company`, {
+      companyId
+    }).pipe(
+      map(response => {
+        if (!response.success || !response.data) {
+          throw new Error(response.message || 'Company switch failed');
+        }
+        return response.data;
+      }),
+      tap(loginResponse => {
+        this.handleLoginSuccess(loginResponse);
+      })
     );
   }
 
   /**
-   * Get current user as observable
+   * Update user profile
    */
-  getCurrentUser(): Observable<User | null> {
-    return this.currentUser$;
+  updateProfile(updates: Partial<User>): Observable<User> {
+    return this.http.put<ApiResponse<User>>(`${this.API_BASE}/profile`, updates)
+      .pipe(
+        map(response => {
+          if (!response.success || !response.data) {
+            throw new Error(response.message || 'Profile update failed');
+          }
+          return response.data;
+        }),
+        tap(updatedUser => {
+          this.setCurrentUser(updatedUser);
+        })
+      );
   }
 
   /**
-   * Get current user synchronously
+   * Verify email address
    */
-  getCurrentUserSync(): User | null {
-    return this.currentUser();
+  verifyEmail(token: string): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${this.API_BASE}/verify-email`, { token })
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Email verification failed');
+          }
+        })
+      );
   }
 
   /**
-   * Check if user belongs to specific company
+   * Resend email verification
    */
-  belongsToCompany(companyId: string): boolean {
-    const user = this.currentUser();
-    return user?.companyId === companyId;
+  resendEmailVerification(): Observable<void> {
+    return this.http.post<ApiResponse<void>>(`${this.API_BASE}/resend-verification`, {})
+      .pipe(
+        map(response => {
+          if (!response.success) {
+            throw new Error(response.message || 'Failed to resend verification email');
+          }
+        })
+      );
   }
 
   // Private helper methods
@@ -309,14 +368,6 @@ export class AuthService {
     this.currentUser.set(user);
     this.currentUserSubject.next(user);
     localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-
-    // Update auth state for backward compatibility
-    const authState: AuthState = {
-      isAuthenticated: true,
-      user: user,
-      token: this.getStoredToken()
-    };
-    this.authState.next(authState);
   }
 
   private setCurrentCompany(company: Company): void {
@@ -349,19 +400,10 @@ export class AuthService {
     this.currentCompanySubject.next(null);
     this.permissionsSubject.next([]);
 
-    // Update auth state for backward compatibility
-    const authState: AuthState = {
-      isAuthenticated: false,
-      user: null,
-      token: null
-    };
-    this.authState.next(authState);
-
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     localStorage.removeItem(this.COMPANY_KEY);
-    localStorage.removeItem(this.AUTH_STORAGE_KEY);
   }
 
   private storeToken(token: string): void {

@@ -1,0 +1,484 @@
+.company-details-dialog {
+  width: 100%;
+  max-width: 1000px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.company-header {
+  flex: 1;
+}
+
+.company-info h2 {
+  margin: 0 0 12px 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.company-meta {
+  display: flex;
+  gap: 8px;
+}
+
+/* Content */
+.dialog-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.tab-content {
+  padding: 24px;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+/* Info Cards */
+.info-card {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.info-card:last-child {
+  margin-bottom: 0;
+}
+
+.info-card mat-card-header {
+  padding-bottom: 16px;
+}
+
+.info-card mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.info-card mat-card-title mat-icon {
+  color: #1976d2;
+}
+
+/* Info Grid */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.info-item label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item span,
+.info-item a {
+  font-size: 1rem;
+  color: #333;
+  word-break: break-word;
+}
+
+/* Links */
+.email-link,
+.phone-link,
+.website-link {
+  color: #1976d2;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: color 0.2s ease;
+}
+
+.email-link:hover,
+.phone-link:hover,
+.website-link:hover {
+  color: #1565c0;
+  text-decoration: underline;
+}
+
+.domain-value {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+/* Description */
+.description-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.description-section label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.description-text {
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Address */
+.address-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 1rem;
+  color: #333;
+  line-height: 1.6;
+}
+
+.address-content mat-icon {
+  color: #666;
+  margin-top: 2px;
+}
+
+/* Features */
+.features-grid mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.features-grid mat-chip {
+  font-size: 0.875rem;
+  background-color: #e8f5e8;
+  color: #2e7d32;
+}
+
+/* Statistics */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.stat-item {
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+}
+
+.stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+/* Progress Bars */
+.stat-progress {
+  margin-top: 12px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.progress-fill.primary {
+  background-color: #1976d2;
+}
+
+.progress-fill.success {
+  background-color: #4caf50;
+}
+
+.progress-fill.accent {
+  background-color: #ff9800;
+}
+
+.progress-fill.warn {
+  background-color: #f44336;
+}
+
+.progress-text {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* Users Table */
+.table-container {
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.users-table {
+  width: 100%;
+  background: white;
+}
+
+.users-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.users-table td {
+  border-bottom: 1px solid #dee2e6;
+  padding: 12px 16px;
+}
+
+.users-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.user-email {
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.user-email:hover {
+  text-decoration: underline;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.loading-container p {
+  margin-top: 16px;
+  font-size: 1rem;
+}
+
+/* No Data State */
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.no-data-icon {
+  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.no-data h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+}
+
+.no-data p {
+  margin: 0;
+  color: #666;
+}
+
+/* Chips */
+mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+mat-chip {
+  font-size: 0.75rem;
+  font-weight: 500;
+  min-height: 24px;
+  padding: 0 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .company-details-dialog {
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
+    max-height: none;
+  }
+
+  .dialog-header {
+    padding: 16px;
+  }
+
+  .company-info h2 {
+    font-size: 1.5rem;
+  }
+
+  .tab-content {
+    padding: 16px;
+    max-height: none;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .stat-item {
+    padding: 16px;
+  }
+
+  .stat-value {
+    font-size: 1.5rem;
+  }
+
+  .users-table {
+    font-size: 0.875rem;
+  }
+
+  .users-table td {
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .company-info h2 {
+    font-size: 1.25rem;
+  }
+
+  .info-card mat-card-title {
+    font-size: 1.1rem;
+  }
+
+  .stat-value {
+    font-size: 1.25rem;
+  }
+
+  .company-meta {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
+/* Material Design Enhancements */
+.mat-mdc-card {
+  border-radius: 12px !important;
+}
+
+.mat-mdc-tab-group {
+  height: 100%;
+}
+
+.mat-mdc-tab-body-wrapper {
+  flex: 1;
+  overflow: hidden;
+}
+
+.mat-mdc-tab-body-content {
+  overflow: visible;
+}
+
+/* Animation Classes */
+.fade-in {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Tab Animation */
+.mat-mdc-tab-body {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Hover Effects */
+.info-card:hover .info-card mat-card-title mat-icon {
+  color: #1565c0;
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}

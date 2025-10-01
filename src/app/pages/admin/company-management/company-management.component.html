@@ -1,0 +1,270 @@
+<div class="company-management-container">
+  <!-- Header Section -->
+  <div class="header-section">
+    <div class="title-section">
+      <h1>Company Management</h1>
+      <p class="subtitle">Manage all companies in the system</p>
+    </div>
+
+    <div class="header-actions">
+      @if (canManageCompany()) {
+        <button
+          mat-raised-button
+          color="primary"
+          (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          Add Company
+        </button>
+      }
+
+      <button
+        mat-stroked-button
+        (click)="exportCompanies()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+
+      <button
+        mat-icon-button
+        matTooltip="Refresh"
+        (click)="refreshData()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-grid">
+    <mat-card class="stat-card">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalCompanies() }}</div>
+          <div class="stat-label">Total Companies</div>
+        </div>
+        <mat-icon class="stat-icon">business</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card success">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ activeCompanies() }}</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <mat-icon class="stat-icon">check_circle</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card accent">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ trialCompanies() }}</div>
+          <div class="stat-label">Trial</div>
+        </div>
+        <mat-icon class="stat-icon">schedule</mat-icon>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="stat-card warn">
+      <mat-card-content>
+        <div class="stat-content">
+          <div class="stat-value">{{ suspendedCompanies() }}</div>
+          <div class="stat-label">Suspended</div>
+        </div>
+        <mat-icon class="stat-icon">block</mat-icon>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filters Section -->
+  <mat-card class="filters-card">
+    <mat-card-content>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>Search companies</mat-label>
+          <input
+            matInput
+            [value]="searchTerm()"
+            (input)="onSearchChange($event.target.value || '')"
+            placeholder="Search by name, domain, or email">
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select
+            [value]="statusFilter()"
+            (selectionChange)="onStatusFilterChange($event.value)">
+            <mat-option value="all">All Statuses</mat-option>
+            @for (status of statusOptions; track status) {
+              <mat-option [value]="status">
+                {{ status | titlecase }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Plan</mat-label>
+          <mat-select
+            [value]="planFilter()"
+            (selectionChange)="onPlanFilterChange($event.value)">
+            <mat-option value="all">All Plans</mat-option>
+            @for (plan of planOptions; track plan) {
+              <mat-option [value]="plan">
+                {{ plan | titlecase }}
+              </mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Companies Table -->
+  <mat-card class="table-card">
+    <mat-card-content>
+      @if (!isLoading()) {
+        <div class="table-container">
+        <table mat-table [dataSource]="filteredCompanies()" class="companies-table">
+
+          <!-- Name Column -->
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>Company Name</th>
+            <td mat-cell *matCellDef="let company">
+              <div class="company-name-cell">
+                <div class="company-name">{{ company.name }}</div>
+                <div class="company-email">{{ company.contactEmail }}</div>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Domain Column -->
+          <ng-container matColumnDef="domain">
+            <th mat-header-cell *matHeaderCellDef>Domain</th>
+            <td mat-cell *matCellDef="let company">
+              @if (company.domain) {
+                <span class="domain-badge">
+                  {{ company.domain }}
+                </span>
+              } @else {
+                <span class="no-domain">
+                  No domain
+                </span>
+              }
+            </td>
+          </ng-container>
+
+          <!-- Status Column -->
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let company">
+              <mat-chip-set>
+                <mat-chip
+                  [color]="getStatusColor(company.status)">
+                  {{ company.status | titlecase }}
+                </mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+
+          <!-- Plan Column -->
+          <ng-container matColumnDef="plan">
+            <th mat-header-cell *matHeaderCellDef>Plan</th>
+            <td mat-cell *matCellDef="let company">
+              <mat-chip-set>
+                <mat-chip
+                  [color]="getPlanColor(company.subscription.plan)">
+                  {{ company.subscription.plan | titlecase }}
+                </mat-chip>
+              </mat-chip-set>
+            </td>
+          </ng-container>
+
+          <!-- User Count Column -->
+          <ng-container matColumnDef="userCount">
+            <th mat-header-cell *matHeaderCellDef>Users</th>
+            <td mat-cell *matCellDef="let company">
+              <div class="user-count">
+                <mat-icon class="count-icon">people</mat-icon>
+                {{ company.userCount || 0 }}
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- Created At Column -->
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef>Created</th>
+            <td mat-cell *matCellDef="let company">
+              {{ formatDate(company.createdAt) }}
+            </td>
+          </ng-container>
+
+          <!-- Actions Column -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let company">
+              <div class="action-buttons">
+                <button
+                  mat-icon-button
+                  matTooltip="View Details"
+                  (click)="viewCompanyDetails(company)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+
+                @if (canManageCompany()) {
+                  <button
+                    mat-icon-button
+                    matTooltip="Edit Company"
+                    (click)="openEditDialog(company)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                }
+
+                @if (canManageCompany()) {
+                  <button
+                    mat-icon-button
+                    [matTooltip]="company.status === 'active' ? 'Deactivate' : 'Activate'"
+                    (click)="toggleCompanyStatus(company)">
+                    <mat-icon [color]="company.status === 'active' ? 'warn' : 'primary'">
+                      {{ company.status === 'active' ? 'block' : 'play_arrow' }}
+                    </mat-icon>
+                  </button>
+                }
+
+                @if (canDeleteCompany()) {
+                  <button
+                    mat-icon-button
+                    matTooltip="Delete Company"
+                    color="warn"
+                    (click)="deleteCompany(company)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+
+        <!-- No Data Message -->
+        @if (filteredCompanies().length === 0) {
+          <div class="no-data">
+            <mat-icon class="no-data-icon">business</mat-icon>
+            <h3>No companies found</h3>
+            <p>Try adjusting your search criteria or create a new company.</p>
+          </div>
+        }
+        </div>
+      } @else {
+        <!-- Loading Template -->
+        <div class="loading-container">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Loading companies...</p>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
