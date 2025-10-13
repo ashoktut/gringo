@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -15,10 +16,16 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialogModule } from '@angular/material/dialog';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatDialogModule, MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { FormSection, FormField, ReusableFormComponent } from '../reusable-form/reusable-form.component';
 import { FormConfiguration, FormConfigService } from '../../services/form-config.service';
+
+export interface SectionEditData {
+  title: string;
+  description: string;
+}
 
 export interface FieldPaletteItem {
   type: string;
@@ -26,6 +33,101 @@ export interface FieldPaletteItem {
   icon: string;
   description: string;
   category: 'basic' | 'advanced' | 'special';
+}
+
+// Section Edit Dialog Component
+@Component({
+  selector: 'app-section-edit-dialog',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    TextFieldModule
+  ],
+  template: `
+    <h2 mat-dialog-title>Edit Section</h2>
+    <form [formGroup]="sectionForm" (ngSubmit)="onSubmit()">
+      <mat-dialog-content class="section-edit-content">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Section Title</mat-label>
+          <input matInput formControlName="title" placeholder="Enter section title">
+          <mat-error *ngIf="sectionForm.get('title')?.hasError('required')">
+            Section title is required
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Section Description</mat-label>
+          <textarea matInput
+                    formControlName="description"
+                    placeholder="Enter section description (optional)"
+                    rows="3"
+                    cdkTextareaAutosize
+                    [cdkAutosizeMinRows]="2"
+                    [cdkAutosizeMaxRows]="5">
+          </textarea>
+        </mat-form-field>
+      </mat-dialog-content>
+
+      <mat-dialog-actions align="end">
+        <button mat-button type="button" (click)="onCancel()">Cancel</button>
+        <button mat-raised-button
+                color="primary"
+                type="submit"
+                [disabled]="sectionForm.invalid">
+          Save Changes
+        </button>
+      </mat-dialog-actions>
+    </form>
+  `,
+  styles: [`
+    .section-edit-content {
+      min-width: 350px;
+      padding: 16px 0;
+    }
+
+    .full-width {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+
+    mat-dialog-actions {
+      padding: 16px 0 0 0;
+      margin: 0;
+    }
+  `]
+})
+export class SectionEditDialogComponent implements OnInit {
+  private readonly fb = inject(NonNullableFormBuilder);
+  private readonly dialogRef = inject(MatDialogRef<SectionEditDialogComponent>);
+  readonly data = inject<SectionEditData>(MAT_DIALOG_DATA);
+
+  sectionForm!: FormGroup;
+
+  ngOnInit(): void {
+    this.sectionForm = this.fb.group({
+      title: [this.data.title || '', Validators.required],
+      description: [this.data.description || '']
+    });
+  }
+
+  onSubmit(): void {
+    if (this.sectionForm.valid) {
+      const result: SectionEditData = {
+        title: this.sectionForm.value.title.trim(),
+        description: this.sectionForm.value.description.trim()
+      };
+      this.dialogRef.close(result);
+    }
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
+  }
 }
 
 @Component({
@@ -58,6 +160,7 @@ export interface FieldPaletteItem {
 export class VisualFormEditorComponent implements OnInit {
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
   private readonly formConfigService = inject(FormConfigService);
 
   @Input() configuration: FormConfiguration | null = null;
@@ -532,11 +635,71 @@ export class VisualFormEditorComponent implements OnInit {
   }
 
   editSection(sectionIndex: number): void {
-    // Implementation for section editing - could open a dialog or inline editing
-    this.selectedSectionIndex.set(sectionIndex);
+    const currentSection = this.sections()[sectionIndex];
+    if (!currentSection) return;
+
+    // Create a simple prompt-based edit for now (can be enhanced to full dialog later)
+    const editData: SectionEditData = {
+      title: currentSection.title,
+      description: currentSection.description || ''
+    };
+
+    this.openSectionEditDialog(editData, sectionIndex);
   }
 
-  shouldShowFieldOptions(fieldType: string | undefined): boolean {
+  private openSectionEditDialog(data: SectionEditData, sectionIndex: number): void {
+    const dialogRef = this.dialog.open(SectionEditDialogComponent, {
+      data: { ...data },
+      width: '400px',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe((result: SectionEditData | undefined) => {
+      if (result) {
+        this.updateSectionDetails(sectionIndex, result);
+      }
+    });
+  }
+
+  private updateSectionDetails(sectionIndex: number, updates: Partial<SectionEditData>): void {
+    const currentSections = [...this.sections()];
+    const section = currentSections[sectionIndex];
+
+    if (!section) return;
+
+    // Update section properties
+    if (updates.title !== undefined) {
+      section.title = updates.title;
+    }
+    if (updates.description !== undefined) {
+      section.description = updates.description;
+    }
+
+    // Update the sections signal
+    this.sections.set(currentSections);
+
+    // Update the reactive form
+    this.updateSectionInForm(sectionIndex, section);
+
+    // Show success message
+    this.snackBar.open('Section updated successfully', 'Close', { duration: 3000 });
+
+    // Emit the configuration change
+    const updatedConfig = this.getPreviewConfiguration();
+    this.configurationChange.emit(updatedConfig);
+  }
+
+  private updateSectionInForm(sectionIndex: number, section: FormSection): void {
+    const sectionsArray = this.editorForm.get('sections') as FormArray;
+    const sectionGroup = sectionsArray.at(sectionIndex) as FormGroup;
+
+    if (sectionGroup) {
+      sectionGroup.patchValue({
+        title: section.title,
+        description: section.description
+      });
+    }
+  }  shouldShowFieldOptions(fieldType: string | undefined): boolean {
     return fieldType === 'select' || fieldType === 'radio' || fieldType === 'checkbox';
   }
 
