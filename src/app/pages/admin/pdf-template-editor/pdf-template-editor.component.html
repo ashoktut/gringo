@@ -1,0 +1,315 @@
+<div class="pdf-template-editor-container">
+  <!-- Header -->
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>picture_as_pdf</mat-icon>
+        {{ isEditMode() ? 'Edit PDF Template' : 'Create PDF Template' }}
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-actions align="end">
+      <button mat-button (click)="cancel()">
+        <mat-icon>cancel</mat-icon>
+        Cancel
+      </button>
+      <button mat-raised-button color="accent" (click)="generatePreview()">
+        <mat-icon>visibility</mat-icon>
+        Preview
+      </button>
+      <button mat-raised-button color="primary" (click)="save()" [disabled]="templateForm.invalid || loading()">
+        <mat-icon>save</mat-icon>
+        Save Template
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Main Form -->
+  <form [formGroup]="templateForm" class="template-form">
+    <mat-tab-group>
+
+      <!-- Tab 1: Basic Settings -->
+      <mat-tab label="Basic Settings">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-content>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Template Name</mat-label>
+                  <input matInput formControlName="name" placeholder="e.g., Customer Invoice Template" required>
+                  <mat-icon matPrefix>label</mat-icon>
+                  @if (templateForm.get('name')?.hasError('required')) {
+                    <mat-error>Template name is required</mat-error>
+                  }
+                </mat-form-field>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" rows="3"
+                            placeholder="Brief description of this template"></textarea>
+                  <mat-icon matPrefix>description</mat-icon>
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <h3>Page Settings</h3>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline">
+                  <mat-label>Page Size</mat-label>
+                  <mat-select formControlName="pageSize">
+                    @for (size of pageSizes; track size) {
+                      <mat-option [value]="size">{{ size }}</mat-option>
+                    }
+                  </mat-select>
+                  <mat-icon matPrefix>aspect_ratio</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Orientation</mat-label>
+                  <mat-select formControlName="orientation">
+                    @for (orientation of orientations; track orientation) {
+                      <mat-option [value]="orientation">
+                        {{ orientation | titlecase }}
+                      </mat-option>
+                    }
+                  </mat-select>
+                  <mat-icon matPrefix>rotate_90_degrees_ccw</mat-icon>
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <h3>Margins (mm)</h3>
+
+              <div class="margins-grid">
+                <mat-form-field appearance="outline">
+                  <mat-label>Top</mat-label>
+                  <input matInput type="number" formControlName="marginTop" min="0">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Right</mat-label>
+                  <input matInput type="number" formControlName="marginRight" min="0">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Bottom</mat-label>
+                  <input matInput type="number" formControlName="marginBottom" min="0">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Left</mat-label>
+                  <input matInput type="number" formControlName="marginLeft" min="0">
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <h3>Options</h3>
+
+              <div class="options-list">
+                <mat-slide-toggle formControlName="includeSubmissionInfo">
+                  Include submission information (date, reference number, etc.)
+                </mat-slide-toggle>
+
+                <mat-slide-toggle formControlName="includeCompanyLogo">
+                  Include company logo
+                </mat-slide-toggle>
+              </div>
+
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Watermark Text (optional)</mat-label>
+                  <input matInput formControlName="watermark" placeholder="e.g., CONFIDENTIAL, DRAFT">
+                  <mat-icon matPrefix>water_drop</mat-icon>
+                </mat-form-field>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Tab 2: Template Editor -->
+      <mat-tab label="Template Editor">
+        <div class="tab-content">
+
+          <!-- Available Placeholders Help -->
+          <mat-card class="placeholders-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>info</mat-icon>
+                Available Placeholders
+              </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="help-text">
+                Click on a placeholder to insert it into your template. These will be replaced with actual data when generating PDFs.
+              </p>
+              <mat-chip-set>
+                @for (placeholder of availablePlaceholders; track placeholder.name) {
+                  <mat-chip
+                    class="placeholder-chip"
+                    [matTooltip]="placeholder.description"
+                    (click)="insertPlaceholder(placeholder.name, 'bodyHtml')">
+                    {{ placeholder.name }}
+                  </mat-chip>
+                }
+              </mat-chip-set>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Header Template -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Header Template (Optional)</mat-card-title>
+              <mat-card-subtitle>HTML content for page headers</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-form-field appearance="outline" class="full-width code-editor">
+                <mat-label>Header HTML</mat-label>
+                <textarea
+                  matInput
+                  formControlName="headerHtml"
+                  rows="8"
+                  placeholder="<div>Header content here...</div>"
+                  class="code-input"></textarea>
+              </mat-form-field>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Body Template -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Body Template *</mat-card-title>
+              <mat-card-subtitle>Main content template (Required)</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="editor-actions">
+                <button mat-stroked-button type="button" (click)="loadDefaultTemplate()">
+                  <mat-icon>file_copy</mat-icon>
+                  Load Default Template
+                </button>
+              </div>
+
+              <mat-form-field appearance="outline" class="full-width code-editor">
+                <mat-label>Body HTML</mat-label>
+                <textarea
+                  matInput
+                  formControlName="bodyHtml"
+                  rows="20"
+                  placeholder="<div>Your main content here...</div>"
+                  class="code-input"
+                  required></textarea>
+                @if (templateForm.get('bodyHtml')?.hasError('required')) {
+                  <mat-error>Body template is required</mat-error>
+                }
+              </mat-form-field>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Footer Template -->
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>Footer Template (Optional)</mat-card-title>
+              <mat-card-subtitle>HTML content for page footers</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-form-field appearance="outline" class="full-width code-editor">
+                <mat-label>Footer HTML</mat-label>
+                <textarea
+                  matInput
+                  formControlName="footerHtml"
+                  rows="8"
+                  placeholder="<div>Footer content here...</div>"
+                  class="code-input"></textarea>
+              </mat-form-field>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+      <!-- Tab 3: CSS Styles -->
+      <mat-tab label="CSS Styles">
+        <div class="tab-content">
+          <mat-card>
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>palette</mat-icon>
+                Custom CSS Styles
+              </mat-card-title>
+              <mat-card-subtitle>Add custom styles for your PDF template</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <mat-form-field appearance="outline" class="full-width code-editor">
+                <mat-label>CSS Styles</mat-label>
+                <textarea
+                  matInput
+                  formControlName="cssStyles"
+                  rows="20"
+                  placeholder=".header { text-align: center; }"
+                  class="code-input"></textarea>
+              </mat-form-field>
+
+              <div class="css-help">
+                <h4>Common CSS Classes:</h4>
+                <ul>
+                  <li><code>.header</code> - Header styling</li>
+                  <li><code>.content</code> - Main content area</li>
+                  <li><code>.footer</code> - Footer styling</li>
+                  <li><code>.watermark</code> - Watermark styling</li>
+                  <li><code>h1, h2, h3</code> - Heading styles</li>
+                  <li><code>p, table, ul, ol</code> - Standard elements</li>
+                </ul>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </mat-tab>
+
+    </mat-tab-group>
+  </form>
+
+  <!-- Preview Modal -->
+  @if (showPreview()) {
+    <div class="preview-overlay" (click)="closePreview()">
+      <div class="preview-container" (click)="$event.stopPropagation()">
+        <div class="preview-header">
+          <h2>
+            <mat-icon>visibility</mat-icon>
+            Template Preview
+          </h2>
+          <button mat-icon-button (click)="closePreview()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="preview-content">
+          <iframe
+            [srcdoc]="previewHtml()"
+            class="preview-iframe"
+            title="PDF Template Preview"></iframe>
+        </div>
+        <div class="preview-footer">
+          <p class="preview-note">
+            <mat-icon>info</mat-icon>
+            This is a preview with sample data. Actual PDFs will use real form submission data.
+          </p>
+          <button mat-raised-button color="primary" (click)="closePreview()">
+            <mat-icon>check</mat-icon>
+            Close Preview
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Loading Overlay -->
+  @if (loading()) {
+    <div class="loading-overlay">
+      <mat-spinner></mat-spinner>
+      <p>Processing...</p>
+    </div>
+  }
+</div>

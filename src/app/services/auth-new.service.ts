@@ -157,6 +157,7 @@ export class AuthService {
     return this.http.post<ApiResponse<void>>(`${this.API_BASE}/logout`, {
       refreshToken
     }).pipe(
+      map(() => void 0), // Ensure we return void
       tap(() => {
         this.clearAuthState();
         this.router.navigate(['/login']);
@@ -165,7 +166,7 @@ export class AuthService {
         // Even if logout API fails, clear local state
         this.clearAuthState();
         this.router.navigate(['/login']);
-        return of(undefined);
+        return of(void 0);
       })
     );
   }

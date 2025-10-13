@@ -6,6 +6,40 @@ import { Validators, ValidatorFn } from '@angular/forms';
 import { IndexedDbService } from './indexed-db.service';
 import { FormSeedDataService } from './form-seed-data.service';
 
+/**
+ * @deprecated This service is deprecated as of version 2.0.0
+ *
+ * **MIGRATION NOTICE:**
+ * This service has been consolidated into the new `FormService` to eliminate code duplication
+ * and provide a unified API for all form operations.
+ *
+ * **Please migrate to:**
+ * ```typescript
+ * import { FormService } from './form.service';
+ *
+ * // Old way:
+ * constructor(private formConfigService: FormConfigService) {}
+ * this.formConfigService.getAllFormConfigs();
+ * this.formConfigService.saveFormConfig(config);
+ * this.formConfigService.getComprehensiveRfqConfiguration();
+ *
+ * // New way:
+ * constructor(private formService: FormService) {}
+ * this.formService.getAllFormConfigs();
+ * this.formService.saveFormConfig(config);
+ * this.formService.getComprehensiveRfqConfiguration();
+ * ```
+ *
+ * **Benefits of migration:**
+ * - Unified API for forms, submissions, PDF templates, and approvals
+ * - Signal-based reactive state management
+ * - Reduced code duplication (~3500 lines eliminated)
+ * - Better TypeScript support with EnhancedFormConfiguration
+ * - Integrated PDF generation and download features
+ *
+ * This service will be removed in version 3.0.0
+ */
+
 export interface FormConfiguration {
   id: string;
   name: string;

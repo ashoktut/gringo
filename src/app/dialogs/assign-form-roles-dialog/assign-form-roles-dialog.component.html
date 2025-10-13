@@ -1,0 +1,184 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>
+    <mat-icon>group</mat-icon>
+    Assign Roles to Form
+  </h2>
+
+  <mat-dialog-content>
+    <div class="form-info">
+      <p><strong>Form:</strong> {{ data.formName }}</p>
+    </div>
+
+    <form [formGroup]="roleForm">
+
+      <!-- Access Roles Section -->
+      <div class="section">
+        <h3>Who can access this form? *</h3>
+        <p class="section-description">
+          Select the roles that should have access to fill out this form.
+        </p>
+
+        <!-- Search -->
+        <mat-form-field appearance="outline" class="full-width search-field">
+          <mat-label>Search roles</mat-label>
+          <input matInput
+                 (input)="onSearchChange($event)"
+                 placeholder="Type to search...">
+          <mat-icon matPrefix>search</mat-icon>
+        </mat-form-field>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+          <button mat-button type="button" (click)="selectAll()">
+            <mat-icon>select_all</mat-icon>
+            Select All
+          </button>
+          <button mat-button type="button" (click)="clearAll()">
+            <mat-icon>clear_all</mat-icon>
+            Clear All
+          </button>
+        </div>
+
+        <!-- Selected Roles Display -->
+        @if (selectedAccessRoles().length > 0) {
+          <div class="selected-roles">
+            <p class="selected-count">
+              {{ selectedAccessRoles().length }} role(s) selected
+            </p>
+            <mat-chip-set>
+              @for (role of selectedAccessRoles(); track role.id) {
+                <mat-chip (removed)="removeRole(role.id, 'access')">
+                  {{ role.name }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+
+        <!-- Roles List -->
+        <div class="roles-list">
+          @if (loading()) {
+            <div class="loading-state">
+              <mat-spinner diameter="40"></mat-spinner>
+              <p>Loading roles...</p>
+            </div>
+          } @else if (filteredRoles().length === 0) {
+            <div class="empty-state">
+              <mat-icon>search_off</mat-icon>
+              <p>No roles found</p>
+            </div>
+          } @else {
+            @for (role of filteredRoles(); track role.id) {
+              <div class="role-item" (click)="toggleRoleSelection(role.id, 'access')">
+                <mat-checkbox
+                  [checked]="isRoleSelected(role.id, 'access')"
+                  (click)="$event.stopPropagation()">
+                </mat-checkbox>
+                <div class="role-info">
+                  <div class="role-name">{{ role.name }}</div>
+                  @if (role.description) {
+                    <div class="role-description">{{ role.description }}</div>
+                  }
+                  <div class="role-meta">
+                    <span class="scope-badge" [class.system]="role.scope === 'system'">
+                      {{ role.scope | uppercase }}
+                    </span>
+                    @if (role.permissions) {
+                      <span class="user-count">
+                        <mat-icon>security</mat-icon>
+                        {{ role.permissions.length }} permissions
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          }
+        </div>
+
+        @if (roleForm.get('accessRoleIds')?.hasError('required') && roleForm.get('accessRoleIds')?.touched) {
+          <div class="error-message">
+            <mat-icon>error</mat-icon>
+            At least one role must be selected
+          </div>
+        }
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Approval Settings Section -->
+      <div class="section">
+        <h3>Approval Settings</h3>
+
+        <mat-checkbox formControlName="requiresApproval" class="approval-toggle">
+          Require approval for submissions
+        </mat-checkbox>
+
+        <p class="section-description">
+          When enabled, submissions will need to be approved by users with the selected approver roles.
+        </p>
+
+        @if (roleForm.get('requiresApproval')?.value) {
+          <div class="approver-section">
+            <h4>Who can approve submissions? *</h4>
+
+            <!-- Selected Approver Roles Display -->
+            @if (selectedApproverRoles().length > 0) {
+              <div class="selected-roles">
+                <p class="selected-count">
+                  {{ selectedApproverRoles().length }} approver role(s) selected
+                </p>
+                <mat-chip-set>
+                  @for (role of selectedApproverRoles(); track role.id) {
+                    <mat-chip (removed)="removeRole(role.id, 'approver')" color="accent">
+                      {{ role.name }}
+                      <mat-icon matChipRemove>cancel</mat-icon>
+                    </mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
+
+            <!-- Approver Roles List -->
+            <div class="roles-list approver-list">
+              @for (role of filteredRoles(); track role.id) {
+                <div class="role-item" (click)="toggleRoleSelection(role.id, 'approver')">
+                  <mat-checkbox
+                    [checked]="isRoleSelected(role.id, 'approver')"
+                    (click)="$event.stopPropagation()">
+                  </mat-checkbox>
+                  <div class="role-info">
+                    <div class="role-name">{{ role.name }}</div>
+                    @if (role.description) {
+                      <div class="role-description">{{ role.description }}</div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            @if (roleForm.get('approverRoleIds')?.hasError('required') && roleForm.get('approverRoleIds')?.touched) {
+              <div class="error-message">
+                <mat-icon>error</mat-icon>
+                At least one approver role must be selected when approval is required
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()">
+      <mat-icon>cancel</mat-icon>
+      Cancel
+    </button>
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="roleForm.invalid || loading()">
+      <mat-icon>save</mat-icon>
+      Save Role Assignment
+    </button>
+  </mat-dialog-actions>
+</div>

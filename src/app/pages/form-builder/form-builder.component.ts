@@ -8,12 +8,18 @@ import { MatCardModule } from '@angular/material/card';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
 
-import { FormConfiguration, FormConfigService } from '../../services/form-config.service';
-import { FormBuilderTemplateService } from './services/form-builder-template.service';
+import { EnhancedFormConfiguration } from '../../models/form.models';
 import { VisualFormEditorComponent } from '../../sharedComponents/visual-form-editor/visual-form-editor.component';
 import { ConfigManagementComponent } from './config-management/config-management.component';
 import { CompanyManagementComponent } from './company-management/company-management.component';
+import { FormService } from '../../services/form.service';
+import { AssignFormRolesDialogComponent } from '../../dialogs/assign-form-roles-dialog/assign-form-roles-dialog.component';
+import { PdfTemplateLayout } from '../../models/form.models';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-form-builder',
@@ -27,6 +33,9 @@ import { CompanyManagementComponent } from './company-management/company-managem
     MatMenuModule,
     MatTooltipModule,
     MatChipsModule,
+    MatDialogModule,
+    MatSelectModule,
+    MatFormFieldModule,
     VisualFormEditorComponent,
     ConfigManagementComponent,
     CompanyManagementComponent
@@ -38,21 +47,32 @@ export class FormBuilderComponent implements OnInit {
   // Injected services
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly formConfigService = inject(FormConfigService);
-  private readonly templateService = inject(FormBuilderTemplateService);
+  private readonly formService = inject(FormService);
+  private readonly dialog = inject(MatDialog);
+  private readonly notificationService = inject(NotificationService);
 
   // Component state
   currentMode = signal<string>('management');
-  currentForm = signal<FormConfiguration | null>(null);
-  configurations = signal<FormConfiguration[]>([]);
+  currentForm = signal<Partial<EnhancedFormConfiguration> | null>(null);
+  configurations = signal<EnhancedFormConfiguration[]>([]);
   showCompanyManagement = signal<boolean>(false);
+  selectedPdfTemplateId = signal<string | null>(null);
+  assignedRoleIds = signal<string[]>([]);
 
   // Computed properties
   canEdit = computed(() => !!this.currentForm());
-  availableTemplates = computed(() => this.templateService.getAllTemplates());
+  availableTemplates = computed(() => this.formService.getBuilderTemplates());
+  pdfTemplates = computed(() => this.formService.pdfTemplates());
+  hasRolesAssigned = computed(() => this.assignedRoleIds().length > 0);
+
+  // Helper for template compatibility with visual-form-editor
+  getCurrentFormAsAny(): any {
+    return this.currentForm();
+  }
 
   ngOnInit(): void {
     this.initializeComponent();
+    this.loadPdfTemplates();
   }
 
   // Initialization
@@ -61,9 +81,16 @@ export class FormBuilderComponent implements OnInit {
     this.checkForEditMode();
   }
 
+  private loadPdfTemplates(): void {
+    this.formService.loadPdfTemplates().subscribe({
+      next: () => console.log('PDF templates loaded'),
+      error: (err) => console.error('Failed to load PDF templates:', err)
+    });
+  }
+
   private loadConfigurations(): void {
     // Load existing configurations from service
-    this.formConfigService.getAllFormConfigs().subscribe({
+    this.formService.getAllFormConfigs().subscribe({
       next: (configs) => this.configurations.set(configs),
       error: (error) => console.error('Failed to load configurations:', error)
     });
@@ -145,34 +172,28 @@ export class FormBuilderComponent implements OnInit {
   }
 
   // Configuration management
-  editConfiguration(config: FormConfiguration): void {
+  editConfiguration(config: EnhancedFormConfiguration): void {
     this.currentForm.set(config);
     this.currentMode.set('editor');
   }
 
   createNewConfiguration(): void {
-    const newConfig = this.templateService.createCustomConfiguration();
+    const newConfig = this.formService.createCustomConfiguration();
     this.currentForm.set(newConfig);
     this.currentMode.set('editor');
   }
 
   loadTemplate(templateId: string): void {
-    if (templateId === 'rfq') {
-      // Special handling for RFQ template from FormConfigService
-      const rfqConfig = this.formConfigService.getComprehensiveRfqConfiguration();
-      this.currentForm.set(rfqConfig);
-    } else {
-      // Use template service for other templates
-      const config = this.templateService.templateToFormConfiguration(templateId);
-      if (config) {
-        this.currentForm.set(config);
-      }
+    // Use unified FormService for all templates including RFQ
+    const config = this.formService.templateToFormConfiguration(templateId);
+    if (config) {
+      this.currentForm.set(config);
     }
     this.currentMode.set('editor');
   }
 
   // Event handlers
-  onConfigurationSaved(config: FormConfiguration): void {
+  onConfigurationSaved(config: Partial<EnhancedFormConfiguration>): void {
     this.saveConfiguration(config);
     this.exitEditor();
   }
@@ -181,7 +202,7 @@ export class FormBuilderComponent implements OnInit {
     this.exitEditor();
   }
 
-  deleteConfiguration(config: FormConfiguration): void {
+  deleteConfiguration(config: EnhancedFormConfiguration): void {
     this.configurations.update(configs =>
       configs.filter(c => c.id !== config.id)
     );
@@ -191,22 +212,83 @@ export class FormBuilderComponent implements OnInit {
     }
   }
 
+  // Enhanced Form Features
+  openRoleAssignmentDialog(): void {
+    if (!this.currentForm()?.id) {
+      this.notificationService.showWarning('Please save the form first before assigning roles');
+      return;
+    }
+
+    const formId = this.currentForm()!.id!;
+    const dialogRef = this.dialog.open(AssignFormRolesDialogComponent, {
+      width: '800px',
+      data: {
+        formId: formId,
+        currentRoleIds: this.assignedRoleIds()
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.assignedRoleIds.set(result.roleIds);
+        this.saveRoleAssignments(formId, result);
+      }
+    });
+  }
+
+  onPdfTemplateChange(templateId: string): void {
+    this.selectedPdfTemplateId.set(templateId);
+    const formId = this.currentForm()?.id;
+    if (formId) {
+      this.assignPdfTemplateToForm(formId, templateId);
+    }
+  }
+
+  private saveRoleAssignments(formId: string, roleData: any): void {
+    const allRoleIds = [...(roleData.accessRoleIds || []), ...(roleData.approverRoleIds || [])];
+    this.formService.assignRolesToForm(formId, allRoleIds).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('Roles assigned successfully');
+      },
+      error: (err) => {
+        this.notificationService.showError('Failed to assign roles');
+        console.error('Role assignment error:', err);
+      }
+    });
+  }
+
+  private assignPdfTemplateToForm(formId: string, templateId: string): void {
+    this.formService.assignPdfTemplateToForm(formId, templateId).subscribe({
+      next: () => {
+        this.notificationService.showSuccess('PDF template assigned successfully');
+      },
+      error: (err) => {
+        this.notificationService.showError('Failed to assign PDF template');
+        console.error('PDF template assignment error:', err);
+      }
+    });
+  }
+
+  managePdfTemplates(): void {
+    this.router.navigate(['/pdf-templates']);
+  }
+
   // Private helpers
-  private saveConfiguration(config: FormConfiguration): void {
+  private saveConfiguration(config: Partial<EnhancedFormConfiguration>): void {
     if (!config.id) {
       // New configuration - assign ID
       config.id = this.generateConfigId();
     }
 
-    // Use saveFormConfig for both create and update
-    this.formConfigService.saveFormConfig(config).subscribe({
+    // Use unified FormService for both create and update
+    this.formService.saveFormConfig(config).subscribe({
       next: (savedConfig) => {
         console.log('✅ Configuration saved successfully:', savedConfig);
         this.loadConfigurations(); // Refresh the configurations list
       },
       error: (error) => {
         console.error('❌ Error saving configuration:', error);
-        // TODO: Show error notification to user
+        this.notificationService.showError('Failed to save configuration');
       }
     });
   }

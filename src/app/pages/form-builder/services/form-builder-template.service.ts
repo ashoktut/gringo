@@ -1,6 +1,40 @@
 import { Injectable } from '@angular/core';
 import { FormConfiguration } from '../../../services/form-config.service';
 
+/**
+ * @deprecated This service is deprecated as of version 2.0.0
+ *
+ * **MIGRATION NOTICE:**
+ * This service has been consolidated into the new `FormService` to eliminate code duplication
+ * and provide a unified API for all form operations.
+ *
+ * **Please migrate to:**
+ * ```typescript
+ * import { FormService } from '../../../services/form.service';
+ *
+ * // Old way:
+ * constructor(private templateService: FormBuilderTemplateService) {}
+ * this.templateService.getAllTemplates();
+ * this.templateService.templateToFormConfiguration('rfq');
+ * this.templateService.createCustomConfiguration();
+ *
+ * // New way:
+ * constructor(private formService: FormService) {}
+ * this.formService.getBuilderTemplates();
+ * this.formService.templateToFormConfiguration('rfq');
+ * this.formService.createCustomConfiguration();
+ * ```
+ *
+ * **Benefits of migration:**
+ * - Unified API combining all form template operations
+ * - Better template definitions with proper types
+ * - Integrated with form CRUD operations
+ * - Signal-based reactive state
+ * - Reduced code duplication
+ *
+ * This service will be removed in version 3.0.0
+ */
+
 export interface TemplateDefinition {
   id: string;
   name: string;

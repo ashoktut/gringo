@@ -89,10 +89,10 @@
           <div class="form-info">
             <h2 class="form-name">{{ currentForm()?.name }}</h2>
             <div class="form-meta">
-              <mat-chip class="form-type-chip">{{ currentForm()?.formType | uppercase }}</mat-chip>
-              <span class="form-version">v{{ currentForm()?.version }}</span>
-              <span class="form-status" [class.active]="currentForm()?.isActive">
-                {{ currentForm()?.isActive ? 'Active' : 'Draft' }}
+              <mat-chip class="form-type-chip">{{ currentForm()?.companyId ? 'COMPANY FORM' : 'CUSTOM' }}</mat-chip>
+              <span class="form-version">v{{ currentForm()?.version || '1' }}</span>
+              <span class="form-status" [class.active]="currentForm()?.status === 'ACTIVE'">
+                {{ currentForm()?.status || 'DRAFT' }}
               </span>
             </div>
           </div>
@@ -100,6 +100,43 @@
 
         <div class="header-right">
           <div class="editor-actions">
+            <!-- Role Assignment Button -->
+            <button
+              mat-stroked-button
+              class="action-btn"
+              (click)="openRoleAssignmentDialog()"
+              matTooltip="Assign Roles to Form">
+              <mat-icon>group</mat-icon>
+              Assign Roles
+              @if (hasRolesAssigned()) {
+                <mat-icon class="success-icon">check_circle</mat-icon>
+              }
+            </button>
+
+            <!-- PDF Template Selection -->
+            <mat-form-field appearance="outline" class="pdf-template-select">
+              <mat-label>PDF Template</mat-label>
+              <mat-select
+                [value]="selectedPdfTemplateId()"
+                (selectionChange)="onPdfTemplateChange($event.value)"
+                placeholder="Select PDF Template">
+                <mat-option [value]="null">None</mat-option>
+                @for (template of pdfTemplates(); track template.id) {
+                  <mat-option [value]="template.id">
+                    {{ template.name }}
+                  </mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              class="icon-btn"
+              (click)="managePdfTemplates()"
+              matTooltip="Manage PDF Templates">
+              <mat-icon>settings</mat-icon>
+            </button>
+
             <button mat-stroked-button class="action-btn" (click)="previewForm()" matTooltip="Preview Form">
               <mat-icon>visibility</mat-icon>
               Preview
@@ -115,8 +152,8 @@
       <!-- Visual Editor Area -->
       <div class="editor-workspace">
         <app-visual-form-editor
-          [configuration]="currentForm()"
-          (save)="onConfigurationSaved($event)"
+          [configuration]="getCurrentFormAsAny()"
+          (save)="onConfigurationSaved($any($event))"
           (cancel)="onEditorCancelled()">
         </app-visual-form-editor>
       </div>

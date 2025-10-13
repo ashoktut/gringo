@@ -14,6 +14,16 @@ import { ConfigManagementComponent } from './pages/form-builder/config-managemen
 import { UniversalFormRendererComponent } from './sharedComponents/universal-form-renderer/universal-form-renderer.component';
 import { FormsDashboardComponent } from './pages/forms-dashboard/forms-dashboard.component.new';
 
+// Enhanced Forms System Components
+import { FormsDashboardComponent as UserFormsDashboard } from './pages/user/forms-dashboard/forms-dashboard.component';
+import { FormSubmissionComponent } from './pages/user/form-submission/form-submission.component';
+import { SubmissionApprovalComponent } from './pages/user/submission-approval/submission-approval.component';
+import { PdfTemplateEditorComponent } from './pages/admin/pdf-template-editor/pdf-template-editor.component';
+
+// Guards
+import { authGuard } from './guards/auth.guard';
+import { companyAdminGuard, superAdminGuard } from './guards/role.guard';
+
 export const routes: Routes = [
   // Authentication routes
   { path: 'login', component: LoginComponent },
@@ -59,6 +69,66 @@ export const routes: Routes = [
   { path: 'storage-management', component: StorageManagementComponent },
   { path: 'form-builder', component: FormBuilderComponent },
   { path: 'config-management', component: ConfigManagementComponent },
+
+  // ==================== Enhanced Forms Management System Routes ====================
+
+  // User Dashboard - View accessible forms and submissions
+  {
+    path: 'my-forms',
+    component: UserFormsDashboard,
+    canActivate: [authGuard]
+  },
+
+  // Form Submission - Fill out a form
+  {
+    path: 'forms/submit/:formId',
+    component: FormSubmissionComponent,
+    canActivate: [authGuard]
+  },
+
+  // View Submission Details
+  {
+    path: 'forms/submission/:submissionId',
+    component: FormSubmissionComponent,
+    canActivate: [authGuard]
+  },
+
+  // Submission Approval - For approvers to review submissions
+  {
+    path: 'forms/approvals',
+    component: SubmissionApprovalComponent,
+    canActivate: [authGuard]
+  },
+
+  // PDF Template Management - Admin only
+  {
+    path: 'admin/pdf-templates',
+    component: PdfTemplateEditorComponent,
+    canActivate: [authGuard, companyAdminGuard]
+  },
+
+  // PDF Template Editor - Create/Edit specific template
+  {
+    path: 'admin/pdf-templates/:templateId',
+    component: PdfTemplateEditorComponent,
+    canActivate: [authGuard, companyAdminGuard]
+  },
+
+  // Form Builder - Enhanced with role and PDF template assignment
+  {
+    path: 'admin/form-builder',
+    component: FormBuilderComponent,
+    canActivate: [authGuard, companyAdminGuard]
+  },
+
+  // Company Forms Management - Admin view of all company forms
+  {
+    path: 'admin/forms-management',
+    component: FormBuilderComponent,
+    canActivate: [authGuard, companyAdminGuard]
+  },
+
+  // ==================== End Enhanced Forms Routes ====================
 
   // Default redirect
   { path: '', redirectTo: '/home', pathMatch: 'full' },

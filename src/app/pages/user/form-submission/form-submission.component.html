@@ -1,0 +1,291 @@
+<div class="form-submission-container">
+  @if (loading()) {
+    <div class="loading-state">
+      <mat-spinner diameter="60"></mat-spinner>
+      <p>Loading form...</p>
+    </div>
+  } @else if (formConfig()) {
+    <!-- Header -->
+    <mat-card class="header-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>assignment</mat-icon>
+          {{ formTitle() }}
+        </mat-card-title>
+        @if (formConfig()?.description) {
+          <mat-card-subtitle>{{ formConfig()?.description }}</mat-card-subtitle>
+        }
+      </mat-card-header>
+
+      @if (requiresApproval()) {
+        <mat-card-content>
+          <div class="approval-notice">
+            <mat-icon>info</mat-icon>
+            <p>This form requires approval after submission</p>
+          </div>
+        </mat-card-content>
+      }
+    </mat-card>
+
+    <!-- Form Content -->
+    <form [formGroup]="submissionForm" class="submission-form">
+      <mat-card class="form-card">
+        <mat-card-content>
+
+          @if (formConfig(); as config) {
+            @for (field of config.fields; track field.name) {
+              @if (isFieldVisible(field)) {
+                <div class="form-field-wrapper">
+
+                  <!-- Text Input -->
+                  @if (getFieldType(field) === 'text' || getFieldType(field) === 'email' || getFieldType(field) === 'tel') {
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{ field.label }}</mat-label>
+                      <input
+                        matInput
+                        [formControlName]="field.name"
+                        [type]="getFieldType(field)"
+                        [placeholder]="field.placeholder || ''"
+                        [required]="field.required">
+                      @if (field.required) {
+                        <mat-icon matSuffix class="required-icon">star</mat-icon>
+                      }
+                      @if (field.helpText) {
+                        <mat-hint>{{ field.helpText }}</mat-hint>
+                      }
+                      @if (getFieldControl(field.name).invalid && getFieldControl(field.name).touched) {
+                        <mat-error>{{ getFieldError(field.name) }}</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+
+                  <!-- Textarea -->
+                  @if (getFieldType(field) === 'textarea') {
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{ field.label }}</mat-label>
+                      <textarea
+                        matInput
+                        [formControlName]="field.name"
+                        [placeholder]="field.placeholder || ''"
+                        [rows]="field.rows || 4"
+                        [required]="field.required"></textarea>
+                      @if (field.required) {
+                        <mat-icon matSuffix class="required-icon">star</mat-icon>
+                      }
+                      @if (field.helpText) {
+                        <mat-hint>{{ field.helpText }}</mat-hint>
+                      }
+                      @if (getFieldControl(field.name).invalid && getFieldControl(field.name).touched) {
+                        <mat-error>{{ getFieldError(field.name) }}</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+
+                  <!-- Number Input -->
+                  @if (getFieldType(field) === 'number') {
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{ field.label }}</mat-label>
+                      <input
+                        matInput
+                        type="number"
+                        [formControlName]="field.name"
+                        [placeholder]="field.placeholder || ''"
+                        [min]="field.min"
+                        [max]="field.max"
+                        [required]="field.required">
+                      @if (field.required) {
+                        <mat-icon matSuffix class="required-icon">star</mat-icon>
+                      }
+                      @if (field.helpText) {
+                        <mat-hint>{{ field.helpText }}</mat-hint>
+                      }
+                      @if (getFieldControl(field.name).invalid && getFieldControl(field.name).touched) {
+                        <mat-error>{{ getFieldError(field.name) }}</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+
+                  <!-- Date Picker -->
+                  @if (getFieldType(field) === 'date') {
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{ field.label }}</mat-label>
+                      <input
+                        matInput
+                        [matDatepicker]="picker"
+                        [formControlName]="field.name"
+                        [required]="field.required">
+                      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+                      <mat-datepicker #picker></mat-datepicker>
+                      @if (field.helpText) {
+                        <mat-hint>{{ field.helpText }}</mat-hint>
+                      }
+                      @if (getFieldControl(field.name).invalid && getFieldControl(field.name).touched) {
+                        <mat-error>{{ getFieldError(field.name) }}</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+
+                  <!-- Select Dropdown -->
+                  @if (getFieldType(field) === 'select') {
+                    <mat-form-field appearance="outline" class="full-width">
+                      <mat-label>{{ field.label }}</mat-label>
+                      <mat-select
+                        [formControlName]="field.name"
+                        [required]="field.required">
+                        @for (option of field.options; track option.value) {
+                          <mat-option [value]="option.value">
+                            {{ option.label }}
+                          </mat-option>
+                        }
+                      </mat-select>
+                      @if (field.required) {
+                        <mat-icon matSuffix class="required-icon">star</mat-icon>
+                      }
+                      @if (field.helpText) {
+                        <mat-hint>{{ field.helpText }}</mat-hint>
+                      }
+                      @if (getFieldControl(field.name).invalid && getFieldControl(field.name).touched) {
+                        <mat-error>{{ getFieldError(field.name) }}</mat-error>
+                      }
+                    </mat-form-field>
+                  }
+
+                  <!-- Checkbox -->
+                  @if (getFieldType(field) === 'checkbox') {
+                    <div class="checkbox-field">
+                      <mat-checkbox [formControlName]="field.name">
+                        {{ field.label }}
+                        @if (field.required) {
+                          <span class="required-asterisk">*</span>
+                        }
+                      </mat-checkbox>
+                      @if (field.helpText) {
+                        <p class="help-text">{{ field.helpText }}</p>
+                      }
+                    </div>
+                  }
+
+                  <!-- Radio Group -->
+                  @if (getFieldType(field) === 'radio') {
+                    <div class="radio-field">
+                      <label class="field-label">
+                        {{ field.label }}
+                        @if (field.required) {
+                          <span class="required-asterisk">*</span>
+                        }
+                      </label>
+                      <mat-radio-group [formControlName]="field.name">
+                        @for (option of field.options; track option.value) {
+                          <mat-radio-button [value]="option.value">
+                            {{ option.label }}
+                          </mat-radio-button>
+                        }
+                      </mat-radio-group>
+                      @if (field.helpText) {
+                        <p class="help-text">{{ field.helpText }}</p>
+                      }
+                    </div>
+                  }
+
+                  <!-- File Upload -->
+                  @if (getFieldType(field) === 'file') {
+                    <div class="file-upload-field">
+                      <label class="field-label">
+                        {{ field.label }}
+                        @if (field.required) {
+                          <span class="required-asterisk">*</span>
+                        }
+                      </label>
+
+                      <div class="file-upload-area">
+                        <input
+                          type="file"
+                          [id]="'file-' + field.name"
+                          (change)="onFileSelect($event, field.name)"
+                          [multiple]="field.multiple"
+                          [accept]="field.accept"
+                          hidden>
+
+                        <button
+                          mat-stroked-button
+                          type="button"
+                          (click)="document.getElementById('file-' + field.name).click()">
+                          <mat-icon>upload_file</mat-icon>
+                          Choose File(s)
+                        </button>
+                      </div>
+
+                      @if (attachments().length > 0) {
+                        <div class="uploaded-files">
+                          <mat-chip-set>
+                            @for (file of attachments(); track $index) {
+                              <mat-chip (removed)="removeAttachment($index)">
+                                <mat-icon matChipAvatar>attach_file</mat-icon>
+                                {{ file.name }} ({{ formatBytes(file.size) }})
+                                <mat-icon matChipRemove>cancel</mat-icon>
+                              </mat-chip>
+                            }
+                          </mat-chip-set>
+                        </div>
+                      }
+
+                      @if (field.helpText) {
+                        <p class="help-text">{{ field.helpText }}</p>
+                      }
+                    </div>
+                  }
+
+                  <!-- Section Header -->
+                  @if (getFieldType(field) === 'section') {
+                    <div class="section-header">
+                      <h3>{{ field.label }}</h3>
+                      @if (field.description) {
+                        <p>{{ field.description }}</p>
+                      }
+                      <mat-divider></mat-divider>
+                    </div>
+                  }
+
+                </div>
+              }
+            }
+          }
+
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Actions -->
+      <mat-card class="actions-card">
+        <mat-card-actions align="end">
+          <button mat-button type="button" (click)="cancel()" [disabled]="isSubmitting()">
+            <mat-icon>cancel</mat-icon>
+            Cancel
+          </button>
+
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="saveDraft()"
+            [disabled]="isSubmitting()">
+            <mat-icon>save</mat-icon>
+            Save as Draft
+          </button>
+
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            (click)="submit()"
+            [disabled]="isSubmitting() || !isValid()">
+            @if (isSubmitting() && !isDraft()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              <mat-icon>send</mat-icon>
+            }
+            Submit Form
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </form>
+  }
+</div>
