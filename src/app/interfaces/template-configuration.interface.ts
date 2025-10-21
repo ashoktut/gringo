@@ -19,6 +19,8 @@ export interface TemplateConfiguration {
   version: string;
   author: string;
   tags: string[];
+  createdBy?: string;                 // User ID who created the template
+  isCompanySpecific?: boolean;        // Whether template is company-specific
 
   // PDF generation settings
   pdfSettings: PdfSettings;

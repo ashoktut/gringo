@@ -14,6 +14,7 @@ import { FormSubmissionService, FormSubmission } from '../../services/form-submi
 import { Template, TemplateType, TemplateGenerationRequest } from '../../models/template.models';
 import { TemplateManagementService } from '../../services/template-management.service';
 import { PdfGenerationService } from '../../services/pdf-generation.service';
+import { UserManagementService } from '../../services/user-management.service';
 import { SearchComponent, SearchConfig } from '../../sharedComponents/search/search.component';
 
 @Component({
@@ -303,6 +304,7 @@ export class SubmissionsComponent implements OnInit {
   displayedSubmissions: FormSubmission[] = [];
   searchTerm: string = '';
   isSearching: boolean = false;
+  availableTemplates: Template[] = [];
 
   // Search configuration
   searchConfig: SearchConfig = {
@@ -316,6 +318,7 @@ export class SubmissionsComponent implements OnInit {
     private formSubmissionService: FormSubmissionService,
     private templateService: TemplateManagementService,
     private pdfGenerationService: PdfGenerationService,
+    private userManagementService: UserManagementService,
     private router: Router,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
@@ -323,6 +326,7 @@ export class SubmissionsComponent implements OnInit {
 
   ngOnInit() {
     this.loadSubmissions();
+    this.loadAvailableTemplates();
   }
 
   loadSubmissions() {
@@ -337,6 +341,18 @@ export class SubmissionsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading submissions:', error);
+      }
+    });
+  }
+
+  loadAvailableTemplates() {
+    this.templateService.getTemplatesForCurrentUser().subscribe({
+      next: (templates) => {
+        this.availableTemplates = templates;
+        console.log('Company-filtered templates loaded:', templates.length);
+      },
+      error: (error) => {
+        console.error('Error loading templates:', error);
       }
     });
   }  // Search functionality
@@ -515,15 +531,16 @@ export class SubmissionsComponent implements OnInit {
 
   // PDF Template Methods
   hasTemplatesForForm(formType: string): boolean {
-    // For now, we'll return true and handle the actual check in the template
-    // In a real implementation, you might want to cache templates or use a synchronous check
-    return true;
+    return this.availableTemplates.some(template =>
+      template.formType === formType || template.isUniversal
+    );
   }
 
   getTemplatesForSubmission(submission: FormSubmission): Template[] {
-    // This should be updated to return an Observable or use async pipe in template
-    // For now, returning empty array - should be refactored to use observables
-    return [];
+    const formType = submission.formType || 'rfq';
+    return this.availableTemplates.filter(template =>
+      template.formType === formType || template.isUniversal
+    );
   }
 
   generatePdfFromTemplate(submission: FormSubmission, template: Template) {

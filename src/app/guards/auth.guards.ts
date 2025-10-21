@@ -322,9 +322,9 @@ export function subscriptionGuard(requiredPlan?: 'basic' | 'premium' | 'enterpri
 
     // Check specific plan if required
     if (requiredPlan) {
-      const planHierarchy = { basic: 1, premium: 2, enterprise: 3 };
-      const currentPlanLevel = planHierarchy[currentCompany.subscription.plan];
-      const requiredPlanLevel = planHierarchy[requiredPlan];
+      const planHierarchy: Record<string, number> = { free: 0, basic: 1, premium: 2, enterprise: 3 };
+      const currentPlanLevel = planHierarchy[currentCompany.subscription.plan] || 0;
+      const requiredPlanLevel = planHierarchy[requiredPlan] || 0;
 
       if (currentPlanLevel < requiredPlanLevel) {
         router.navigate(['/upgrade-required'], {

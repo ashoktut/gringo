@@ -40,6 +40,7 @@ import { MatCardModule } from '@angular/material/card';
 import { PdfTemplateService, Template } from '../../services/pdf-template.service';
 import { PdfGenerationService } from '../../services/pdf-generation.service';
 import { DocxProcessingService } from '../../services/docx-processing.service';
+import { TemplateManagementService } from '../../services/template-management.service';
 import { Template as DocxTemplate, DocumentType } from '../../models/template.models';
 
 // Import new services for Device Magic parity
@@ -225,6 +226,7 @@ export interface FormSection {
 export class ReusableFormComponent implements OnInit, OnChanges, OnDestroy {
   private readonly snackBar = inject(MatSnackBar);
   private readonly pdfTemplateService = inject(PdfTemplateService);
+  private readonly templateManagementService = inject(TemplateManagementService);
   private readonly pdfGenerationService = inject(PdfGenerationService);
   private readonly docxProcessingService = inject(DocxProcessingService);
   private readonly offlineSyncService = inject(OfflineSyncService);
@@ -481,7 +483,7 @@ private async performAutoSave(value: any): Promise<void> {
   } catch (error) {
     console.error('Auto-save failed:', error);
     this.autoSaveStatus.set('error');
-    
+
     if (this.enableValidationFeedback) {
       this.snackBar.open('Auto-save failed. Changes will sync when online.', 'Dismiss', {
         duration: 3000,
@@ -604,10 +606,10 @@ private getErrorMessage(errorKey: string, errorValue: any): string {
 
       } catch (error) {
         console.error('Error during form submission:', error);
-        
+
         // Still emit the form data for local handling even if sync fails
         this.formSubmit.emit(formData);
-        
+
         if (this.enableValidationFeedback) {
           this.snackBar.open('Form submitted locally. Sync will retry when online.', 'Dismiss', {
             duration: 5000,
@@ -1443,7 +1445,7 @@ getFieldError(fieldName: string): string {
 
       // Get available templates if no templateId provided
       if (!templateId) {
-        const templates = await this.pdfTemplateService.getTemplatesForCompany(companyId);
+        const templates = await this.getAvailableTemplates();
         if (templates.length === 0) {
           this.snackBar.open('No templates available for this company', 'Dismiss', {
             duration: 4000,
@@ -1454,28 +1456,40 @@ getFieldError(fieldName: string): string {
         templateId = templates[0].id; // Use first available template
       }
 
-      // Use PdfTemplateService to generate from current form configuration
-      const pdfBlob = await this.pdfTemplateService.generateFromFormConfiguration(
-        templateId,
-        formData,
-        { sections: this.sections, fields: this.fields }
-      );
+      if (!templateId) {
+        this.snackBar.open('No valid template ID available', 'Dismiss', {
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
+        return;
+      }
 
-      // Download the PDF
-      const url = URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `form-submission-${new Date().getTime()}.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
+      // Use TemplateManagementService to generate PDF with company-aware template
+      const templateGenerationRequest = {
+        templateId: templateId!,
+        formData: formData,
+        formType: 'custom',
+        outputFilename: `form-submission-${new Date().getTime()}.pdf`
+      };
 
-      this.snackBar.open('PDF generated successfully', 'Dismiss', {
-        duration: 3000,
-        panelClass: ['success-snackbar']
+      this.templateManagementService.generatePdf(templateGenerationRequest).subscribe({
+        next: () => {
+          this.snackBar.open('PDF generated successfully', 'Dismiss', {
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+        },
+        error: (error) => {
+          console.error('PDF generation failed:', error);
+          this.snackBar.open('Failed to generate PDF: ' + error.message, 'Dismiss', {
+            duration: 4000,
+            panelClass: ['error-snackbar']
+          });
+        }
       });
     } catch (error) {
-      console.error('PDF generation failed:', error);
-      this.snackBar.open('Failed to generate PDF', 'Dismiss', {
+      console.error('PDF generation setup failed:', error);
+      this.snackBar.open('Failed to set up PDF generation', 'Dismiss', {
         duration: 4000,
         panelClass: ['error-snackbar']
       });
@@ -1507,7 +1521,10 @@ getFieldError(fieldName: string): string {
         placeholders: [],
         size: templateFile.size,
         uploadedAt: new Date(),
-        isUniversal: false
+        isUniversal: false,
+        // Added required properties to satisfy the Template type
+        isCompanySpecific: false,
+        visibility: 'private'
       };
 
       // Use DocxProcessingService to process the template
@@ -1546,8 +1563,16 @@ getFieldError(fieldName: string): string {
    */
   async getAvailableTemplates(): Promise<any[]> {
     try {
-      const companyId = this.currentCompanyId();
-      return await this.pdfTemplateService.getTemplatesForCompany(companyId);
+      // Use the company-aware template management service
+      return new Promise((resolve, reject) => {
+        this.templateManagementService.getTemplatesForCurrentUser().subscribe({
+          next: (templates) => resolve(templates),
+          error: (error) => {
+            console.error('Failed to get templates:', error);
+            reject(error);
+          }
+        });
+      });
     } catch (error) {
       console.error('Failed to get templates:', error);
       return [];

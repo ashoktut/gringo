@@ -13,6 +13,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { AuthService } from '../../../services/auth-new.service';
+import { AuthBridgeService } from '../../../services/auth-bridge.service';
 import { CompanyService } from '../../../services/company.service';
 import { LoginRequest, Company } from '../../../models/auth.models';
 
@@ -37,6 +38,7 @@ import { LoginRequest, Company } from '../../../models/auth.models';
 })
 export class LoginComponent implements OnInit {
   private readonly authService = inject(AuthService);
+  private readonly authBridge = inject(AuthBridgeService);
   private readonly companyService = inject(CompanyService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -94,9 +96,14 @@ export class LoginComponent implements OnInit {
         rememberMe: this.loginForm.value.rememberMe || false
       };
 
-      const response = await this.authService.login(credentials).toPromise();
+      // Use the bridge service for enhanced login with multi-tenant sync
+      const success = await this.authBridge.login(
+        credentials.email,
+        credentials.password,
+        credentials.companyDomain
+      );
 
-      if (response) {
+      if (success) {
         this.snackBar.open('Login successful', 'Dismiss', {
           duration: 3000,
           panelClass: ['success-snackbar']

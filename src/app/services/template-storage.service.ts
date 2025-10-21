@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
 import { map, catchError, tap, switchMap } from 'rxjs/operators';
-import { Template, TemplateType, DocumentType } from '../models/template.models';
+import { Template, TemplateType, type DocumentType, TemplateUploadRequest } from '../models/template.models';
 import { IndexedDbService } from './indexed-db.service';
+import { UserManagementService } from './user-management.service';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,10 @@ export class TemplateStorageService {
   private templatesSubject = new BehaviorSubject<Template[]>([]);
   public templates$ = this.templatesSubject.asObservable();
 
-  constructor(private indexedDbService: IndexedDbService) {
+  constructor(
+    private indexedDbService: IndexedDbService,
+    private userService: UserManagementService
+  ) {
     this.loadTemplatesFromStorage();
   }
 
@@ -41,6 +45,65 @@ export class TemplateStorageService {
       t.formType === formType || t.isUniversal
     );
     return of(filtered);
+  }
+
+  /**
+   * Get templates available to current user (company-aware)
+   */
+  getTemplatesForCurrentUser(): Observable<Template[]> {
+    const currentUser = this.userService.getCurrentUser();
+    const currentCompany = this.userService.getCurrentCompany();
+
+    if (!currentUser) {
+      return of([]);
+    }
+
+    return this.templates$.pipe(
+      map(templates => {
+        // Super admin sees all templates
+        if (currentUser.role === 'super-admin') {
+          return templates;
+        }
+
+        // Company admin sees templates assigned to their company or global templates
+        if (currentUser.role === 'company-admin' && currentCompany) {
+          return templates.filter(template =>
+            template.visibility === 'public' || // Global templates
+            (template.assignedCompanies && template.assignedCompanies.includes(currentCompany.id)) ||
+            template.companyId === currentCompany.id
+          );
+        }
+
+        // Regular users see public templates only
+        return templates.filter(template => template.visibility === 'public');
+      })
+    );
+  }
+
+  /**
+   * Get templates by company and form type (company-aware)
+   */
+  getTemplatesByCompanyAndFormType(formType: string, companyId?: string): Observable<Template[]> {
+    const currentUser = this.userService.getCurrentUser();
+    const targetCompanyId = companyId || this.userService.getCurrentCompany()?.id;
+
+    if (!currentUser || !targetCompanyId) {
+      return of([]);
+    }
+
+    // Check if user can access templates for this company
+    if (currentUser.role !== 'super-admin' && currentUser.companyId !== targetCompanyId) {
+      return of([]);
+    }
+
+    return this.getTemplatesForCurrentUser().pipe(
+      map(templates => templates.filter(template =>
+        (template.formType === formType || template.isUniversal) &&
+        (template.visibility === 'public' ||
+         (template.assignedCompanies && template.assignedCompanies.includes(targetCompanyId)) ||
+         template.companyId === targetCompanyId)
+      ))
+    );
   }
 
   /**
@@ -162,7 +225,9 @@ export class TemplateStorageService {
           placeholders: this.extractPlaceholders(reader.result as string),
           size: file.size,
           uploadedAt: new Date(),
-          isUniversal: isUniversal
+          isUniversal: isUniversal,
+          isCompanySpecific: false,
+          visibility: 'public'
         };
 
         this.saveTemplate(template).subscribe({
@@ -170,13 +235,154 @@ export class TemplateStorageService {
             observer.next(savedTemplate);
             observer.complete();
           },
-          error: (error) => observer.error(error)
+          error: (error) => {
+            observer.error(error);
+          }
         });
       };
 
-      reader.onerror = () => observer.error(reader.error);
+      reader.onerror = () => {
+        observer.error(new Error('Failed to read file'));
+      };
+
       reader.readAsText(file);
     });
+  }
+
+  /**
+   * Upload template with company assignment (enhanced method)
+   */
+  uploadTemplateWithAssignment(uploadRequest: TemplateUploadRequest): Observable<Template> {
+    const currentUser = this.userService.getCurrentUser();
+    const currentCompany = this.userService.getCurrentCompany();
+
+    if (!currentUser) {
+      return throwError(() => new Error('User not authenticated'));
+    }
+
+    return new Observable(observer => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const template: Template = {
+          id: this.generateTemplateId(),
+          name: uploadRequest.name,
+          type: this.getTemplateType(uploadRequest.file),
+          formType: uploadRequest.formType,
+          content: reader.result as string,
+          placeholders: this.extractPlaceholders(reader.result as string),
+          size: uploadRequest.file.size,
+          uploadedAt: new Date(),
+          isUniversal: uploadRequest.isUniversal || false,
+          isCompanySpecific: uploadRequest.isCompanySpecific || false,
+          visibility: uploadRequest.visibility || 'public',
+
+          // Company assignment properties
+          companyId: uploadRequest.companyId || currentCompany?.id,
+          assignedCompanies: uploadRequest.assignedCompanies || [],
+          createdBy: currentUser.id,
+
+          // Metadata from upload request
+          metadata: uploadRequest.metadata
+        };
+
+        // Auto-assign to current company for company admins
+        if (currentUser.role === 'company-admin' && currentCompany && !template.assignedCompanies?.includes(currentCompany.id)) {
+          template.assignedCompanies = template.assignedCompanies || [];
+          template.assignedCompanies.push(currentCompany.id);
+          template.isCompanySpecific = true;
+          template.visibility = 'company';
+        }
+
+        this.saveTemplate(template).subscribe({
+          next: (savedTemplate) => {
+            observer.next(savedTemplate);
+            observer.complete();
+          },
+          error: (error) => {
+            observer.error(error);
+          }
+        });
+      };
+
+      reader.onerror = () => {
+        observer.error(new Error('Failed to read file'));
+      };
+
+      reader.readAsText(uploadRequest.file);
+    });
+  }
+
+  /**
+   * Assign template to companies (super-admin only)
+   */
+  assignTemplateToCompanies(templateId: string, companyIds: string[]): Observable<Template> {
+    const currentUser = this.userService.getCurrentUser();
+
+    if (!currentUser || currentUser.role !== 'super-admin') {
+      return throwError(() => new Error('Only super-admins can assign templates to companies'));
+    }
+
+    return this.getTemplateById(templateId).pipe(
+      switchMap(template => {
+        if (!template) {
+          return throwError(() => new Error('Template not found'));
+        }
+
+        // Add new company assignments
+        const updatedAssignedCompanies = [...new Set([...(template.assignedCompanies || []), ...companyIds])];
+
+        const updatedTemplate: Template = {
+          ...template,
+          assignedCompanies: updatedAssignedCompanies,
+          isCompanySpecific: updatedAssignedCompanies.length > 0,
+          visibility: updatedAssignedCompanies.length > 0 ? 'company' : template.visibility
+        };
+
+        return this.saveTemplate(updatedTemplate);
+      })
+    );
+  }
+
+  /**
+   * Unassign template from companies (super-admin only)
+   */
+  unassignTemplateFromCompanies(templateId: string, companyIds: string[]): Observable<Template> {
+    const currentUser = this.userService.getCurrentUser();
+
+    if (!currentUser || currentUser.role !== 'super-admin') {
+      return throwError(() => new Error('Only super-admins can unassign templates from companies'));
+    }
+
+    return this.getTemplateById(templateId).pipe(
+      switchMap(template => {
+        if (!template) {
+          return throwError(() => new Error('Template not found'));
+        }
+
+        // Remove company assignments
+        const updatedAssignedCompanies = (template.assignedCompanies || []).filter(
+          (companyId: string) => !companyIds.includes(companyId)
+        );
+
+        const updatedTemplate: Template = {
+          ...template,
+          assignedCompanies: updatedAssignedCompanies,
+          isCompanySpecific: updatedAssignedCompanies.length > 0,
+          visibility: updatedAssignedCompanies.length > 0 ? 'company' : 'public'
+        };
+
+        return this.saveTemplate(updatedTemplate);
+      })
+    );
+  }
+
+  /**
+   * Get all companies assigned to a template
+   */
+  getTemplateAssignments(templateId: string): Observable<string[]> {
+    return this.getTemplateById(templateId).pipe(
+      map(template => template?.assignedCompanies || [])
+    );
   }
 
   /**
@@ -220,7 +426,7 @@ export class TemplateStorageService {
   private loadFromIndexedDB(): void {
     this.indexedDbService.getAll<Template>(this.indexedDbService.STORES.TEMPLATES).subscribe({
       next: (items) => {
-        const templates = items.map(item => ({
+        const templates = items.map(item => this.migrateTemplate({
           ...item.data,
           uploadedAt: new Date(item.data.uploadedAt)
         }));
@@ -267,5 +473,21 @@ export class TemplateStorageService {
     }
 
     return placeholders.sort();
+  }
+
+  /**
+   * Migrate old template format to new format with company properties
+   */
+  private migrateTemplate(template: any): Template {
+    return {
+      ...template,
+      // Add default values for new required properties if they don't exist
+      isCompanySpecific: template.isCompanySpecific ?? false,
+      visibility: template.visibility ?? 'public',
+      // Ensure other optional properties exist
+      companyId: template.companyId ?? undefined,
+      assignedCompanies: template.assignedCompanies ?? undefined,
+      createdBy: template.createdBy ?? undefined
+    };
   }
 }

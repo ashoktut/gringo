@@ -219,8 +219,8 @@ export class FormSubmissionService {
   private processRfqWithDocx(formData: any): Observable<any> {
     console.log('🔍 Looking for RFQ templates...');
 
-    // Get RFQ templates
-    return this.templateService.getTemplatesForForm('rfq').pipe(
+    // Get RFQ templates using company-aware filtering
+    return this.templateService.getTemplatesForCurrentUserAndForm('rfq').pipe(
       switchMap(templates => {
         console.log('📋 Found templates:', templates.length, templates.map(t => ({
           id: t.id,

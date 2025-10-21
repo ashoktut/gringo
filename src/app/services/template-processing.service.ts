@@ -30,6 +30,9 @@ export class TemplateProcessingService {
               size: request.file.size,
               uploadedAt: new Date(),
               isUniversal: request.isUniversal || false,
+              // Add missing required properties with sensible defaults from the request
+              isCompanySpecific: request.isCompanySpecific || false,
+              visibility: request.visibility ?? (request.metadata as any)?.visibility ?? 'private',
               metadata: request.metadata,
 
               // Enhanced properties for docx processing

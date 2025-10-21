@@ -12,6 +12,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
 import { Template, TemplateType, TemplateUploadRequest } from '../../models/template.models';
 import { TemplateManagementService } from '../../services/template-management.service';
+import { UserManagementService } from '../../services/user-management.service';
+import { User, Company } from '../../models/user.models';
 
 @Component({
   selector: 'app-document-template',
@@ -81,6 +83,74 @@ import { TemplateManagementService } from '../../services/template-management.se
                     Universal Template
                   </mat-checkbox>
                 </div>
+
+                <!-- Company Assignment Section -->
+                <div class="company-section">
+                  @if (canCreateGlobalTemplates()) {
+                    <div class="company-specific-toggle">
+                      <mat-checkbox
+                        [(ngModel)]="isCompanySpecific"
+                        (ngModelChange)="onCompanySpecificChange($event)"
+                        matTooltip="Assign this template to specific companies">
+                        Company-Specific Template
+                      </mat-checkbox>
+                    </div>
+                  }
+
+                  @if (currentUser?.role === 'company-admin') {
+                    <div class="company-info">
+                      <mat-icon>business</mat-icon>
+                      <span>This template will be assigned to: <strong>{{ currentCompany?.name }}</strong></span>
+                    </div>
+                  }
+
+                  @if (shouldShowCompanySelection()) {
+                    <div class="company-selection">
+                      <mat-form-field appearance="outline" class="company-select">
+                        <mat-label>Assign to Companies</mat-label>
+                        <mat-select
+                          [multiple]="canSelectMultipleCompanies()"
+                          [value]="canSelectMultipleCompanies() ? assignedCompanies : selectedCompanyId"
+                          (selectionChange)="onCompanySelectionChange($event.value)">
+                          @for (company of availableCompanies; track company.id) {
+                            <mat-option [value]="company.id">
+                              <div class="company-option">
+                                <span class="company-name">{{ company.name }}</span>
+                                <span class="company-code">({{ company.code }})</span>
+                              </div>
+                            </mat-option>
+                          }
+                        </mat-select>
+                        <mat-hint>
+                          @if (canSelectMultipleCompanies()) {
+                            Select companies that can use this template
+                          } @else {
+                            Select the company for this template
+                          }
+                        </mat-hint>
+                      </mat-form-field>
+
+                      @if (assignedCompanies.length > 0 && canSelectMultipleCompanies()) {
+                        <div class="selected-companies">
+                          <mat-chip-set>
+                            @for (companyId of assignedCompanies; track companyId) {
+                              @for (company of availableCompanies; track company.id) {
+                                @if (company.id === companyId) {
+                                  <mat-chip
+                                    [removable]="true"
+                                    (removed)="toggleCompanyAssignment(companyId, {checked: false})">
+                                    {{ company.name }}
+                                    <mat-icon matChipRemove>cancel</mat-icon>
+                                  </mat-chip>
+                                }
+                              }
+                            }
+                          </mat-chip-set>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
               </div>
             }
 
@@ -144,6 +214,25 @@ import { TemplateManagementService } from '../../services/template-management.se
                     {{ uploadedTemplate.isUniversal ? 'Universal' : uploadedTemplate.formType.toUpperCase() }}
                   </mat-chip>
                 </div>
+                @if (uploadedTemplate.isCompanySpecific) {
+                  <div class="info-row">
+                    <span class="label">Company Access:</span>
+                    <div class="company-chips">
+                      @for (companyId of uploadedTemplate.assignedCompanies || []; track companyId) {
+                        @for (company of availableCompanies; track company.id) {
+                          @if (company.id === companyId) {
+                            <mat-chip class="company-chip">{{ company.name }}</mat-chip>
+                          }
+                        }
+                      }
+                    </div>
+                  </div>
+                } @else {
+                  <div class="info-row">
+                    <span class="label">Access:</span>
+                    <mat-chip class="global-chip">Global Access</mat-chip>
+                  </div>
+                }
                 @if (uploadedTemplate.placeholders.length > 0) {
                   <div class="info-row">
                     <span class="label">Placeholders Found:</span>
@@ -347,6 +436,83 @@ import { TemplateManagementService } from '../../services/template-management.se
       color: #f57c00 !important;
     }
 
+    /* Company Selection Styles */
+    .company-section {
+      margin-top: 16px;
+      padding: 16px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border: 1px solid #e9ecef;
+    }
+
+    .company-specific-toggle {
+      margin-bottom: 16px;
+    }
+
+    .company-selection {
+      margin-top: 12px;
+    }
+
+    .company-select {
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    .company-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .company-name {
+      font-weight: 500;
+    }
+
+    .company-code {
+      color: #666;
+      font-size: 12px;
+    }
+
+    .selected-companies {
+      margin-top: 8px;
+    }
+
+    .company-chip {
+      background-color: #e3f2fd !important;
+      color: #1976d2 !important;
+      margin-right: 8px;
+      margin-bottom: 4px;
+    }
+
+    .global-chip {
+      background-color: #e8f5e8 !important;
+      color: #2e7d32 !important;
+    }
+
+    .company-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .company-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background-color: #e3f2fd;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+      color: #1976d2;
+      font-size: 14px;
+    }
+
+    .company-info mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
     .guide-content h4 {
       color: #1976d2;
       margin-top: 24px;
@@ -415,17 +581,47 @@ export class DocumentTemplateComponent {
 
   selectedFile: File | null = null;
   selectedFormType: TemplateType | '' = '';
+  selectedCompanyId: string = '';
+  assignedCompanies: string[] = [];
   isUniversal: boolean = false;
+  isCompanySpecific: boolean = false;
   isUploading: boolean = false;
   isDragOver: boolean = false;
   uploadedTemplate: Template | null = null;
 
-  constructor(private templateService: TemplateManagementService) {}
+  // Dynamic company list based on user role
+  availableCompanies: Company[] = [];
+  currentUser: User | null = null;
+  currentCompany: Company | null = null;
 
-  ngOnInit() {
+  constructor(
+    private templateService: TemplateManagementService,
+    private userService: UserManagementService
+  ) {}  ngOnInit() {
     if (this.formType) {
       this.selectedFormType = this.formType;
     }
+
+    this.loadUserData();
+    this.loadAvailableCompanies();
+  }
+
+  private loadUserData(): void {
+    this.currentUser = this.userService.getCurrentUser();
+    this.currentCompany = this.userService.getCurrentCompany();
+
+    // For company admins, pre-select their company
+    if (this.currentUser?.role === 'company-admin' && this.currentCompany) {
+      this.selectedCompanyId = this.currentCompany.id;
+      this.assignedCompanies = [this.currentCompany.id];
+      this.isCompanySpecific = true;
+    }
+  }
+
+  private loadAvailableCompanies(): void {
+    this.userService.getCompanies().subscribe(companies => {
+      this.availableCompanies = companies;
+    });
   }
 
   onDragOver(event: DragEvent) {
@@ -479,14 +675,34 @@ export class DocumentTemplateComponent {
       return;
     }
 
+    // Validate company selection if template is company-specific
+    if (this.isCompanySpecific && this.assignedCompanies.length === 0) {
+      this.uploadError.emit('Please select at least one company for company-specific templates');
+      return;
+    }
+
     this.isUploading = true;
 
     const uploadRequest: TemplateUploadRequest = {
       file: this.selectedFile,
       name: this.selectedFile.name,
       formType: this.selectedFormType,
-      isUniversal: this.isUniversal
+      isUniversal: this.isUniversal,
+      companyId: this.selectedCompanyId || this.currentCompany?.id,
+      assignedCompanies: this.isCompanySpecific ? this.assignedCompanies : undefined,
+      isCompanySpecific: this.isCompanySpecific,
+      visibility: this.determineTemplateVisibility()
     };
+
+    // Add user context
+    if (this.currentUser) {
+      uploadRequest.metadata = {
+        ...uploadRequest.metadata,
+        author: this.currentUser.name,
+        createdBy: this.currentUser.id,
+        companyContext: this.currentCompany?.name
+      };
+    }
 
     this.templateService.uploadTemplate(uploadRequest).subscribe({
       next: (template) => {
@@ -521,6 +737,9 @@ export class DocumentTemplateComponent {
     this.selectedFile = null;
     this.selectedFormType = this.formType || '';
     this.isUniversal = false;
+    this.isCompanySpecific = false;
+    this.selectedCompanyId = '';
+    this.assignedCompanies = [];
   }
 
   canTestTemplate(): boolean {
@@ -586,5 +805,75 @@ export class DocumentTemplateComponent {
           notes: 'This is a test document generated from template'
         };
     }
+  }
+
+  // Company Management Methods
+  onCompanySpecificChange(isCompanySpecific: boolean) {
+    this.isCompanySpecific = isCompanySpecific;
+    if (!isCompanySpecific) {
+      this.assignedCompanies = [];
+      this.selectedCompanyId = '';
+    }
+  }
+
+  onCompanySelectionChange(value: string | string[]) {
+    if (this.canSelectMultipleCompanies()) {
+      this.assignedCompanies = Array.isArray(value) ? value : [value];
+    } else {
+      this.selectedCompanyId = typeof value === 'string' ? value : value[0] || '';
+      this.assignedCompanies = this.selectedCompanyId ? [this.selectedCompanyId] : [];
+    }
+  }
+
+  toggleCompanyAssignment(companyId: string, event: any) {
+    if (event.checked) {
+      if (!this.assignedCompanies.includes(companyId)) {
+        this.assignedCompanies.push(companyId);
+      }
+    } else {
+      this.assignedCompanies = this.assignedCompanies.filter(id => id !== companyId);
+    }
+  }
+
+  getSelectedCompanyNames(): string {
+    if (this.assignedCompanies.length === 0) return 'No companies selected';
+
+    const selectedNames = this.availableCompanies
+      .filter(company => this.assignedCompanies.includes(company.id))
+      .map(company => company.name);
+
+    if (selectedNames.length <= 2) {
+      return selectedNames.join(', ');
+    } else {
+      return `${selectedNames[0]}, ${selectedNames[1]} and ${selectedNames.length - 2} more`;
+    }
+  }
+
+  private determineTemplateVisibility(): 'public' | 'company' | 'private' {
+    if (!this.currentUser) {
+      return 'public';
+    }
+
+    if (this.currentUser.role === 'super-admin') {
+      // Super admin can choose visibility based on company assignment
+      return this.isCompanySpecific ? 'company' : 'public';
+    } else {
+      // Company admins create company-specific templates by default
+      return 'company';
+    }
+  }
+
+  canSelectMultipleCompanies(): boolean {
+    return this.currentUser?.role === 'super-admin';
+  }
+
+  canCreateGlobalTemplates(): boolean {
+    return this.currentUser?.role === 'super-admin';
+  }
+
+  shouldShowCompanySelection(): boolean {
+    // Super admins see company selection when creating company-specific templates
+    // Company admins always create templates for their company (no selection needed)
+    return this.currentUser?.role === 'super-admin' && this.isCompanySpecific;
   }
 }

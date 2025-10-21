@@ -2,9 +2,11 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, map, filter, switchMap, forkJoin, of } from 'rxjs';
 import { TemplateConfiguration, TemplateCategory, FieldMapping } from '../interfaces/template-configuration.interface';
 import { Template, TemplateUploadRequest, TemplateGenerationRequest, TemplateType, PdfGenerationOptions } from '../models/template.models';
+import { CompanyTemplateAssignment } from '../models/user.models';
 import { TemplateStorageService } from './template-storage.service';
 import { TemplateProcessingService } from './template-processing.service';
 import { PdfGenerationService } from './pdf-generation.service';
+import { UserManagementService } from './user-management.service';
 
 @Injectable({
   providedIn: 'root'
@@ -15,14 +17,22 @@ export class EnhancedTemplateManagementService {
 
   private templatesSubject = new BehaviorSubject<TemplateConfiguration[]>([]);
   private categoriesSubject = new BehaviorSubject<TemplateCategory[]>([]);
+  private templateAssignmentsSubject = new BehaviorSubject<CompanyTemplateAssignment[]>([]);
 
   public templates$ = this.templatesSubject.asObservable();
   public categories$ = this.categoriesSubject.asObservable();
+  public templateAssignments$ = this.templateAssignmentsSubject.asObservable();
+
+  // Company-specific observables
+  public companyTemplates$ = this.templates$.pipe(
+    switchMap(() => this.getTemplatesForCurrentUser())
+  );
 
   constructor(
     private storageService: TemplateStorageService,
     private processingService: TemplateProcessingService,
-    private pdfService: PdfGenerationService
+    private pdfService: PdfGenerationService,
+    private userService: UserManagementService
   ) {
     this.initializeService();
   }
@@ -30,6 +40,7 @@ export class EnhancedTemplateManagementService {
   private async initializeService(): Promise<void> {
     await this.loadTemplates();
     await this.loadCategories();
+    this.loadAssignments();
 
     // Initialize with system templates if none exist
     if (this.templatesSubject.value.length === 0) {
@@ -99,51 +110,172 @@ export class EnhancedTemplateManagementService {
     return duplicatedTemplate;
   }
 
-  // ===== MULTI-TENANT TEMPLATE RETRIEVAL =====
+  // ===== COMPANY-SPECIFIC TEMPLATE MANAGEMENT =====
 
   getTemplate(templateId: string): TemplateConfiguration | undefined {
-    return this.templatesSubject.value.find(t => t.id === templateId);
+    const template = this.templatesSubject.value.find(t => t.id === templateId);
+
+    // Check if user has access to this template
+    if (template && !this.canUserAccessTemplate(template)) {
+      return undefined;
+    }
+
+    return template;
   }
 
-  getTemplatesForCompanyAndForm(companyId: string, formType: string): TemplateConfiguration[] {
-    return this.templatesSubject.value.filter(template =>
-      template.isActive &&
-      (template.isGlobal || template.assignedCompanies.includes(companyId)) &&
-      (template.formTypes.length === 0 || template.formTypes.includes(formType))
+  getTemplatesForCurrentUser(): Observable<TemplateConfiguration[]> {
+    return this.templates$.pipe(
+      map(templates => {
+        const currentUser = this.userService.getCurrentUser();
+        const currentCompany = this.userService.getCurrentCompany();
+
+        if (!currentUser) {
+          return [];
+        }
+
+        // Super admin sees all templates
+        if (currentUser.role === 'super-admin') {
+          return templates;
+        }
+
+        // Company admin sees templates assigned to their company
+        if (currentUser.role === 'company-admin' && currentCompany) {
+          return templates.filter(template =>
+            template.isGlobal ||
+            template.assignedCompanies.includes(currentCompany.id) ||
+            template.createdBy === currentUser.id
+          );
+        }
+
+        return [];
+      })
+    );
+  }
+
+  getTemplatesForCompanyAndForm(companyId: string, formType: string): Observable<TemplateConfiguration[]> {
+    // Check if user can access templates for this company
+    if (!this.userService.canManageCompany(companyId)) {
+      return of([]);
+    }
+
+    return this.getTemplatesForCurrentUser().pipe(
+      map(templates => templates.filter(template =>
+        template.isActive &&
+        (template.isGlobal || template.assignedCompanies.includes(companyId)) &&
+        (template.formTypes.length === 0 || template.formTypes.includes(formType))
+      ))
     );
   }
 
   getTemplatesByCategory(categoryId: string): Observable<TemplateConfiguration[]> {
-    return this.templates$.pipe(
+    return this.getTemplatesForCurrentUser().pipe(
       map(templates => templates.filter(t => t.tags.includes(categoryId)))
     );
   }
 
-  getDefaultTemplate(companyId: string, formType: string): TemplateConfiguration | undefined {
-    const availableTemplates = this.getTemplatesForCompanyAndForm(companyId, formType);
-    return availableTemplates.find(t => t.isDefault) || availableTemplates[0];
+  async assignTemplateToCompany(templateId: string, companyId: string, formType: string): Promise<CompanyTemplateAssignment> {
+    const currentUser = this.userService.getCurrentUser();
+
+    if (!currentUser || !this.userService.hasPermission('templates', 'assign')) {
+      throw new Error('Insufficient permissions to assign templates');
+    }
+
+    // Company admins can only assign to their own company
+    if (currentUser.role === 'company-admin' && currentUser.companyId !== companyId) {
+      throw new Error('Company admins can only assign templates to their own company');
+    }
+
+    const assignment: CompanyTemplateAssignment = {
+      id: `assignment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      templateId,
+      companyId,
+      formType,
+      assignedBy: currentUser.id,
+      assignedAt: new Date(),
+      isActive: true
+    };
+
+    // Update the template's assigned companies
+    const template = this.getTemplate(templateId);
+    if (template) {
+      if (!template.assignedCompanies.includes(companyId)) {
+        template.assignedCompanies.push(companyId);
+        template.isCompanySpecific = true;
+        template.lastModified = new Date();
+        await this.saveTemplate(template);
+      }
+    }
+
+    // Save the assignment
+    const assignments = this.templateAssignmentsSubject.value;
+    assignments.push(assignment);
+    this.templateAssignmentsSubject.next(assignments);
+    this.saveAssignments();
+
+    return assignment;
   }
 
-  getTemplatesGroupedByCompany(): Observable<Record<string, TemplateConfiguration[]>> {
-    return this.templates$.pipe(
-      map(templates => {
-        const grouped: Record<string, TemplateConfiguration[]> = {};
+  async unassignTemplateFromCompany(templateId: string, companyId: string): Promise<void> {
+    const currentUser = this.userService.getCurrentUser();
 
-        templates.forEach(template => {
-          if (template.isGlobal) {
-            if (!grouped['Global']) grouped['Global'] = [];
-            grouped['Global'].push(template);
-          } else {
-            template.assignedCompanies.forEach(companyId => {
-              if (!grouped[companyId]) grouped[companyId] = [];
-              grouped[companyId].push(template);
-            });
-          }
-        });
+    if (!currentUser || !this.userService.hasPermission('templates', 'assign')) {
+      throw new Error('Insufficient permissions to unassign templates');
+    }
 
-        return grouped;
-      })
+    // Company admins can only unassign from their own company
+    if (currentUser.role === 'company-admin' && currentUser.companyId !== companyId) {
+      throw new Error('Company admins can only unassign templates from their own company');
+    }
+
+    // Update template
+    const template = this.getTemplate(templateId);
+    if (template) {
+      template.assignedCompanies = template.assignedCompanies.filter(id => id !== companyId);
+      template.isCompanySpecific = template.assignedCompanies.length > 0;
+      template.lastModified = new Date();
+      await this.saveTemplate(template);
+    }
+
+    // Remove assignments
+    const assignments = this.templateAssignmentsSubject.value;
+    const updatedAssignments = assignments.filter(a =>
+      !(a.templateId === templateId && a.companyId === companyId)
     );
+    this.templateAssignmentsSubject.next(updatedAssignments);
+    this.saveAssignments();
+  }
+
+  getTemplateAssignmentsForCompany(companyId: string): Observable<CompanyTemplateAssignment[]> {
+    if (!this.userService.canManageCompany(companyId)) {
+      return of([]);
+    }
+
+    return this.templateAssignments$.pipe(
+      map(assignments => assignments.filter(a => a.companyId === companyId && a.isActive))
+    );
+  }
+
+  private canUserAccessTemplate(template: TemplateConfiguration): boolean {
+    const currentUser = this.userService.getCurrentUser();
+    const currentCompany = this.userService.getCurrentCompany();
+
+    if (!currentUser) {
+      return false;
+    }
+
+    // Super admin can access all templates
+    if (currentUser.role === 'super-admin') {
+      return true;
+    }
+
+    // Company admin can access global templates and templates assigned to their company
+    if (currentUser.role === 'company-admin' && currentCompany) {
+      return template.isGlobal ||
+             template.assignedCompanies.includes(currentCompany.id) ||
+             template.createdBy === currentUser.id;
+    }
+
+    return false;
   }
 
   // ===== TEMPLATE ACTIVATION AND MANAGEMENT =====
@@ -178,16 +310,6 @@ export class EnhancedTemplateManagementService {
 
     await this.saveToStorage(templates);
     this.templatesSubject.next([...templates]);
-  }
-
-  async assignTemplateToCompany(templateId: string, companyId: string): Promise<void> {
-    const template = this.getTemplate(templateId);
-    if (template && !template.assignedCompanies.includes(companyId)) {
-      template.assignedCompanies.push(companyId);
-      template.isGlobal = false; // Remove global status when assigning to specific company
-      template.lastModified = new Date();
-      await this.saveTemplate(template);
-    }
   }
 
   async removeTemplateFromCompany(templateId: string, companyId: string): Promise<void> {
@@ -309,6 +431,9 @@ export class EnhancedTemplateManagementService {
       uploadedAt: template.createdDate || new Date(),
       isUniversal: template.isGlobal || false,
       preserveFormatting: true,
+      // New properties required by Template type
+      isCompanySpecific: template.assignedCompanies && template.assignedCompanies.length > 0,
+      visibility: template.isGlobal ? 'public' : 'private',
       metadata: {
         author: template.author,
         version: template.version,
@@ -943,5 +1068,26 @@ export class EnhancedTemplateManagementService {
   private async createSystemTemplates(): Promise<void> {
     // Create the LCP template as a system template
     await this.importLCPRoofingTemplate();
+  }
+
+  // ===== TEMPLATE ASSIGNMENT STORAGE =====
+
+  private loadAssignments(): void {
+    const stored = localStorage.getItem('template-assignments');
+    if (stored) {
+      try {
+        const assignments = JSON.parse(stored).map((a: any) => ({
+          ...a,
+          assignedAt: new Date(a.assignedAt)
+        }));
+        this.templateAssignmentsSubject.next(assignments);
+      } catch (error) {
+        console.error('Failed to load template assignments:', error);
+      }
+    }
+  }
+
+  private saveAssignments(): void {
+    localStorage.setItem('template-assignments', JSON.stringify(this.templateAssignmentsSubject.value));
   }
 }

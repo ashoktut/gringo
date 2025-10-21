@@ -15,7 +15,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { Subject, takeUntil } from 'rxjs';
 import { Template, TemplateType, PdfGenerationOptions } from '../../models/template.models';
 import { TemplateManagementService } from '../../services/template-management.service';
+import { UserManagementService } from '../../services/user-management.service';
+import { User, Company } from '../../models/user.models';
 import { DocumentTemplateComponent } from '../../sharedComponents/document-template/document-template.component';
+import { TemplateAssignmentDialogComponent } from '../../sharedComponents/template-assignment-dialog/template-assignment-dialog.component';
 
 @Component({
   selector: 'app-templates',
@@ -50,16 +53,35 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
             'Managing templates for ' + currentFormType.toUpperCase() + ' forms' :
             'Upload and manage document templates for all form types' }}
           </p>
+          @if (currentUser) {
+            <div class="user-context">
+              <mat-icon>account_circle</mat-icon>
+              <span class="user-info">{{ currentUser.name }}</span>
+              @if (currentCompany) {
+                <mat-icon>business</mat-icon>
+                <span class="company-info">{{ currentCompany.name }}</span>
+              }
+              <mat-chip [class]="getRoleClass(currentUser.role)">
+                {{ getRoleDisplay(currentUser.role) }}
+              </mat-chip>
+            </div>
+          }
         </div>
         <div class="header-stats">
           <div class="stat-card">
             <div class="stat-number">{{ totalTemplates }}</div>
-            <div class="stat-label">Total Templates</div>
+            <div class="stat-label">Available Templates</div>
           </div>
           <div class="stat-card">
             <div class="stat-number">{{ availableFormTypes.length }}</div>
             <div class="stat-label">Form Types</div>
           </div>
+          @if (isCompanyAdmin && currentCompany) {
+            <div class="stat-card company-stat">
+              <div class="stat-number">{{ getCompanyTemplateCount() }}</div>
+              <div class="stat-label">Company Templates</div>
+            </div>
+          }
         </div>
       </div>
 
@@ -248,14 +270,45 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </div>
           <mat-card-title>{{ template.name }}</mat-card-title>
           <mat-card-subtitle>
-            <mat-chip [class.universal]="template.isUniversal" class="form-type-chip">
-              {{ template.isUniversal ? 'Universal' : template.formType.toUpperCase() }}
-            </mat-chip>
+            <div class="template-badges">
+              <mat-chip [class.universal]="template.isUniversal" class="form-type-chip">
+                {{ template.isUniversal ? 'Universal' : template.formType.toUpperCase() }}
+              </mat-chip>
+              <mat-chip class="visibility-chip" [matTooltip]="getTemplateVisibilityLabel(template)">
+                <mat-icon>{{ getTemplateVisibilityIcon(template) }}</mat-icon>
+                {{ template.visibility }}
+              </mat-chip>
+            </div>
             <span class="upload-date">{{ template.uploadedAt | date:'short' }}</span>
           </mat-card-subtitle>
         </mat-card-header>
 
         <mat-card-content>
+          <!-- Company Information -->
+          @if (template.isCompanySpecific) {
+            <div class="company-info-section">
+              <mat-icon class="company-icon">business</mat-icon>
+              <div class="company-details">
+                @if (template.assignedCompanies && template.assignedCompanies.length > 0) {
+                  <span class="company-label">Assigned to:</span>
+                  <div class="assigned-companies">
+                    @for (companyId of template.assignedCompanies.slice(0, 2); track companyId) {
+                      <mat-chip class="company-chip">{{ getCompanyName(companyId) }}</mat-chip>
+                    }
+                    @if (template.assignedCompanies.length > 2) {
+                      <mat-chip class="more-companies-chip">
+                        +{{ template.assignedCompanies.length - 2 }} more
+                      </mat-chip>
+                    }
+                  </div>
+                } @else if (template.companyId) {
+                  <span class="company-label">Company:</span>
+                  <mat-chip class="company-chip">{{ getCompanyName(template.companyId) }}</mat-chip>
+                }
+              </div>
+            </div>
+          }
+
           <div class="template-details">
             <div class="detail-row">
               <span class="label">Size:</span>
@@ -271,20 +324,24 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
                 <span class="value">{{ template.placeholders.length }} found</span>
               </div>
             }
+            @if (template.createdBy) {
+              <div class="detail-row">
+                <span class="label">Created by:</span>
+                <span class="value">{{ getUserName(template.createdBy) }}</span>
+              </div>
+            }
           </div>
 
           @if (template.placeholders.length > 0) {
             <div class="placeholders-preview">
               <mat-chip-set>
                 @for (placeholder of template.placeholders.slice(0, 3); track placeholder) {
-                  <mat-chip
-                    class="placeholder-chip">
+                  <mat-chip class="placeholder-chip">
                     {{ placeholder }}
                   </mat-chip>
                 }
                 @if (template.placeholders.length > 3) {
-                  <mat-chip
-                    class="more-chip">
+                  <mat-chip class="more-chip">
                     +{{ template.placeholders.length - 3 }} more
                   </mat-chip>
                 }
@@ -312,6 +369,12 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
             <button mat-menu-item (click)="cloneTemplate(template)">
               <mat-icon>content_copy</mat-icon>
               <span>Clone for Other Form</span>
+            </button>
+            <button mat-menu-item
+              (click)="openAssignmentDialog(template)"
+              *ngIf="currentUser?.role === 'super-admin'">
+              <mat-icon>business</mat-icon>
+              <span>Manage Company Assignments</span>
             </button>
             <button mat-menu-item (click)="downloadTemplate(template)">
               <mat-icon>download</mat-icon>
@@ -359,9 +422,46 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
       font-size: 16px;
     }
 
+    /* User Context Styles */
+    .user-context {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      padding: 12px;
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      flex-wrap: wrap;
+    }
+
+    .user-info, .company-info {
+      font-weight: 500;
+      color: #333;
+    }
+
+    .role-super-admin {
+      background-color: #f44336 !important;
+      color: white !important;
+    }
+
+    .role-company-admin {
+      background-color: #ff9800 !important;
+      color: white !important;
+    }
+
+    .role-user {
+      background-color: #4caf50 !important;
+      color: white !important;
+    }
+
     .header-stats {
       display: flex;
       gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .company-stat {
+      border-left: 3px solid #ff9800;
     }
 
     .stat-card {
@@ -439,6 +539,72 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
     .form-type-chip.universal {
       background-color: #fff3e0;
       color: #f57c00;
+    }
+
+    .template-badges {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .visibility-chip {
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .visibility-chip mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Company Info Styles */
+    .company-info-section {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 12px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #1976d2;
+    }
+
+    .company-icon {
+      color: #1976d2;
+      margin-top: 2px;
+    }
+
+    .company-details {
+      flex: 1;
+    }
+
+    .company-label {
+      font-size: 12px;
+      color: #666;
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .assigned-companies {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .company-chip {
+      background-color: #e3f2fd !important;
+      color: #1976d2 !important;
+      font-size: 11px;
+    }
+
+    .more-companies-chip {
+      background-color: #f5f5f5 !important;
+      color: #666 !important;
+      font-size: 11px;
     }
 
     .upload-date {
@@ -618,12 +784,25 @@ export class TemplatesComponent implements OnInit, OnDestroy {
   availableFormTypes: TemplateType[] = [];
   selectedTabIndex: number = 0;
 
+  // User and company context
+  currentUser: User | null = null;
+  currentCompany: Company | null = null;
+
   get totalTemplates(): number {
     return this.allTemplates.length;
   }
 
+  get isCompanyAdmin(): boolean {
+    return this.currentUser?.role === 'company-admin';
+  }
+
+  get isSuperAdmin(): boolean {
+    return this.currentUser?.role === 'super-admin';
+  }
+
   constructor(
     private templateService: TemplateManagementService,
+    private userService: UserManagementService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private route: ActivatedRoute,
@@ -631,6 +810,9 @@ export class TemplatesComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Load user context first
+    this.loadUserContext();
+
     // Check if we have a specific form type from route
     this.route.paramMap.pipe(
       takeUntil(this.destroy$)
@@ -643,14 +825,25 @@ export class TemplatesComponent implements OnInit, OnDestroy {
     });
   }
 
+  private loadUserContext() {
+    this.currentUser = this.userService.getCurrentUser();
+    this.currentCompany = this.userService.getCurrentCompany();
+
+    // Redirect to user selector if not logged in
+    if (!this.currentUser) {
+      this.router.navigate(['/user-selector']);
+      return;
+    }
+  }
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
   loadTemplates() {
-    // Load all templates
-    this.templateService.getAllTemplates().pipe(
+    // Load templates available to current user (company-aware)
+    this.templateService.getTemplatesForCurrentUser().pipe(
       takeUntil(this.destroy$)
     ).subscribe({
       next: (templates) => {
@@ -744,6 +937,24 @@ export class TemplatesComponent implements OnInit, OnDestroy {
     link.download = template.name;
     link.click();
     window.URL.revokeObjectURL(url);
+  }
+
+  openAssignmentDialog(template: Template): void {
+    const dialogRef = this.dialog.open(TemplateAssignmentDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      data: { template }
+    });
+
+    dialogRef.afterClosed().subscribe((updatedTemplate: Template) => {
+      if (updatedTemplate) {
+        // Reload templates to reflect assignment changes
+        this.loadTemplates();
+        this.snackBar.open('Template assignments updated successfully', 'Close', {
+          duration: 3000
+        });
+      }
+    });
   }
 
   deleteTemplate(templateId: string) {
@@ -861,5 +1072,80 @@ export class TemplatesComponent implements OnInit, OnDestroy {
       duration: 5000,
       panelClass: ['error-snackbar']
     });
+  }
+
+  // User and company helper methods
+  getRoleDisplay(role: string): string {
+    switch (role) {
+      case 'super-admin': return 'Super Admin';
+      case 'company-admin': return 'Company Admin';
+      case 'user': return 'User';
+      default: return role;
+    }
+  }
+
+  getRoleClass(role: string): string {
+    return `role-${role}`;
+  }
+
+  getCompanyTemplateCount(): number {
+    if (!this.currentCompany) return 0;
+    return this.allTemplates.filter(template =>
+      template.companyId === this.currentCompany!.id ||
+      (template.assignedCompanies && template.assignedCompanies.includes(this.currentCompany!.id))
+    ).length;
+  }
+
+  getTemplateVisibilityIcon(template: Template): string {
+    switch (template.visibility) {
+      case 'public': return 'public';
+      case 'company': return 'business';
+      case 'private': return 'lock';
+      default: return 'help';
+    }
+  }
+
+  getTemplateVisibilityLabel(template: Template): string {
+    switch (template.visibility) {
+      case 'public': return 'Global Template';
+      case 'company': return 'Company Template';
+      case 'private': return 'Private Template';
+      default: return 'Unknown';
+    }
+  }
+
+  canEditTemplate(template: Template): boolean {
+    if (!this.currentUser) return false;
+
+    if (this.currentUser.role === 'super-admin') return true;
+
+    if (this.currentUser.role === 'company-admin') {
+      const isOwner = template.createdBy && this.currentUser.id && template.createdBy === this.currentUser.id;
+      const isAssigned = this.currentCompany && template.companyId === this.currentCompany.id;
+      return Boolean(isOwner || isAssigned);
+    }
+
+    return false;
+  }
+
+  getCompanyName(companyId: string): string {
+    // In a real app, this would come from a company service or cache
+    const companyNames: { [key: string]: string } = {
+      'company-1': 'Acme Corp',
+      'company-2': 'Global Industries',
+      'company-3': 'Tech Solutions Inc'
+    };
+    return companyNames[companyId] || 'Unknown Company';
+  }
+
+  getUserName(userId: string): string {
+    // In a real app, this would come from a user service or cache
+    const userNames: { [key: string]: string } = {
+      'super-admin': 'Super Administrator',
+      'admin-acme': 'John Smith',
+      'admin-global': 'Sarah Johnson',
+      'admin-tech': 'Mike Chen'
+    };
+    return userNames[userId] || 'Unknown User';
   }
 }

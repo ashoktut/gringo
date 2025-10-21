@@ -26,10 +26,8 @@ export class TemplateManagementService {
       throw new Error(validation.errors.join(', '));
     }
 
-    // Enhanced processing for binary content preservation
-    return this.processingService.processTemplateFileWithBinary(request).pipe(
-      switchMap(template => this.storageService.saveTemplate(template))
-    );
+    // Use the new company-aware upload method
+    return this.storageService.uploadTemplateWithAssignment(request);
   }
 
   /**
@@ -44,6 +42,20 @@ export class TemplateManagementService {
    */
   getTemplatesForForm(formType: string): Observable<Template[]> {
     return this.storageService.getTemplatesByFormType(formType);
+  }
+
+  /**
+   * Get templates available to current user (company-aware)
+   */
+  getTemplatesForCurrentUser(): Observable<Template[]> {
+    return this.storageService.getTemplatesForCurrentUser();
+  }
+
+  /**
+   * Get templates for current user's company and form type
+   */
+  getTemplatesForCurrentUserAndForm(formType: string): Observable<Template[]> {
+    return this.storageService.getTemplatesByCompanyAndFormType(formType);
   }
 
   /**
@@ -210,5 +222,20 @@ export class TemplateManagementService {
         window.URL.revokeObjectURL(url);
       })
     );
+  }
+
+  /**
+   * Assignment Management Methods (Super-admin only)
+   */
+  assignTemplateToCompanies(templateId: string, companyIds: string[]): Observable<Template> {
+    return this.storageService.assignTemplateToCompanies(templateId, companyIds);
+  }
+
+  unassignTemplateFromCompanies(templateId: string, companyIds: string[]): Observable<Template> {
+    return this.storageService.unassignTemplateFromCompanies(templateId, companyIds);
+  }
+
+  getTemplateAssignments(templateId: string): Observable<string[]> {
+    return this.storageService.getTemplateAssignments(templateId);
   }
 }

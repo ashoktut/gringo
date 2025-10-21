@@ -10,6 +10,13 @@ export interface Template {
   isUniversal: boolean;
   metadata?: TemplateMetadata;
 
+  // Company Assignment Properties
+  companyId?: string;                 // Template owner company ID
+  assignedCompanies?: string[];       // Companies that can use this template
+  isCompanySpecific: boolean;         // Whether template is company-specific
+  createdBy?: string;                 // User ID who created the template
+  visibility: 'public' | 'company' | 'private'; // Template visibility scope
+
   // Enhanced properties for docx library support
   originalFile?: Blob;                // Original Word file for format preservation
   binaryContent?: ArrayBuffer;        // Binary data of the document
@@ -22,6 +29,8 @@ export interface TemplateMetadata {
   version?: string;
   description?: string;
   tags?: string[];
+  createdBy?: string;                 // User ID who created the template
+  companyContext?: string;            // Company context when created
 }
 
 export type TemplateType = 'rfq' | 'rqr' | 'invoice' | 'quote' | 'report';
@@ -35,6 +44,12 @@ export interface TemplateUploadRequest {
   isUniversal?: boolean;
   metadata?: Partial<TemplateMetadata>;
   preserveFormatting?: boolean;       // Enable format preservation during upload
+
+  // Company Assignment Properties
+  companyId?: string;                 // Assign template to specific company
+  assignedCompanies?: string[];       // Multiple companies that can use template
+  isCompanySpecific?: boolean;        // Whether template is company-specific
+  visibility?: 'public' | 'company' | 'private'; // Template visibility scope
 }
 
 export interface TemplateGenerationRequest {
@@ -89,6 +104,30 @@ export interface PdfGenerationOptions {
   emailRecipients?: string[];
   googleDriveUpload?: boolean;
   serverStorage?: boolean;
+}
+
+// Company Management Interfaces
+export interface Company {
+  id: string;
+  name: string;
+  code: string;                     // Company abbreviation/code
+  industry?: string;
+  logo?: string;
+  active: boolean;                  // Changed from isActive for consistency
+  createdAt?: Date;
+  templates?: string[];             // Template IDs associated with this company
+  allowedFormTypes?: TemplateType[]; // Form types this company can use
+}
+
+export interface TemplateAssignment {
+  id: string;
+  templateId: string;
+  companyId: string;
+  formType: TemplateType;
+  isDefault: boolean;               // Whether this is the default template for this company+formType
+  assignedBy: string;               // User ID who made the assignment
+  assignedAt: Date;
+  expiresAt?: Date;                 // Optional expiration date
 }
 
 export interface RfqProcessingResult {

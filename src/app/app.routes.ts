@@ -13,6 +13,7 @@ import { FormBuilderComponent } from './pages/form-builder/form-builder.componen
 import { ConfigManagementComponent } from './pages/form-builder/config-management/config-management.component';
 import { UniversalFormRendererComponent } from './sharedComponents/universal-form-renderer/universal-form-renderer.component';
 import { FormsDashboardComponent } from './pages/forms-dashboard/forms-dashboard.component.new';
+import { UserSelectorComponent } from './sharedComponents/user-selector/user-selector.component';
 
 // Enhanced Forms System Components
 import { FormsDashboardComponent as UserFormsDashboard } from './pages/user/forms-dashboard/forms-dashboard.component';
@@ -23,11 +24,15 @@ import { PdfTemplateEditorComponent } from './pages/admin/pdf-template-editor/pd
 // Guards
 import { authGuard } from './guards/auth.guard';
 import { companyAdminGuard, superAdminGuard } from './guards/role.guard';
+import { userAuthGuard, companyAdminGuard as newCompanyAdminGuard, superAdminGuard as newSuperAdminGuard } from './guards/user-auth.guard';
 
 export const routes: Routes = [
-  // Authentication routes
+  // Authentication routes (legacy)
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
+
+  // User management (new)
+  { path: 'user-selector', component: UserSelectorComponent },
   { path: 'forgot-password', component: ForgotPasswordComponent },
 
   // Main application routes
@@ -60,10 +65,10 @@ export const routes: Routes = [
   { path: 'submissions/:category', component: SubmissionsComponent },
   { path: 'submissions/:category/:formType', component: SubmissionsComponent },
 
-  { path: 'templates', component: TemplatesComponent },
-  { path: 'templates/:formType', component: TemplatesComponent },
-  { path: 'enhanced-templates', component: EnhancedTemplatesComponent },
-  { path: 'admin/templates', component: EnhancedTemplatesComponent },
+  { path: 'templates', component: TemplatesComponent, canActivate: [newCompanyAdminGuard] },
+  { path: 'templates/:formType', component: TemplatesComponent, canActivate: [newCompanyAdminGuard] },
+  { path: 'enhanced-templates', component: EnhancedTemplatesComponent, canActivate: [newCompanyAdminGuard] },
+  { path: 'admin/templates', component: EnhancedTemplatesComponent, canActivate: [newSuperAdminGuard] },
 
   // Management and configuration routes
   { path: 'storage-management', component: StorageManagementComponent },
@@ -131,8 +136,8 @@ export const routes: Routes = [
   // ==================== End Enhanced Forms Routes ====================
 
   // Default redirect
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
 
   // Wildcard route for 404s
-  { path: '**', redirectTo: '/home' }
+  { path: '**', redirectTo: '/login' }
 ];
