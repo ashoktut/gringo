@@ -75,7 +75,7 @@ export class AppComponent implements OnInit {
         this.drawer.toggle();
       }
     });
-    
+
     // Initialize responsive observable
     this.isHandset$ = this.breakpointObserver.observe(Breakpoints.Handset)
       .pipe(
@@ -93,9 +93,9 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.updateNavigation();
-    
-    // Update navigation when user state changes  
-    // Since authBridge doesn't have getCurrentUser() observable, 
+
+    // Update navigation when user state changes
+    // Since authBridge doesn't have getCurrentUser() observable,
     // we'll check on route changes
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)

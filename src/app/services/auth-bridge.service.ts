@@ -249,6 +249,20 @@ export class AuthBridgeService {
   }
 
   /**
+   * Get current session for workflow and task services
+   */
+  getCurrentSession(): { user: UserMgmtUser; company: UserMgmtCompany } | null {
+    const user = this.getCurrentUser();
+    const company = this.getCurrentCompany();
+
+    if (user && company) {
+      return { user, company };
+    }
+
+    return null;
+  }
+
+  /**
    * Check if user has company admin privileges
    */
   isCompanyAdmin(): boolean {

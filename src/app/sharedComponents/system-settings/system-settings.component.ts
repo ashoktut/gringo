@@ -126,7 +126,7 @@ export class SystemSettingsComponent implements OnInit {
   isSuperAdmin = false;
   loading = signal(false);
   timezones = [
-    'UTC', 'America/New_York', 'America/Chicago', 'America/Denver', 
+    'UTC', 'America/New_York', 'America/Chicago', 'America/Denver',
     'America/Los_Angeles', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo'
   ];
 
@@ -136,7 +136,7 @@ export class SystemSettingsComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {
     this.isSuperAdmin = this.authBridge.isSuperAdmin();
-    
+
     // Initialize forms
     this.generalForm = this.createGeneralForm();
     this.securityForm = this.createSecurityForm();
@@ -203,17 +203,17 @@ export class SystemSettingsComponent implements OnInit {
 
   private loadSettings() {
     this.loading.set(true);
-    
+
     // Simulate loading settings from backend
     setTimeout(() => {
       const currentSettings = this.settings();
-      
+
       this.generalForm.patchValue(currentSettings.general);
       this.securityForm.patchValue(currentSettings.security);
       this.featuresForm.patchValue(currentSettings.features);
       this.brandingForm.patchValue(currentSettings.branding);
       this.emailForm.patchValue(currentSettings.email);
-      
+
       this.loading.set(false);
     }, 1000);
   }
@@ -221,17 +221,17 @@ export class SystemSettingsComponent implements OnInit {
   async saveGeneralSettings() {
     if (this.generalForm.valid) {
       this.loading.set(true);
-      
+
       try {
         // Simulate API call
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const currentSettings = this.settings();
         this.settings.set({
           ...currentSettings,
           general: this.generalForm.value
         });
-        
+
         this.snackBar.open('General settings saved successfully', 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
@@ -250,16 +250,16 @@ export class SystemSettingsComponent implements OnInit {
   async saveSecuritySettings() {
     if (this.securityForm.valid && this.isSuperAdmin) {
       this.loading.set(true);
-      
+
       try {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const currentSettings = this.settings();
         this.settings.set({
           ...currentSettings,
           security: this.securityForm.value
         });
-        
+
         this.snackBar.open('Security settings saved successfully', 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
@@ -277,16 +277,16 @@ export class SystemSettingsComponent implements OnInit {
 
   async saveFeatureSettings() {
     this.loading.set(true);
-    
+
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       const currentSettings = this.settings();
       this.settings.set({
         ...currentSettings,
         features: this.featuresForm.value
       });
-      
+
       this.snackBar.open('Feature settings saved successfully', 'Close', {
         duration: 3000,
         panelClass: ['success-snackbar']
@@ -304,16 +304,16 @@ export class SystemSettingsComponent implements OnInit {
   async saveBrandingSettings() {
     if (this.brandingForm.valid) {
       this.loading.set(true);
-      
+
       try {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const currentSettings = this.settings();
         this.settings.set({
           ...currentSettings,
           branding: this.brandingForm.value
         });
-        
+
         this.snackBar.open('Branding settings saved successfully', 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
@@ -332,16 +332,16 @@ export class SystemSettingsComponent implements OnInit {
   async saveEmailSettings() {
     if (this.emailForm.valid && this.isSuperAdmin) {
       this.loading.set(true);
-      
+
       try {
         await new Promise(resolve => setTimeout(resolve, 1000));
-        
+
         const currentSettings = this.settings();
         this.settings.set({
           ...currentSettings,
           email: this.emailForm.value
         });
-        
+
         this.snackBar.open('Email settings saved successfully', 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
@@ -360,11 +360,11 @@ export class SystemSettingsComponent implements OnInit {
   async testEmailConnection() {
     if (this.emailForm.valid) {
       this.loading.set(true);
-      
+
       try {
         // Simulate email test
         await new Promise(resolve => setTimeout(resolve, 2000));
-        
+
         this.snackBar.open('Email connection test successful', 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
@@ -382,11 +382,11 @@ export class SystemSettingsComponent implements OnInit {
 
   previewBranding() {
     const branding = this.brandingForm.value;
-    
+
     // Apply preview styling
     document.documentElement.style.setProperty('--primary-color', branding.primaryColor);
     document.documentElement.style.setProperty('--secondary-color', branding.secondaryColor);
-    
+
     this.snackBar.open('Branding preview applied', 'Close', {
       duration: 3000,
       panelClass: ['info-snackbar']
@@ -402,11 +402,11 @@ export class SystemSettingsComponent implements OnInit {
       faviconUrl: '',
       customCss: ''
     });
-    
+
     // Reset CSS variables
     document.documentElement.style.removeProperty('--primary-color');
     document.documentElement.style.removeProperty('--secondary-color');
-    
+
     this.snackBar.open('Branding reset to defaults', 'Close', {
       duration: 3000,
       panelClass: ['info-snackbar']

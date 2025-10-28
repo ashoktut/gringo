@@ -101,7 +101,7 @@ export class AnalyticsDashboardComponent implements OnInit {
 
   private async loadDashboardData(): Promise<void> {
     this.isLoading.set(true);
-    
+
     try {
       await Promise.all([
         this.loadStats(),
@@ -117,11 +117,11 @@ export class AnalyticsDashboardComponent implements OnInit {
     // Get users data
     this.userService.getUsers().subscribe(users => {
       const activeUsers = users.filter(u => u.isActive).length;
-      
+
       // Get companies data
       this.userService.getCompanies().subscribe(companies => {
         const activeCompanies = companies.filter(c => c.active).length;
-        
+
         // Get templates data
         this.templateService.getAllTemplates().subscribe(templates => {
           const stats: DashboardStats = {
@@ -133,7 +133,7 @@ export class AnalyticsDashboardComponent implements OnInit {
             totalSubmissions: this.getRandomSubmissionCount(), // Mock data
             recentActivity: this.generateRecentActivity(users, companies, templates)
           };
-          
+
           this.stats.set(stats);
         });
       });
@@ -146,10 +146,10 @@ export class AnalyticsDashboardComponent implements OnInit {
         this.templateService.getAllTemplates().subscribe(templates => {
           const usage: CompanyUsage[] = companies.map(company => {
             const companyUsers = users.filter(u => u.companyId === company.id);
-            const companyTemplates = templates.filter(t => 
+            const companyTemplates = templates.filter(t =>
               t.assignedCompanies?.includes(company.id) || t.companyId === company.id
             );
-            
+
             return {
               companyId: company.id,
               companyName: company.name,
@@ -159,7 +159,7 @@ export class AnalyticsDashboardComponent implements OnInit {
               lastActivity: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000)
             };
           });
-          
+
           this.companyUsage.set(usage);
         });
       });
@@ -196,12 +196,12 @@ export class AnalyticsDashboardComponent implements OnInit {
   private generateRecentActivity(users: any[], companies: any[], templates: any[]): ActivityItem[] {
     const activities: ActivityItem[] = [];
     const activityTypes = ['user_login', 'template_upload', 'form_submission', 'user_created', 'company_created'];
-    
+
     for (let i = 0; i < 10; i++) {
       const type = activityTypes[Math.floor(Math.random() * activityTypes.length)] as ActivityItem['type'];
       const user = users[Math.floor(Math.random() * users.length)];
       const company = companies[Math.floor(Math.random() * companies.length)];
-      
+
       let description = '';
       switch (type) {
         case 'user_login':
@@ -220,7 +220,7 @@ export class AnalyticsDashboardComponent implements OnInit {
           description = `New company ${company?.name || 'Company'} created`;
           break;
       }
-      
+
       activities.push({
         id: `activity-${i}`,
         type,
@@ -230,7 +230,7 @@ export class AnalyticsDashboardComponent implements OnInit {
         companyId: company?.id
       });
     }
-    
+
     return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 

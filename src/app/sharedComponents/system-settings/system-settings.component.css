@@ -299,15 +299,15 @@ button[mat-button] {
   .settings-container {
     padding: 16px;
   }
-  
+
   .tab-content {
     padding: 24px;
   }
-  
+
   .settings-card mat-card-content {
     padding: 24px;
   }
-  
+
   .features-grid {
     grid-template-columns: 1fr;
   }
@@ -317,49 +317,49 @@ button[mat-button] {
   .settings-header {
     padding: 24px 16px;
   }
-  
+
   .settings-header h1 {
     font-size: 28px;
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .settings-header p {
     font-size: 16px;
   }
-  
+
   .tab-content {
     padding: 16px;
   }
-  
+
   .settings-card mat-card-content {
     padding: 16px;
   }
-  
+
   .settings-card mat-card-actions {
     padding: 16px;
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .half-width {
     width: 100%;
     min-width: unset;
   }
-  
+
   .feature-item {
     padding: 16px;
   }
-  
+
   .feature-label {
     gap: 12px;
   }
-  
+
   .feature-label mat-icon {
     font-size: 24px;
     width: 24px;
@@ -371,28 +371,28 @@ button[mat-button] {
   .settings-container {
     padding: 8px;
   }
-  
+
   .settings-header {
     padding: 16px 12px;
   }
-  
+
   .settings-header h1 {
     font-size: 24px;
   }
-  
+
   .tab-content {
     padding: 12px;
   }
-  
+
   .settings-card mat-card-content {
     padding: 12px;
   }
-  
+
   .settings-tabs ::ng-deep .mat-mdc-tab-label {
     min-width: 80px;
     font-size: 12px;
   }
-  
+
   button[mat-raised-button],
   button[mat-button] {
     padding: 8px 16px;

@@ -176,7 +176,7 @@
   .roles-table-container {
     padding: 8px;
   }
-  
+
   .header-cell,
   .name-cell,
   .description-cell,
@@ -184,17 +184,17 @@
   .actions-cell {
     padding: 12px 8px;
   }
-  
+
   .description-text {
     max-width: 200px;
     font-size: 12px;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 4px;
   }
-  
+
   .action-button {
     width: 36px;
     height: 36px;
@@ -205,15 +205,15 @@
   .header-icon {
     display: none;
   }
-  
+
   .description-cell {
     display: none;
   }
-  
+
   .empty-state {
     padding: 32px 16px;
   }
-  
+
   .empty-icon {
     font-size: 48px;
     width: 48px;

@@ -77,7 +77,7 @@ export class UserManagementDashboardComponent implements OnInit {
   roles = signal<Role[]>([]);
   selectedTabIndex = signal(0);
   isLoading = signal(false);
-  
+
   // Table display columns
   userDisplayedColumns = ['name', 'email', 'role', 'company', 'status', 'lastLogin', 'actions'];
   companyDisplayedColumns = ['name', 'code', 'userCount', 'status', 'actions'];

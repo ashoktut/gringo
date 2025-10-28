@@ -20,7 +20,7 @@
               </mat-card-title>
               <mat-card-subtitle>Basic system settings and preferences</mat-card-subtitle>
             </mat-card-header>
-            
+
             <mat-card-content>
               <form [formGroup]="generalForm" class="settings-form">
                 <div class="form-row">
@@ -71,8 +71,8 @@
             </mat-card-content>
 
             <mat-card-actions>
-              <button mat-raised-button color="primary" 
-                      (click)="saveGeneralSettings()" 
+              <button mat-raised-button color="primary"
+                      (click)="saveGeneralSettings()"
                       [disabled]="generalForm.invalid || loading()">
                 <mat-icon>save</mat-icon>
                 Save General Settings
@@ -95,7 +95,7 @@
               </mat-card-title>
               <mat-card-subtitle>Authentication and security settings</mat-card-subtitle>
             </mat-card-header>
-            
+
             <mat-card-content>
               @if (!isSuperAdmin) {
                 <div class="permission-warning">
@@ -108,14 +108,14 @@
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>Session Timeout (minutes)</mat-label>
-                    <input matInput type="number" formControlName="sessionTimeout" 
+                    <input matInput type="number" formControlName="sessionTimeout"
                            min="5" max="480" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>timer</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>Minimum Password Length</mat-label>
-                    <input matInput type="number" formControlName="passwordMinLength" 
+                    <input matInput type="number" formControlName="passwordMinLength"
                            min="6" max="20" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>lock</mat-icon>
                   </mat-form-field>
@@ -151,8 +151,8 @@
             </mat-card-content>
 
             <mat-card-actions>
-              <button mat-raised-button color="primary" 
-                      (click)="saveSecuritySettings()" 
+              <button mat-raised-button color="primary"
+                      (click)="saveSecuritySettings()"
                       [disabled]="securityForm.invalid || loading() || !isSuperAdmin">
                 <mat-icon>save</mat-icon>
                 Save Security Settings
@@ -175,7 +175,7 @@
               </mat-card-title>
               <mat-card-subtitle>Enable or disable system features</mat-card-subtitle>
             </mat-card-header>
-            
+
             <mat-card-content>
               <form [formGroup]="featuresForm" class="settings-form">
                 <div class="features-grid">
@@ -243,8 +243,8 @@
             </mat-card-content>
 
             <mat-card-actions>
-              <button mat-raised-button color="primary" 
-                      (click)="saveFeatureSettings()" 
+              <button mat-raised-button color="primary"
+                      (click)="saveFeatureSettings()"
                       [disabled]="loading()">
                 <mat-icon>save</mat-icon>
                 Save Feature Settings
@@ -267,7 +267,7 @@
               </mat-card-title>
               <mat-card-subtitle>Customize the look and feel of your platform</mat-card-subtitle>
             </mat-card-header>
-            
+
             <mat-card-content>
               <form [formGroup]="brandingForm" class="settings-form">
                 <div class="form-row">
@@ -303,7 +303,7 @@
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Custom CSS</mat-label>
-                    <textarea matInput formControlName="customCss" rows="6" 
+                    <textarea matInput formControlName="customCss" rows="6"
                               placeholder="/* Custom CSS styles */"></textarea>
                     <mat-icon matSuffix>code</mat-icon>
                   </mat-form-field>
@@ -312,8 +312,8 @@
             </mat-card-content>
 
             <mat-card-actions>
-              <button mat-raised-button color="primary" 
-                      (click)="saveBrandingSettings()" 
+              <button mat-raised-button color="primary"
+                      (click)="saveBrandingSettings()"
                       [disabled]="brandingForm.invalid || loading()">
                 <mat-icon>save</mat-icon>
                 Save Branding
@@ -344,7 +344,7 @@
               </mat-card-title>
               <mat-card-subtitle>SMTP settings for outgoing emails</mat-card-subtitle>
             </mat-card-header>
-            
+
             <mat-card-content>
               @if (!isSuperAdmin) {
                 <div class="permission-warning">
@@ -357,14 +357,14 @@
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>SMTP Host</mat-label>
-                    <input matInput formControlName="smtpHost" 
+                    <input matInput formControlName="smtpHost"
                            placeholder="smtp.gmail.com" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>dns</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>SMTP Port</mat-label>
-                    <input matInput type="number" formControlName="smtpPort" 
+                    <input matInput type="number" formControlName="smtpPort"
                            placeholder="587" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>router</mat-icon>
                   </mat-form-field>
@@ -373,14 +373,14 @@
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>SMTP Username</mat-label>
-                    <input matInput formControlName="smtpUser" 
+                    <input matInput formControlName="smtpUser"
                            placeholder="your-email@gmail.com" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>account_circle</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>SMTP Password</mat-label>
-                    <input matInput type="password" formControlName="smtpPassword" 
+                    <input matInput type="password" formControlName="smtpPassword"
                            placeholder="••••••••" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>lock</mat-icon>
                   </mat-form-field>
@@ -389,14 +389,14 @@
                 <div class="form-row">
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>From Email</mat-label>
-                    <input matInput type="email" formControlName="fromEmail" 
+                    <input matInput type="email" formControlName="fromEmail"
                            placeholder="noreply@example.com" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>send</mat-icon>
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="half-width">
                     <mat-label>From Name</mat-label>
-                    <input matInput formControlName="fromName" 
+                    <input matInput formControlName="fromName"
                            placeholder="Your Platform Name" [readonly]="!isSuperAdmin">
                     <mat-icon matSuffix>badge</mat-icon>
                   </mat-form-field>
@@ -414,13 +414,13 @@
             </mat-card-content>
 
             <mat-card-actions>
-              <button mat-raised-button color="primary" 
-                      (click)="saveEmailSettings()" 
+              <button mat-raised-button color="primary"
+                      (click)="saveEmailSettings()"
                       [disabled]="emailForm.invalid || loading() || !isSuperAdmin">
                 <mat-icon>save</mat-icon>
                 Save Email Settings
               </button>
-              <button mat-button (click)="testEmailConnection()" 
+              <button mat-button (click)="testEmailConnection()"
                       [disabled]="emailForm.invalid || loading() || !isSuperAdmin">
                 <mat-icon>send</mat-icon>
                 Test Connection

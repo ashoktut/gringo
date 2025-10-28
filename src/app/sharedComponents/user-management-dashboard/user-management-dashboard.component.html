@@ -8,12 +8,12 @@
   </div>
 
   <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="management-tabs">
-    
+
     <!-- Users Tab -->
     <mat-tab label="Users">
       <ng-template matTabContent>
         <div class="tab-content">
-          
+
           <!-- Users Header -->
           <div class="section-header">
             <div class="header-info">
@@ -86,7 +86,7 @@
           <!-- Users Table -->
           <mat-card class="table-card">
             <mat-table [dataSource]="users()" class="users-table">
-              
+
               <!-- Name Column -->
               <ng-container matColumnDef="name">
                 <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
@@ -147,7 +147,7 @@
                     <button mat-icon-button (click)="onEditUser(user)" matTooltip="Edit User">
                       <mat-icon>edit</mat-icon>
                     </button>
-                    <button mat-icon-button (click)="onToggleUserStatus(user)" 
+                    <button mat-icon-button (click)="onToggleUserStatus(user)"
                             [matTooltip]="user.isActive ? 'Deactivate' : 'Activate'">
                       <mat-icon>{{ user.isActive ? 'person_off' : 'person' }}</mat-icon>
                     </button>
@@ -170,7 +170,7 @@
     <mat-tab label="Companies">
       <ng-template matTabContent>
         <div class="tab-content">
-          
+
           <!-- Companies Header -->
           <div class="section-header">
             <div class="header-info">
@@ -228,7 +228,7 @@
           <!-- Companies Table -->
           <mat-card class="table-card">
             <mat-table [dataSource]="companies()" class="companies-table">
-              
+
               <!-- Name Column -->
               <ng-container matColumnDef="name">
                 <mat-header-cell *matHeaderCellDef>Company Name</mat-header-cell>
@@ -292,7 +292,7 @@
     <mat-tab label="Roles">
       <ng-template matTabContent>
         <div class="tab-content">
-          
+
           <!-- Roles Header -->
           <div class="section-header">
             <div class="header-info">
@@ -307,7 +307,7 @@
 
           <!-- Roles Table -->
           <mat-card class="table-card">
-            <app-roles-data-table 
+            <app-roles-data-table
               [roles]="roles()"
               (editRole)="onEditRole($event)"
               (deleteRole)="onDeleteRole($event)">

@@ -8,7 +8,7 @@
       </h1>
       <p>System-wide metrics and insights</p>
     </div>
-    
+
     <div class="header-controls">
       <mat-form-field appearance="outline" class="time-range-selector">
         <mat-label>Time Range</mat-label>
@@ -19,7 +19,7 @@
           <mat-option value="90d">Last 90 Days</mat-option>
         </mat-select>
       </mat-form-field>
-      
+
       <button mat-raised-button color="primary" (click)="onRefreshData()" [disabled]="isLoading()">
         <mat-icon>refresh</mat-icon>
         Refresh
@@ -39,8 +39,8 @@
         <div class="metric-subtitle">
           {{ stats().activeUsers }} active users
         </div>
-        <mat-progress-bar 
-          mode="determinate" 
+        <mat-progress-bar
+          mode="determinate"
           [value]="getUsagePercentage(stats().activeUsers, stats().totalUsers)"
           class="usage-bar">
         </mat-progress-bar>
@@ -57,8 +57,8 @@
         <div class="metric-subtitle">
           {{ stats().activeCompanies }} active companies
         </div>
-        <mat-progress-bar 
-          mode="determinate" 
+        <mat-progress-bar
+          mode="determinate"
           [value]="getUsagePercentage(stats().activeCompanies, stats().totalCompanies)"
           class="usage-bar">
         </mat-progress-bar>
@@ -75,8 +75,8 @@
         <div class="metric-subtitle">
           Available templates
         </div>
-        <mat-progress-bar 
-          mode="determinate" 
+        <mat-progress-bar
+          mode="determinate"
           [value]="75"
           class="usage-bar">
         </mat-progress-bar>
@@ -93,8 +93,8 @@
         <div class="metric-subtitle">
           Total form submissions
         </div>
-        <mat-progress-bar 
-          mode="determinate" 
+        <mat-progress-bar
+          mode="determinate"
           [value]="85"
           class="usage-bar">
         </mat-progress-bar>
@@ -104,12 +104,12 @@
 
   <!-- Content Tabs -->
   <mat-tab-group class="analytics-tabs">
-    
+
     <!-- Overview Tab -->
     <mat-tab label="Overview">
       <div class="tab-content">
         <div class="charts-grid">
-          
+
           <!-- User Growth Chart -->
           <mat-card class="chart-card">
             <mat-card-header>
@@ -196,7 +196,7 @@
                     <div class="stat-label">Users</div>
                   </div>
                 </div>
-                
+
                 <div class="stat-item">
                   <mat-icon class="stat-icon">description</mat-icon>
                   <div class="stat-content">
@@ -204,7 +204,7 @@
                     <div class="stat-label">Templates</div>
                   </div>
                 </div>
-                
+
                 <div class="stat-item">
                   <mat-icon class="stat-icon">assignment</mat-icon>
                   <div class="stat-content">
@@ -213,7 +213,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="last-activity">
                 <mat-icon>access_time</mat-icon>
                 <span>Last activity: {{ formatDate(company.lastActivity) }}</span>
@@ -228,7 +228,7 @@
     <mat-tab label="Performance">
       <div class="tab-content">
         <div class="performance-grid">
-          
+
           <!-- System Performance -->
           <mat-card class="performance-card">
             <mat-card-header>
@@ -242,19 +242,19 @@
                   <div class="performance-value">245ms</div>
                   <mat-progress-bar mode="determinate" value="75" class="performance-bar good"></mat-progress-bar>
                 </div>
-                
+
                 <div class="performance-item">
                   <div class="performance-label">System Uptime</div>
                   <div class="performance-value">99.8%</div>
                   <mat-progress-bar mode="determinate" value="99.8" class="performance-bar excellent"></mat-progress-bar>
                 </div>
-                
+
                 <div class="performance-item">
                   <div class="performance-label">Error Rate</div>
                   <div class="performance-value">0.2%</div>
                   <mat-progress-bar mode="determinate" value="5" class="performance-bar excellent"></mat-progress-bar>
                 </div>
-                
+
                 <div class="performance-item">
                   <div class="performance-label">Storage Usage</div>
                   <div class="performance-value">68%</div>
@@ -279,7 +279,7 @@
                     <div class="trend-value">+24% this week</div>
                   </div>
                 </div>
-                
+
                 <div class="trend-item">
                   <mat-icon class="trend-icon positive">trending_up</mat-icon>
                   <div class="trend-content">
@@ -287,7 +287,7 @@
                     <div class="trend-value">+18% this week</div>
                   </div>
                 </div>
-                
+
                 <div class="trend-item">
                   <mat-icon class="trend-icon neutral">trending_flat</mat-icon>
                   <div class="trend-content">
@@ -295,7 +295,7 @@
                     <div class="trend-value">+2% this week</div>
                   </div>
                 </div>
-                
+
                 <div class="trend-item">
                   <mat-icon class="trend-icon positive">trending_up</mat-icon>
                   <div class="trend-content">

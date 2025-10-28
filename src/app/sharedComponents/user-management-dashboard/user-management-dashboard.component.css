@@ -239,12 +239,12 @@
   .dashboard-container {
     padding: 16px;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .form-row mat-form-field {
     width: 100%;
   }
@@ -254,26 +254,26 @@
   .dashboard-header h1 {
     font-size: 24px;
   }
-  
+
   .section-header {
     flex-direction: column;
     gap: 16px;
     align-items: stretch;
   }
-  
+
   .add-button {
     width: 100%;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .action-buttons {
     flex-direction: column;
     gap: 2px;
   }
-  
+
   .action-buttons button {
     width: 32px;
     height: 32px;
@@ -284,19 +284,19 @@
   .dashboard-container {
     padding: 8px;
   }
-  
+
   .tab-content {
     padding: 16px;
   }
-  
+
   .form-card mat-card-content {
     padding: 16px;
   }
-  
+
   .dashboard-header {
     padding: 16px;
   }
-  
+
   .dashboard-header h1 {
     font-size: 20px;
   }

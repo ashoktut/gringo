@@ -42,7 +42,7 @@ interface AdminTab {
 
       <div class="admin-content">
         @if (showTabs) {
-          <mat-tab-group 
+          <mat-tab-group
             class="admin-tabs"
             [selectedIndex]="selectedTabIndex"
             (selectedTabChange)="onTabChange($event)"
@@ -155,7 +155,7 @@ export class AdminLayoutComponent implements OnInit {
 
   private loadUserInfo() {
     this.currentUser = this.authBridge.getCurrentUser();
-    
+
     if (this.authBridge.isSuperAdmin()) {
       this.userRole = 'Super Admin';
       this.adminTabs = [...this.adminTabs, ...this.superAdminTabs];

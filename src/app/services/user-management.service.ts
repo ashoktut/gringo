@@ -421,4 +421,22 @@ export class UserManagementService {
     const currentUser = this.getCurrentUser();
     return currentUser?.role === role;
   }
+
+  /**
+   * Get users by role
+   */
+  getUsersByRole(role: string): Observable<User[]> {
+    return this.getUsers().pipe(
+      map(users => users.filter(user => user.role === role))
+    );
+  }
+
+  /**
+   * Get users by IDs
+   */
+  getUsersByIds(userIds: string[]): Observable<User[]> {
+    return this.getUsers().pipe(
+      map(users => users.filter(user => userIds.includes(user.id)))
+    );
+  }
 }

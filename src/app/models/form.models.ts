@@ -267,3 +267,30 @@ export interface ApprovalActionRequest {
   comments?: string;
   attachments?: File[];
 }
+
+/**
+ * Basic Form Interface for Workflow Engine
+ */
+export interface Form {
+  id: string;
+  title: string;
+  type?: string;
+  category?: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  fields?: FormField[];
+  status?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+/**
+ * Form Field Interface
+ */
+export interface FormField {
+  id: string;
+  name: string;
+  type: string;
+  value: any;
+  label?: string;
+  required?: boolean;
+}
