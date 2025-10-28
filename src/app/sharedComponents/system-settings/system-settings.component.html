@@ -1,0 +1,434 @@
+<div class="settings-container" [class.loading]="loading()">
+  <div class="settings-header">
+    <h1>
+      <mat-icon>settings</mat-icon>
+      System Settings
+    </h1>
+    <p>Configure system-wide settings and preferences</p>
+  </div>
+
+  <mat-tab-group class="settings-tabs" animationDuration="300ms">
+    <!-- General Settings -->
+    <mat-tab label="General">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>settings_applications</mat-icon>
+                General Configuration
+              </mat-card-title>
+              <mat-card-subtitle>Basic system settings and preferences</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <form [formGroup]="generalForm" class="settings-form">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Site Name</mat-label>
+                    <input matInput formControlName="siteName" placeholder="Enter site name">
+                    <mat-icon matSuffix>business</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Support Email</mat-label>
+                    <input matInput type="email" formControlName="supportEmail" placeholder="support@example.com">
+                    <mat-icon matSuffix>email</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Max File Size (MB)</mat-label>
+                    <input matInput type="number" formControlName="maxFileSize" min="1" max="100">
+                    <mat-icon matSuffix>file_upload</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Default Timezone</mat-label>
+                    <mat-select formControlName="defaultTimezone">
+                      @for (tz of timezones; track tz) {
+                        <mat-option [value]="tz">{{ tz }}</mat-option>
+                      }
+                    </mat-select>
+                    <mat-icon matSuffix>schedule</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <div class="file-types-section">
+                    <label class="section-label">Allowed File Types</label>
+                    <mat-chip-listbox class="file-types-chips">
+                      @for (type of settings().general.allowedFileTypes; track type) {
+                        <mat-chip-option>{{ type }}</mat-chip-option>
+                      }
+                    </mat-chip-listbox>
+                  </div>
+                </div>
+              </form>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-raised-button color="primary" 
+                      (click)="saveGeneralSettings()" 
+                      [disabled]="generalForm.invalid || loading()">
+                <mat-icon>save</mat-icon>
+                Save General Settings
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- Security Settings -->
+    <mat-tab label="Security">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>security</mat-icon>
+                Security Configuration
+              </mat-card-title>
+              <mat-card-subtitle>Authentication and security settings</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              @if (!isSuperAdmin) {
+                <div class="permission-warning">
+                  <mat-icon>warning</mat-icon>
+                  <span>Super Admin privileges required to modify security settings</span>
+                </div>
+              }
+
+              <form [formGroup]="securityForm" class="settings-form">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Session Timeout (minutes)</mat-label>
+                    <input matInput type="number" formControlName="sessionTimeout" 
+                           min="5" max="480" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>timer</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Minimum Password Length</mat-label>
+                    <input matInput type="number" formControlName="passwordMinLength" 
+                           min="6" max="20" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>lock</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row toggle-row">
+                  <mat-slide-toggle formControlName="requireMFA" [disabled]="!isSuperAdmin">
+                    <span class="toggle-label">
+                      <mat-icon>verified_user</mat-icon>
+                      Require Multi-Factor Authentication
+                    </span>
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="form-row toggle-row">
+                  <mat-slide-toggle formControlName="allowRegistration" [disabled]="!isSuperAdmin">
+                    <span class="toggle-label">
+                      <mat-icon>person_add</mat-icon>
+                      Allow User Registration
+                    </span>
+                  </mat-slide-toggle>
+                </div>
+
+                <div class="form-row toggle-row">
+                  <mat-slide-toggle formControlName="emailVerificationRequired" [disabled]="!isSuperAdmin">
+                    <span class="toggle-label">
+                      <mat-icon>mark_email_read</mat-icon>
+                      Require Email Verification
+                    </span>
+                  </mat-slide-toggle>
+                </div>
+              </form>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-raised-button color="primary" 
+                      (click)="saveSecuritySettings()" 
+                      [disabled]="securityForm.invalid || loading() || !isSuperAdmin">
+                <mat-icon>save</mat-icon>
+                Save Security Settings
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- Features Settings -->
+    <mat-tab label="Features">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>tune</mat-icon>
+                Feature Configuration
+              </mat-card-title>
+              <mat-card-subtitle>Enable or disable system features</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <form [formGroup]="featuresForm" class="settings-form">
+                <div class="features-grid">
+                  <div class="feature-item">
+                    <mat-slide-toggle formControlName="enablePdfGeneration">
+                      <span class="feature-label">
+                        <mat-icon>picture_as_pdf</mat-icon>
+                        <div class="feature-text">
+                          <span class="feature-title">PDF Generation</span>
+                          <span class="feature-description">Enable automated PDF document generation</span>
+                        </div>
+                      </span>
+                    </mat-slide-toggle>
+                  </div>
+
+                  <div class="feature-item">
+                    <mat-slide-toggle formControlName="enableDigitalSignature">
+                      <span class="feature-label">
+                        <mat-icon>draw</mat-icon>
+                        <div class="feature-text">
+                          <span class="feature-title">Digital Signature</span>
+                          <span class="feature-description">Allow users to sign documents digitally</span>
+                        </div>
+                      </span>
+                    </mat-slide-toggle>
+                  </div>
+
+                  <div class="feature-item">
+                    <mat-slide-toggle formControlName="enableAnalytics">
+                      <span class="feature-label">
+                        <mat-icon>analytics</mat-icon>
+                        <div class="feature-text">
+                          <span class="feature-title">Analytics & Reporting</span>
+                          <span class="feature-description">Track usage metrics and generate reports</span>
+                        </div>
+                      </span>
+                    </mat-slide-toggle>
+                  </div>
+
+                  <div class="feature-item">
+                    <mat-slide-toggle formControlName="enableNotifications">
+                      <span class="feature-label">
+                        <mat-icon>notifications</mat-icon>
+                        <div class="feature-text">
+                          <span class="feature-title">Email Notifications</span>
+                          <span class="feature-description">Send automated email notifications</span>
+                        </div>
+                      </span>
+                    </mat-slide-toggle>
+                  </div>
+
+                  <div class="feature-item">
+                    <mat-slide-toggle formControlName="enableApiAccess">
+                      <span class="feature-label">
+                        <mat-icon>api</mat-icon>
+                        <div class="feature-text">
+                          <span class="feature-title">API Access</span>
+                          <span class="feature-description">Enable REST API for external integrations</span>
+                        </div>
+                      </span>
+                    </mat-slide-toggle>
+                  </div>
+                </div>
+              </form>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-raised-button color="primary" 
+                      (click)="saveFeatureSettings()" 
+                      [disabled]="loading()">
+                <mat-icon>save</mat-icon>
+                Save Feature Settings
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- Branding Settings -->
+    <mat-tab label="Branding">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>palette</mat-icon>
+                Branding & Appearance
+              </mat-card-title>
+              <mat-card-subtitle>Customize the look and feel of your platform</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              <form [formGroup]="brandingForm" class="settings-form">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Primary Color</mat-label>
+                    <input matInput type="color" formControlName="primaryColor">
+                    <mat-icon matSuffix>color_lens</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>Secondary Color</mat-label>
+                    <input matInput type="color" formControlName="secondaryColor">
+                    <mat-icon matSuffix>format_color_fill</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Logo URL</mat-label>
+                    <input matInput formControlName="logoUrl" placeholder="https://example.com/logo.png">
+                    <mat-icon matSuffix>image</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Favicon URL</mat-label>
+                    <input matInput formControlName="faviconUrl" placeholder="https://example.com/favicon.ico">
+                    <mat-icon matSuffix>web</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Custom CSS</mat-label>
+                    <textarea matInput formControlName="customCss" rows="6" 
+                              placeholder="/* Custom CSS styles */"></textarea>
+                    <mat-icon matSuffix>code</mat-icon>
+                  </mat-form-field>
+                </div>
+              </form>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-raised-button color="primary" 
+                      (click)="saveBrandingSettings()" 
+                      [disabled]="brandingForm.invalid || loading()">
+                <mat-icon>save</mat-icon>
+                Save Branding
+              </button>
+              <button mat-button (click)="previewBranding()" [disabled]="loading()">
+                <mat-icon>preview</mat-icon>
+                Preview
+              </button>
+              <button mat-button color="warn" (click)="resetBranding()" [disabled]="loading()">
+                <mat-icon>refresh</mat-icon>
+                Reset to Defaults
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- Email Settings -->
+    <mat-tab label="Email">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>
+                <mat-icon>email</mat-icon>
+                Email Configuration
+              </mat-card-title>
+              <mat-card-subtitle>SMTP settings for outgoing emails</mat-card-subtitle>
+            </mat-card-header>
+            
+            <mat-card-content>
+              @if (!isSuperAdmin) {
+                <div class="permission-warning">
+                  <mat-icon>warning</mat-icon>
+                  <span>Super Admin privileges required to modify email settings</span>
+                </div>
+              }
+
+              <form [formGroup]="emailForm" class="settings-form">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Host</mat-label>
+                    <input matInput formControlName="smtpHost" 
+                           placeholder="smtp.gmail.com" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>dns</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Port</mat-label>
+                    <input matInput type="number" formControlName="smtpPort" 
+                           placeholder="587" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>router</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Username</mat-label>
+                    <input matInput formControlName="smtpUser" 
+                           placeholder="your-email@gmail.com" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>account_circle</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>SMTP Password</mat-label>
+                    <input matInput type="password" formControlName="smtpPassword" 
+                           placeholder="••••••••" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>lock</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>From Email</mat-label>
+                    <input matInput type="email" formControlName="fromEmail" 
+                           placeholder="noreply@example.com" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>send</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="half-width">
+                    <mat-label>From Name</mat-label>
+                    <input matInput formControlName="fromName" 
+                           placeholder="Your Platform Name" [readonly]="!isSuperAdmin">
+                    <mat-icon matSuffix>badge</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row toggle-row">
+                  <mat-slide-toggle formControlName="enableSSL" [disabled]="!isSuperAdmin">
+                    <span class="toggle-label">
+                      <mat-icon>enhanced_encryption</mat-icon>
+                      Enable SSL/TLS Encryption
+                    </span>
+                  </mat-slide-toggle>
+                </div>
+              </form>
+            </mat-card-content>
+
+            <mat-card-actions>
+              <button mat-raised-button color="primary" 
+                      (click)="saveEmailSettings()" 
+                      [disabled]="emailForm.invalid || loading() || !isSuperAdmin">
+                <mat-icon>save</mat-icon>
+                Save Email Settings
+              </button>
+              <button mat-button (click)="testEmailConnection()" 
+                      [disabled]="emailForm.invalid || loading() || !isSuperAdmin">
+                <mat-icon>send</mat-icon>
+                Test Connection
+              </button>
+            </mat-card-actions>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</div>

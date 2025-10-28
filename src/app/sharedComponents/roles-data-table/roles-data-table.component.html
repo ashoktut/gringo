@@ -1,0 +1,95 @@
+<div class="roles-table-container">
+  <mat-table [dataSource]="roles" class="roles-table">
+    
+    <!-- Name Column -->
+    <ng-container matColumnDef="name">
+      <mat-header-cell *matHeaderCellDef class="header-cell">
+        <mat-icon class="header-icon">security</mat-icon>
+        Role Name
+      </mat-header-cell>
+      <mat-cell *matCellDef="let role" class="name-cell">
+        <div class="role-name">
+          <strong>{{ role.name }}</strong>
+        </div>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Description Column -->
+    <ng-container matColumnDef="description">
+      <mat-header-cell *matHeaderCellDef class="header-cell">
+        <mat-icon class="header-icon">description</mat-icon>
+        Description
+      </mat-header-cell>
+      <mat-cell *matCellDef="let role" class="description-cell">
+        <span class="description-text">
+          {{ role.description || 'No description provided' }}
+        </span>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Status Column -->
+    <ng-container matColumnDef="status">
+      <mat-header-cell *matHeaderCellDef class="header-cell">
+        <mat-icon class="header-icon">toggle_on</mat-icon>
+        Status
+      </mat-header-cell>
+      <mat-cell *matCellDef="let role" class="status-cell">
+        <mat-chip-set>
+          <mat-chip 
+            [class]="role.isActive ? 'active-chip' : 'inactive-chip'"
+            [disabled]="!role.isActive">
+            <mat-icon class="chip-icon">
+              {{ role.isActive ? 'check_circle' : 'cancel' }}
+            </mat-icon>
+            {{ role.isActive ? 'Active' : 'Inactive' }}
+          </mat-chip>
+        </mat-chip-set>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Actions Column -->
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef class="header-cell actions-header">
+        <mat-icon class="header-icon">settings</mat-icon>
+        Actions
+      </mat-header-cell>
+      <mat-cell *matCellDef="let role" class="actions-cell">
+        <div class="action-buttons">
+          <button 
+            mat-icon-button 
+            color="primary"
+            (click)="onEdit(role)"
+            matTooltip="Edit Role"
+            class="action-button edit-button">
+            <mat-icon>edit</mat-icon>
+          </button>
+          
+          <button 
+            mat-icon-button 
+            color="warn"
+            (click)="onDelete(role)"
+            matTooltip="Delete Role"
+            class="action-button delete-button"
+            [disabled]="!role.isActive">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </mat-cell>
+    </ng-container>
+
+    <!-- Header and Row Definitions -->
+    <mat-header-row *matHeaderRowDef="displayedColumns" class="table-header"></mat-header-row>
+    <mat-row 
+      *matRowDef="let row; columns: displayedColumns;" 
+      class="table-row"
+      [class.inactive-row]="!row.isActive">
+    </mat-row>
+  </mat-table>
+
+  <!-- Empty State -->
+  <div *ngIf="roles.length === 0" class="empty-state">
+    <mat-icon class="empty-icon">security</mat-icon>
+    <h3>No Roles Found</h3>
+    <p>No roles have been configured yet. Add roles to manage user permissions.</p>
+  </div>
+</div>

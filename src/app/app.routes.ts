@@ -21,6 +21,11 @@ import { FormSubmissionComponent } from './pages/user/form-submission/form-submi
 import { SubmissionApprovalComponent } from './pages/user/submission-approval/submission-approval.component';
 import { PdfTemplateEditorComponent } from './pages/admin/pdf-template-editor/pdf-template-editor.component';
 
+// Admin Dashboard Components
+import { UserManagementDashboardComponent } from './sharedComponents/user-management-dashboard/user-management-dashboard.component';
+import { AnalyticsDashboardComponent } from './sharedComponents/analytics-dashboard/analytics-dashboard.component';
+import { SystemSettingsComponent } from './sharedComponents/system-settings/system-settings.component';
+
 // Guards
 import { authGuard } from './guards/auth.guard';
 import { companyAdminGuard, superAdminGuard } from './guards/role.guard';
@@ -74,6 +79,48 @@ export const routes: Routes = [
   { path: 'storage-management', component: StorageManagementComponent },
   { path: 'form-builder', component: FormBuilderComponent },
   { path: 'config-management', component: ConfigManagementComponent },
+
+  // ==================== Admin Dashboard Routes ====================
+
+  // User Management Dashboard - Super Admin and Company Admin
+  {
+    path: 'admin/users',
+    component: UserManagementDashboardComponent,
+    canActivate: [authGuard, companyAdminGuard]
+  },
+
+  // Analytics Dashboard - Super Admin and Company Admin
+  {
+    path: 'admin/analytics',
+    component: AnalyticsDashboardComponent,
+    canActivate: [authGuard, companyAdminGuard]
+  },
+
+  // System Settings - Super Admin and Company Admin
+  {
+    path: 'admin/settings',
+    component: SystemSettingsComponent,
+    canActivate: [authGuard, companyAdminGuard]
+  },
+
+  // Super Admin only routes
+  {
+    path: 'super-admin/users',
+    component: UserManagementDashboardComponent,
+    canActivate: [authGuard, superAdminGuard]
+  },
+
+  {
+    path: 'super-admin/analytics',
+    component: AnalyticsDashboardComponent,
+    canActivate: [authGuard, superAdminGuard]
+  },
+
+  {
+    path: 'super-admin/settings',
+    component: SystemSettingsComponent,
+    canActivate: [authGuard, superAdminGuard]
+  },
 
   // ==================== Enhanced Forms Management System Routes ====================
 

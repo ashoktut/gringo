@@ -100,7 +100,7 @@
           <mat-label>Search Users</mat-label>
           <input matInput
                  [value]="searchTerm()"
-                 (input)="onSearchChange($event.target.value || '')"
+                 (input)="onSearchChange($any($event.target).value || '')"
                  placeholder="Search by name, email, or role...">
           <mat-icon matSuffix>search</mat-icon>
         </mat-form-field>

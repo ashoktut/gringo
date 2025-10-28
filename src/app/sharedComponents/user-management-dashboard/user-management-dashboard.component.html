@@ -1,0 +1,320 @@
+<div class="dashboard-container">
+  <div class="dashboard-header">
+    <h1>
+      <mat-icon>admin_panel_settings</mat-icon>
+      User Management Dashboard
+    </h1>
+    <p>Manage users, companies, and roles across the system</p>
+  </div>
+
+  <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="management-tabs">
+    
+    <!-- Users Tab -->
+    <mat-tab label="Users">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          
+          <!-- Users Header -->
+          <div class="section-header">
+            <div class="header-info">
+              <h2>User Management</h2>
+              <span class="user-count">{{ users().length }} total users</span>
+            </div>
+            <button mat-raised-button color="primary" class="add-button">
+              <mat-icon>person_add</mat-icon>
+              Add User
+            </button>
+          </div>
+
+          <!-- Create User Form -->
+          <mat-card class="form-card">
+            <mat-card-header>
+              <mat-card-title>Create New User</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="userForm" (ngSubmit)="onCreateUser()" class="user-form">
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Full Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Enter full name">
+                    <mat-icon matSuffix>person</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Email Address</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="user@company.com">
+                    <mat-icon matSuffix>email</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Role</mat-label>
+                    <mat-select formControlName="role">
+                      <mat-option value="user">User</mat-option>
+                      <mat-option value="company-admin">Company Admin</mat-option>
+                      <mat-option value="super-admin">Super Admin</mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>security</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Company</mat-label>
+                    <mat-select formControlName="companyId">
+                      <mat-option value="">No Company</mat-option>
+                      <mat-option *ngFor="let company of companies()" [value]="company.id">
+                        {{ company.name }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-icon matSuffix>business</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" mat-raised-button color="primary" [disabled]="userForm.invalid">
+                    <mat-icon>save</mat-icon>
+                    Create User
+                  </button>
+                  <button type="button" mat-button (click)="userForm.reset()">
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Users Table -->
+          <mat-card class="table-card">
+            <mat-table [dataSource]="users()" class="users-table">
+              
+              <!-- Name Column -->
+              <ng-container matColumnDef="name">
+                <mat-header-cell *matHeaderCellDef>Name</mat-header-cell>
+                <mat-cell *matCellDef="let user">
+                  <div class="user-info">
+                    <strong>{{ user.name }}</strong>
+                  </div>
+                </mat-cell>
+              </ng-container>
+
+              <!-- Email Column -->
+              <ng-container matColumnDef="email">
+                <mat-header-cell *matHeaderCellDef>Email</mat-header-cell>
+                <mat-cell *matCellDef="let user">{{ user.email }}</mat-cell>
+              </ng-container>
+
+              <!-- Role Column -->
+              <ng-container matColumnDef="role">
+                <mat-header-cell *matHeaderCellDef>Role</mat-header-cell>
+                <mat-cell *matCellDef="let user">
+                  <mat-chip [color]="getRoleColor(user.role)">
+                    {{ user.role | titlecase }}
+                  </mat-chip>
+                </mat-cell>
+              </ng-container>
+
+              <!-- Company Column -->
+              <ng-container matColumnDef="company">
+                <mat-header-cell *matHeaderCellDef>Company</mat-header-cell>
+                <mat-cell *matCellDef="let user">
+                  {{ getCompanyName(user.companyId) }}
+                </mat-cell>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                <mat-cell *matCellDef="let user">
+                  <mat-chip [class]="user.isActive ? 'status-active' : 'status-inactive'">
+                    {{ user.isActive ? 'Active' : 'Inactive' }}
+                  </mat-chip>
+                </mat-cell>
+              </ng-container>
+
+              <!-- Last Login Column -->
+              <ng-container matColumnDef="lastLogin">
+                <mat-header-cell *matHeaderCellDef>Last Login</mat-header-cell>
+                <mat-cell *matCellDef="let user">
+                  {{ formatDate(user.lastLoginAt) }}
+                </mat-cell>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                <mat-cell *matCellDef="let user">
+                  <div class="action-buttons">
+                    <button mat-icon-button (click)="onEditUser(user)" matTooltip="Edit User">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="onToggleUserStatus(user)" 
+                            [matTooltip]="user.isActive ? 'Deactivate' : 'Activate'">
+                      <mat-icon>{{ user.isActive ? 'person_off' : 'person' }}</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="onDeleteUser(user)" matTooltip="Delete User">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="userDisplayedColumns"></mat-header-row>
+              <mat-row *matRowDef="let row; columns: userDisplayedColumns;"></mat-row>
+            </mat-table>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- Companies Tab -->
+    <mat-tab label="Companies">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          
+          <!-- Companies Header -->
+          <div class="section-header">
+            <div class="header-info">
+              <h2>Company Management</h2>
+              <span class="company-count">{{ companies().length }} total companies</span>
+            </div>
+            <button mat-raised-button color="primary" class="add-button">
+              <mat-icon>business</mat-icon>
+              Add Company
+            </button>
+          </div>
+
+          <!-- Create Company Form -->
+          <mat-card class="form-card">
+            <mat-card-header>
+              <mat-card-title>Create New Company</mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+              <form [formGroup]="companyForm" (ngSubmit)="onCreateCompany()" class="company-form">
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Company Name</mat-label>
+                    <input matInput formControlName="name" placeholder="Enter company name">
+                    <mat-icon matSuffix>business</mat-icon>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Company Code</mat-label>
+                    <input matInput formControlName="code" placeholder="COMPANY_CODE">
+                    <mat-icon matSuffix>code</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline">
+                    <mat-label>Industry</mat-label>
+                    <input matInput formControlName="industry" placeholder="e.g., Construction, Technology">
+                    <mat-icon matSuffix>category</mat-icon>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                  <button type="submit" mat-raised-button color="primary" [disabled]="companyForm.invalid">
+                    <mat-icon>save</mat-icon>
+                    Create Company
+                  </button>
+                  <button type="button" mat-button (click)="companyForm.reset()">
+                    Reset
+                  </button>
+                </div>
+              </form>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- Companies Table -->
+          <mat-card class="table-card">
+            <mat-table [dataSource]="companies()" class="companies-table">
+              
+              <!-- Name Column -->
+              <ng-container matColumnDef="name">
+                <mat-header-cell *matHeaderCellDef>Company Name</mat-header-cell>
+                <mat-cell *matCellDef="let company">
+                  <strong>{{ company.name }}</strong>
+                </mat-cell>
+              </ng-container>
+
+              <!-- Code Column -->
+              <ng-container matColumnDef="code">
+                <mat-header-cell *matHeaderCellDef>Code</mat-header-cell>
+                <mat-cell *matCellDef="let company">
+                  <code class="company-code">{{ company.code }}</code>
+                </mat-cell>
+              </ng-container>
+
+              <!-- User Count Column -->
+              <ng-container matColumnDef="userCount">
+                <mat-header-cell *matHeaderCellDef>Users</mat-header-cell>
+                <mat-cell *matCellDef="let company">
+                  <mat-chip class="user-count-chip">
+                    {{ company.userCount || 0 }} users
+                  </mat-chip>
+                </mat-cell>
+              </ng-container>
+
+              <!-- Status Column -->
+              <ng-container matColumnDef="status">
+                <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+                <mat-cell *matCellDef="let company">
+                  <mat-chip [class]="company.active ? 'status-active' : 'status-inactive'">
+                    {{ company.active ? 'Active' : 'Inactive' }}
+                  </mat-chip>
+                </mat-cell>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <mat-header-cell *matHeaderCellDef>Actions</mat-header-cell>
+                <mat-cell *matCellDef="let company">
+                  <div class="action-buttons">
+                    <button mat-icon-button (click)="onEditCompany(company)" matTooltip="Edit Company">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="onDeleteCompany(company)" matTooltip="Delete Company">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </mat-cell>
+              </ng-container>
+
+              <mat-header-row *matHeaderRowDef="companyDisplayedColumns"></mat-header-row>
+              <mat-row *matRowDef="let row; columns: companyDisplayedColumns;"></mat-row>
+            </mat-table>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+
+    <!-- Roles Tab -->
+    <mat-tab label="Roles">
+      <ng-template matTabContent>
+        <div class="tab-content">
+          
+          <!-- Roles Header -->
+          <div class="section-header">
+            <div class="header-info">
+              <h2>Role Management</h2>
+              <span class="role-count">{{ roles().length }} total roles</span>
+            </div>
+            <button mat-raised-button color="primary" class="add-button">
+              <mat-icon>security</mat-icon>
+              Add Role
+            </button>
+          </div>
+
+          <!-- Roles Table -->
+          <mat-card class="table-card">
+            <app-roles-data-table 
+              [roles]="roles()"
+              (editRole)="onEditRole($event)"
+              (deleteRole)="onDeleteRole($event)">
+            </app-roles-data-table>
+          </mat-card>
+        </div>
+      </ng-template>
+    </mat-tab>
+  </mat-tab-group>
+</div>

@@ -17,8 +17,8 @@ interface Role {
   selector: 'app-roles-data-table',
   standalone: true,
   imports: [CommonModule, MatTableModule, MatIconModule, MatButtonModule, MatTooltipModule, MatChipsModule],
-  template: '<div></div>',
-  styles: [''],
+  templateUrl: './roles-data-table.component.html',
+  styleUrl: './roles-data-table.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class RolesDataTableComponent {

@@ -88,7 +88,7 @@
           <input
             matInput
             placeholder="Type to search..."
-            (input)="onSearch($event.target.value || '')"
+            (input)="onSearch($any($event.target).value || '')"
             [value]="searchQuery()"
           />
           <mat-icon matSuffix>search</mat-icon>
