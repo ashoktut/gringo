@@ -1,6 +1,19 @@
-<h2>Register</h2>
+<div class="register-container">
+  <h2>Register</h2>
 
-<form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
+  @if (errorMessage()) {
+    <div class="error-message">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (successMessage()) {
+    <div class="success-message">
+      {{ successMessage() }}
+    </div>
+  }
+
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="register-form">
   <mat-form-field appearance="fill" class="full-width">
     <mat-label>Username</mat-label>
     <input matInput type="text" formControlName="username" required />
@@ -54,14 +67,27 @@
       </mat-error>
     }
   </mat-form-field>
-</form>
 
-<div class="button-group">
-  <button mat-raised-button color="accent" type="submit">Register</button>
-  <br />
+  <div class="button-group">
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="registerForm.invalid || isLoading()"
+      class="register-button">
+      @if (isLoading()) {
+        <mat-spinner diameter="20"></mat-spinner>
+        <span>Registering...</span>
+      } @else {
+        <span>Register</span>
+      }
+    </button>
 
-  <small
-    >Already have an account?
-    <button mat-button color="primary" type="button" [routerLink]="['/login']">Login here</button>
-  </small>
+    <div class="links">
+      <small>Already have an account?
+        <a [routerLink]="['/auth/login']">Login here</a>
+      </small>
+    </div>
+  </div>
+  </form>
 </div>

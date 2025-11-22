@@ -189,6 +189,85 @@ export class FormConfigService {
   }
 
   /**
+   * Get configurations by company ID
+   */
+  getConfigurationsByCompany(companyId: string): Observable<FormConfiguration[]> {
+    return this.getCompanyConfigurations(companyId);
+  }
+
+  /**
+   * Get default configuration for a form type
+   */
+  getDefaultConfiguration(formType: string): Observable<FormConfiguration | null> {
+    return this.formConfigsSubject.pipe(
+      map(configs => configs.find(c => 
+        c.formType === formType && 
+        c.isDefault && 
+        c.isActive
+      ) || null)
+    );
+  }
+
+  /**
+   * Save configuration (alias for saveFormConfig)
+   */
+  saveConfiguration(config: FormConfiguration): Observable<FormConfiguration> {
+    return this.saveFormConfig(config);
+  }
+
+  /**
+   * Validate configuration
+   */
+  validateConfiguration(config: FormConfiguration): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!config.name?.trim()) {
+      errors.push('Configuration name is required');
+    }
+
+    if (!config.formType?.trim()) {
+      errors.push('Form type is required');
+    }
+
+    if (!config.sections || config.sections.length === 0) {
+      errors.push('At least one section is required');
+    }
+
+    // Validate sections
+    config.sections?.forEach((section, sectionIndex) => {
+      if (!section.title?.trim()) {
+        errors.push(`Section ${sectionIndex + 1}: Title is required`);
+      }
+
+      if (!section.fields || section.fields.length === 0) {
+        errors.push(`Section ${sectionIndex + 1}: At least one field is required`);
+      }
+
+      // Validate fields
+      section.fields?.forEach((field, fieldIndex) => {
+        if (!field.name?.trim()) {
+          errors.push(`Section ${sectionIndex + 1}, Field ${fieldIndex + 1}: Field name is required`);
+        }
+
+        if (!field.type?.trim()) {
+          errors.push(`Section ${sectionIndex + 1}, Field ${fieldIndex + 1}: Field type is required`);
+        }
+
+        // Check for duplicate field names
+        const duplicateFields = config.sections
+          .flatMap(s => s.fields)
+          .filter(f => f.name === field.name);
+        
+        if (duplicateFields.length > 1) {
+          errors.push(`Duplicate field name '${field.name}' found`);
+        }
+      });
+    });
+
+    return { valid: errors.length === 0, errors };
+  }
+
+  /**
    * Set configuration as default for its form type
    */
   setAsDefault(configId: string): Observable<FormConfiguration> {
@@ -678,6 +757,123 @@ export class FormConfigService {
       catchError(error => {
         console.error('❌ Failed to bulk delete configurations:', error);
         return of(false);
+      })
+    );
+  }
+
+  /**
+   * Import configuration from file
+   */
+  importConfiguration(file: File): Observable<FormConfiguration> {
+    return new Observable(observer => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        try {
+          const configData = JSON.parse(event.target?.result as string);
+          
+          // Validate imported data
+          const validation = this.validateConfiguration(configData);
+          if (!validation.valid) {
+            observer.error(new Error(`Invalid configuration: ${validation.errors.join(', ')}`));
+            return;
+          }
+
+          // Generate new ID and update metadata
+          const importedConfig: FormConfiguration = {
+            ...configData,
+            id: this.generateConfigId(),
+            name: `${configData.name} (Imported)`,
+            isDefault: false, // Imported configs are not default
+            metadata: {
+              ...configData.metadata,
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              createdBy: 'import'
+            }
+          };
+
+          // Save the imported configuration
+          this.saveFormConfig(importedConfig).subscribe({
+            next: (savedConfig) => {
+              observer.next(savedConfig);
+              observer.complete();
+            },
+            error: (error) => observer.error(error)
+          });
+          
+        } catch (error) {
+          observer.error(new Error('Invalid JSON file'));
+        }
+      };
+      
+      reader.onerror = () => {
+        observer.error(new Error('Failed to read file'));
+      };
+      
+      reader.readAsText(file);
+    });
+  }
+
+  /**
+   * Export configuration to JSON file
+   */
+  exportConfiguration(configId: string): Observable<Blob> {
+    return this.formConfigsSubject.pipe(
+      map(configs => {
+        const config = configs.find(c => c.id === configId);
+        if (!config) {
+          throw new Error('Configuration not found');
+        }
+
+        const exportData = this.prepareForStorage(config);
+        const jsonString = JSON.stringify(exportData, null, 2);
+        return new Blob([jsonString], { type: 'application/json' });
+      })
+    );
+  }
+
+  /**
+   * Clone/duplicate configuration
+   */
+  cloneConfiguration(configId: string, newName?: string): Observable<FormConfiguration> {
+    const originalConfig = this.formConfigs.find(c => c.id === configId);
+    if (!originalConfig) {
+      throw new Error('Configuration not found');
+    }
+
+    const clonedConfig: FormConfiguration = {
+      ...JSON.parse(JSON.stringify(originalConfig)), // Deep clone
+      id: this.generateConfigId(),
+      name: newName || `${originalConfig.name} (Copy)`,
+      isDefault: false,
+      metadata: {
+        ...originalConfig.metadata,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: 'clone'
+      }
+    };
+
+    return this.saveFormConfig(clonedConfig);
+  }
+
+  /**
+   * Get form types with their configurations
+   */
+  getFormTypesWithConfigs(): Observable<{ [formType: string]: FormConfiguration[] }> {
+    return this.formConfigsSubject.pipe(
+      map(configs => {
+        const grouped: { [formType: string]: FormConfiguration[] } = {};
+        
+        configs.forEach(config => {
+          if (!grouped[config.formType]) {
+            grouped[config.formType] = [];
+          }
+          grouped[config.formType].push(config);
+        });
+        
+        return grouped;
       })
     );
   }

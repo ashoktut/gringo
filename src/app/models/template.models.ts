@@ -102,3 +102,113 @@ export interface RfqProcessingResult {
   googleDriveUrl?: string;
   serverPath?: string;
 }
+
+// Flow Form Designer Interfaces
+export interface FlowNode {
+  id: string;
+  type: FlowNodeType;
+  label: string;
+  position: NodePosition;
+  properties: NodeProperties;
+  connections: NodeConnections;
+  isSelected?: boolean;
+  isValid?: boolean;
+}
+
+export interface NodePosition {
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+}
+
+export interface NodeConnections {
+  inputs: string[];
+  outputs: string[];
+  dependencies: string[];
+}
+
+export interface NodeProperties {
+  fieldType?: string;
+  label?: string;
+  required?: boolean;
+  validation?: FlowValidationRule[];
+  options?: OptionValue[];
+  placeholder?: string;
+  description?: string;
+  [key: string]: any;
+}
+
+export interface FlowValidationRule {
+  type: string;
+  value?: any;
+  message?: string;
+}
+
+export interface OptionValue {
+  value: any;
+  label: string;
+}
+
+export type FlowNodeType = 'input' | 'logic' | 'validation' | 'output' | 'section';
+
+export interface FlowConnection {
+  id: string;
+  sourceNodeId: string;
+  targetNodeId: string;
+  sourcePort: string;
+  targetPort: string;
+}
+
+export interface FlowLogicRule {
+  id: string;
+  type: 'condition' | 'calculation' | 'validation';
+  conditions: RuleCondition[];
+  actions: RuleAction[];
+  enabled: boolean;
+}
+
+export interface RuleCondition {
+  field: string;
+  operator: 'equals' | 'not_equals' | 'contains' | 'greater_than' | 'less_than' | 'is_empty' | 'is_not_empty';
+  value: any;
+  logicalOperator?: 'AND' | 'OR';
+}
+
+export interface RuleAction {
+  type: 'show' | 'hide' | 'enable' | 'disable' | 'set_value' | 'set_required' | 'validate' | 'calculate';
+  targetField?: string;
+  value?: any;
+  message?: string;
+  formula?: string;
+}
+
+export interface FlowCompiledForm {
+  id: string;
+  name: string;
+  sections: FlowFormSection[];
+  metadata: {
+    createdAt: Date;
+    compiledFrom: 'flow-designer';
+    nodeCount: number;
+    connectionCount: number;
+  };
+}
+
+export interface FlowFormSection {
+  title: string;
+  description?: string;
+  fields: FlowFormField[];
+  expanded?: boolean;
+}
+
+export interface FlowFormField {
+  name: string;
+  label: string;
+  type: string;
+  required: boolean;
+  placeholder?: string;
+  options?: OptionValue[];
+  validation?: any[];
+  conditional?: any;
+}

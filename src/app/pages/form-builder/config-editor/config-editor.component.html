@@ -1,0 +1,344 @@
+<div class="config-editor-container">
+  <!-- Header -->
+  <mat-card class="editor-header">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>settings</mat-icon>
+        {{ isEditing() ? 'Edit' : 'Create' }} Configuration
+      </mat-card-title>
+      <mat-card-subtitle>
+        {{ isEditing() ? 'Modify existing configuration' : 'Create a new form configuration' }}
+      </mat-card-subtitle>
+    </mat-card-header>
+    
+    <mat-card-actions align="end">
+      <button mat-button (click)="cancel()">
+        <mat-icon>cancel</mat-icon>
+        Cancel
+      </button>
+      <button mat-button (click)="previewConfiguration()" [disabled]="!configuration()">
+        <mat-icon>visibility</mat-icon>
+        Preview
+      </button>
+      <button mat-button (click)="exportConfiguration()" [disabled]="!configuration()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+      <button mat-raised-button color="primary" (click)="save()">
+        <mat-icon>save</mat-icon>
+        Save Configuration
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <!-- Validation Errors -->
+  <mat-card *ngIf="validationErrors().length > 0" class="error-card">
+    <mat-card-content>
+      <div class="error-header">
+        <mat-icon color="warn">error</mat-icon>
+        <span>Configuration Errors</span>
+      </div>
+      <ul class="error-list">
+        <li *ngFor="let error of validationErrors()">{{ error }}</li>
+      </ul>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Loading configuration...</p>
+  </div>
+
+  <!-- Main Editor -->
+  <div *ngIf="!isLoading() && configuration()" class="editor-content">
+    
+    <!-- Configuration Details Tab -->
+    <mat-tab-group>
+      <!-- Basic Info Tab -->
+      <mat-tab label="Basic Information">
+        <div class="tab-content">
+          <form [formGroup]="configForm" class="config-form">
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Configuration Name</mat-label>
+                <input matInput formControlName="name" placeholder="Enter configuration name">
+                <mat-error *ngIf="configForm.get('name')?.errors?.['required']">
+                  Name is required
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>Form Type</mat-label>
+                <mat-select formControlName="formType">
+                  <mat-option value="rfq">Request for Quote</mat-option>
+                  <mat-option value="rqr">Request for Revision</mat-option>
+                  <mat-option value="contact">Contact Form</mat-option>
+                  <mat-option value="custom">Custom Form</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field class="form-field">
+                <mat-label>Company ID (Optional)</mat-label>
+                <input matInput formControlName="companyId" placeholder="For company-specific forms">
+              </mat-form-field>
+
+              <mat-form-field class="form-field">
+                <mat-label>Industry</mat-label>
+                <mat-select formControlName="industry">
+                  <mat-option value="construction">Construction</mat-option>
+                  <mat-option value="roofing">Roofing</mat-option>
+                  <mat-option value="general">General</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field class="form-field full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="3" 
+                       placeholder="Describe the purpose of this form configuration"></textarea>
+            </mat-form-field>
+
+            <div class="checkbox-row">
+              <mat-checkbox formControlName="isDefault">
+                Set as default configuration for this form type
+              </mat-checkbox>
+              <mat-checkbox formControlName="isActive">
+                Active (available for use)
+              </mat-checkbox>
+            </div>
+          </form>
+        </div>
+      </mat-tab>
+
+      <!-- Sections & Fields Tab -->
+      <mat-tab label="Sections & Fields">
+        <div class="tab-content">
+          
+          <!-- Sections Header -->
+          <div class="sections-header">
+            <h3>Form Sections</h3>
+            <button mat-raised-button color="primary" (click)="addSection()">
+              <mat-icon>add</mat-icon>
+              Add Section
+            </button>
+          </div>
+
+          <!-- Sections List -->
+          <div class="sections-container">
+            <mat-expansion-panel 
+              *ngFor="let section of configuration()?.sections; let sectionIndex = index; trackBy: trackBySection"
+              class="section-panel"
+              [expanded]="sectionIndex === 0">
+              
+              <!-- Section Header -->
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>view_module</mat-icon>
+                  {{ section.title || 'Untitled Section' }}
+                </mat-panel-title>
+                <mat-panel-description>
+                  {{ section.fields?.length || 0 }} fields
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <!-- Section Content -->
+              <div class="section-content">
+                
+                <!-- Section Properties -->
+                <div class="section-properties">
+                  <mat-form-field class="section-field">
+                    <mat-label>Section Title</mat-label>
+                    <input matInput [(ngModel)]="section.title" placeholder="Enter section title">
+                  </mat-form-field>
+                  
+                  <mat-form-field class="section-field">
+                    <mat-label>Description</mat-label>
+                    <input matInput [(ngModel)]="section.description" placeholder="Optional description">
+                  </mat-form-field>
+                  
+                  <mat-checkbox [(ngModel)]="section.expanded">
+                    Expanded by default
+                  </mat-checkbox>
+                </div>
+
+                <!-- Section Actions -->
+                <div class="section-actions">
+                  <button mat-icon-button (click)="moveSectionUp(sectionIndex)" 
+                          [disabled]="sectionIndex === 0" matTooltip="Move Up">
+                    <mat-icon>keyboard_arrow_up</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="moveSectionDown(sectionIndex)" 
+                          [disabled]="sectionIndex === (configuration()?.sections.length || 0) - 1" 
+                          matTooltip="Move Down">
+                    <mat-icon>keyboard_arrow_down</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" (click)="removeSection(sectionIndex)" 
+                          [disabled]="(configuration()?.sections.length || 0) <= 1" 
+                          matTooltip="Delete Section">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+
+                <!-- Fields Header -->
+                <div class="fields-header">
+                  <h4>Fields</h4>
+                  <button mat-button (click)="addField(sectionIndex)">
+                    <mat-icon>add</mat-icon>
+                    Add Field
+                  </button>
+                </div>
+
+                <!-- Fields List -->
+                <div class="fields-container">
+                  <mat-card 
+                    *ngFor="let field of section.fields; let fieldIndex = index; trackBy: trackByField"
+                    class="field-card">
+                    
+                    <!-- Field Header -->
+                    <mat-card-header class="field-header">
+                      <div mat-card-avatar class="field-avatar">
+                        <mat-icon>{{ getFieldTypeIcon(field.type) }}</mat-icon>
+                      </div>
+                      <mat-card-title>{{ field.label || 'Untitled Field' }}</mat-card-title>
+                      <mat-card-subtitle>{{ field.type }} field</mat-card-subtitle>
+                      
+                      <!-- Field Actions -->
+                      <div class="field-actions">
+                        <button mat-icon-button (click)="moveFieldUp(sectionIndex, fieldIndex)" 
+                                [disabled]="fieldIndex === 0" matTooltip="Move Up">
+                          <mat-icon>keyboard_arrow_up</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="moveFieldDown(sectionIndex, fieldIndex)" 
+                                [disabled]="fieldIndex === section.fields.length - 1" 
+                                matTooltip="Move Down">
+                          <mat-icon>keyboard_arrow_down</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" (click)="removeField(sectionIndex, fieldIndex)" 
+                                matTooltip="Delete Field">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
+                    </mat-card-header>
+
+                    <!-- Field Properties -->
+                    <mat-card-content class="field-content">
+                      <div class="field-properties">
+                        
+                        <!-- Basic Properties -->
+                        <div class="property-row">
+                          <mat-form-field class="property-field">
+                            <mat-label>Field Name</mat-label>
+                            <input matInput [(ngModel)]="field.name" placeholder="fieldName">
+                          </mat-form-field>
+                          
+                          <mat-form-field class="property-field">
+                            <mat-label>Label</mat-label>
+                            <input matInput [(ngModel)]="field.label" placeholder="Display Label">
+                          </mat-form-field>
+                          
+                          <mat-form-field class="property-field">
+                            <mat-label>Field Type</mat-label>
+                            <mat-select [(ngModel)]="field.type">
+                              <mat-option *ngFor="let type of fieldTypes" [value]="type.value">
+                                <mat-icon class="option-icon">{{ type.icon }}</mat-icon>
+                                {{ type.label }}
+                              </mat-option>
+                            </mat-select>
+                          </mat-form-field>
+                        </div>
+
+                        <!-- Additional Properties -->
+                        <div class="property-row">
+                          <mat-form-field class="property-field">
+                            <mat-label>Placeholder</mat-label>
+                            <input matInput [(ngModel)]="field.placeholder" placeholder="Placeholder text">
+                          </mat-form-field>
+                          
+                          <div class="checkbox-group">
+                            <mat-checkbox [(ngModel)]="field.required">Required</mat-checkbox>
+                            <mat-checkbox [(ngModel)]="field.clearable">Clearable</mat-checkbox>
+                            <mat-checkbox [(ngModel)]="field.multiple" 
+                                         *ngIf="field.type === 'select'">Multiple</mat-checkbox>
+                          </div>
+                        </div>
+
+                        <!-- Options for select/radio fields -->
+                        <div *ngIf="field.type === 'select' || field.type === 'radio'" class="options-section">
+                          <div class="options-header">
+                            <h5>Options</h5>
+                            <button mat-button (click)="addFieldOption(sectionIndex, fieldIndex)">
+                              <mat-icon>add</mat-icon>
+                              Add Option
+                            </button>
+                          </div>
+                          
+                          <div class="options-list">
+                            <div *ngFor="let option of field.options; let optionIndex = index; trackBy: trackByOption" 
+                                 class="option-item">
+                              <mat-form-field class="option-field">
+                                <mat-label>Value</mat-label>
+                                <input matInput [(ngModel)]="option.value" placeholder="option-value">
+                              </mat-form-field>
+                              
+                              <mat-form-field class="option-field">
+                                <mat-label>Label</mat-label>
+                                <input matInput [(ngModel)]="option.label" placeholder="Display Label">
+                              </mat-form-field>
+                              
+                              <button mat-icon-button color="warn" 
+                                      (click)="removeFieldOption(sectionIndex, fieldIndex, optionIndex)"
+                                      matTooltip="Remove Option">
+                                <mat-icon>delete</mat-icon>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Conditional Logic -->
+                        <div class="conditional-section" *ngIf="field.conditional">
+                          <h5>Conditional Display</h5>
+                          <div class="conditional-properties">
+                            <mat-form-field class="property-field">
+                              <mat-label>Depends On Field</mat-label>
+                              <input matInput [(ngModel)]="field.conditional.dependsOn" 
+                                     placeholder="Field name this depends on">
+                            </mat-form-field>
+                            
+                            <mat-form-field class="property-field">
+                              <mat-label>Show When Value</mat-label>
+                              <input matInput [(ngModel)]="field.conditional.showWhen" 
+                                     placeholder="Value to show this field">
+                            </mat-form-field>
+                          </div>
+                        </div>
+
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- Preview Tab -->
+      <mat-tab label="Preview">
+        <div class="tab-content">
+          <div class="preview-content">
+            <h3>Form Preview</h3>
+            <p>Preview functionality will be available in the next update.</p>
+            <div class="preview-placeholder">
+              <mat-icon>visibility</mat-icon>
+              <p>Form preview will appear here</p>
+            </div>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+
+  </div>
+</div>

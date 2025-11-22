@@ -1,0 +1,316 @@
+<div class="flow-designer-container">
+  <!-- Top Toolbar: Component Palette -->
+  <mat-toolbar class="component-toolbar" color="primary">
+    <div class="toolbar-content">
+      <div class="toolbar-section">
+        <mat-icon>account_tree</mat-icon>
+        <span class="toolbar-title">Flow Form Designer</span>
+      </div>
+
+      <div class="toolbar-actions">
+        @if (hasNodes()) {
+          <button
+            mat-raised-button
+            color="accent"
+            [disabled]="!canCompile() || readonly"
+            (click)="compileFlowToFormConfig()"
+            matTooltip="Compile flow to form configuration">
+            <mat-icon>build</mat-icon>
+            Compile Flow
+          </button>
+        }
+
+        @if (selectedNode()) {
+          <button
+            mat-icon-button
+            color="warn"
+            [disabled]="readonly"
+            (click)="removeSelectedNode()"
+            matTooltip="Remove selected node">
+            <mat-icon>delete</mat-icon>
+          </button>
+        }
+
+        <button
+          mat-icon-button
+          [disabled]="readonly"
+          matTooltip="Reset canvas view">
+          <mat-icon>center_focus_strong</mat-icon>
+        </button>
+      </div>
+    </div>
+  </mat-toolbar>
+
+  <!-- Component Palette -->
+  <div class="component-palette">
+    <mat-accordion [multi]="true" class="palette-accordion">
+      @for (category of componentCategories; track trackByCategoryType($index, category)) {
+        <mat-expansion-panel [expanded]="category.type === 'input'">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>{{ category.icon }}</mat-icon>
+              {{ category.label }}
+            </mat-panel-title>
+            <mat-panel-description>
+              {{ category.description }}
+            </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <div class="component-items">
+            @for (item of category.items; track item.type) {
+              <button
+                mat-stroked-button
+                class="component-item"
+                [disabled]="readonly"
+                (click)="addComponentToFlow(category, item)"
+                [matTooltip]="'Add ' + item.label + ' to flow'">
+                <mat-icon>{{ item.icon }}</mat-icon>
+                <span>{{ item.label }}</span>
+              </button>
+            }
+          </div>
+        </mat-expansion-panel>
+      }
+    </mat-accordion>
+  </div>
+
+  <!-- Main Flow Canvas -->
+  <div class="flow-main-area">
+    <div
+      #flowCanvas
+      class="flow-canvas"
+      [style.transform]="'scale(' + canvasScale() + ') translate(' + canvasOffset().x + 'px, ' + canvasOffset().y + 'px)'"
+      (click)="onCanvasClick($event)"
+      cdkDropList
+      [cdkDropListData]="formNodes()"
+      (cdkDropListDropped)="onNodeDragEnd($event, $event.item.data)">
+
+      <!-- Background Grid -->
+      <div class="canvas-grid"></div>
+
+      <!-- Flow Nodes -->
+      @for (node of formNodes(); track trackByNodeId($index, node)) {
+        <div
+          class="flow-node"
+          [class.selected]="node.isSelected"
+          [class.invalid]="!node.isValid"
+          [style.left.px]="node.position.x"
+          [style.top.px]="node.position.y"
+          [style.width.px]="node.position.width || 180"
+          [style.height.px]="node.position.height || 100"
+          (click)="selectNode(node); $event.stopPropagation()"
+          cdkDrag
+          [cdkDragData]="node"
+          [cdkDragDisabled]="readonly">
+
+          <mat-card class="node-card" [ngClass]="'node-type-' + node.type">
+            <mat-card-header class="node-header">
+              <mat-icon class="node-icon">{{ getNodeIcon(node.type) }}</mat-icon>
+              <div class="node-title">
+                <span class="node-label">{{ node.label }}</span>
+                <span class="node-type">{{ node.type }}</span>
+              </div>
+
+              @if (node.isSelected) {
+                <button
+                  mat-icon-button
+                  class="node-menu-button"
+                  [disabled]="readonly"
+                  [matMenuTriggerFor]="nodeMenu"
+                  (click)="$event.stopPropagation()">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              }
+            </mat-card-header>
+
+            <mat-card-content class="node-content">
+              <!-- Node-specific content -->
+              @switch (node.type) {
+                @case ('input') {
+                  <div class="input-node-content">
+                    <span class="field-type">{{ node.properties['fieldType'] || 'text' }}</span>
+                    @if (node.properties['required']) {
+                      <mat-icon class="required-icon" color="warn">star</mat-icon>
+                    }
+                  </div>
+                }
+                @case ('logic') {
+                  <div class="logic-node-content">
+                    <mat-icon>alt_route</mat-icon>
+                    <span>Conditional Logic</span>
+                  </div>
+                }
+                @case ('section') {
+                  <div class="section-node-content">
+                    <mat-icon>view_module</mat-icon>
+                    <span>{{ node.properties['description'] || 'Form Section' }}</span>
+                  </div>
+                }
+              }
+            </mat-card-content>
+
+            <!-- Connection Points -->
+            <div class="connection-points">
+              @if (node.type !== 'output') {
+                <div class="connection-point output"
+                     matTooltip="Output connection">
+                  <mat-icon>radio_button_unchecked</mat-icon>
+                </div>
+              }
+
+              @if (node.type !== 'input' && node.type !== 'section') {
+                <div class="connection-point input"
+                     matTooltip="Input connection">
+                  <mat-icon>radio_button_unchecked</mat-icon>
+                </div>
+              }
+            </div>
+          </mat-card>
+        </div>
+      }
+
+      <!-- Connection Lines -->
+      <svg #connectionSvg class="connection-layer" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7"
+                  refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#666" />
+          </marker>
+        </defs>
+
+        @for (connection of nodeConnections(); track connection.id) {
+          <path
+            [attr.d]="getConnectionPath(connection)"
+            class="connection-line"
+            marker-end="url(#arrowhead)"
+            stroke="#666"
+            stroke-width="2"
+            fill="none">
+          </path>
+        }
+      </svg>
+    </div>
+  </div>
+
+  <!-- Properties Panel -->
+  <div class="properties-panel" [class.panel-open]="!!selectedNode()">
+    <mat-expansion-panel [expanded]="!!selectedNode()" class="properties-expansion">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>settings</mat-icon>
+          Node Properties
+        </mat-panel-title>
+        <mat-panel-description>
+          @if (selectedNode()) {
+            {{ selectedNode()!.label }}
+          } @else {
+            Select a node to edit properties
+          }
+        </mat-panel-description>
+      </mat-expansion-panel-header>
+
+      @if (selectedNode()) {
+        <div class="property-editor">
+          <form [formGroup]="nodePropertyForm" class="property-form">
+            <!-- Basic Properties -->
+            <div class="property-section">
+              <h4>Basic Properties</h4>
+
+                <mat-form-field appearance="outline" class="property-field">
+                  <mat-label>Label</mat-label>
+                  <input
+                    matInput
+                    formControlName="label"
+                    [readonly]="readonly"
+                    (blur)="onInputBlur($event, 'label')">
+                  <mat-icon matSuffix>label</mat-icon>
+                </mat-form-field>              @if (selectedNode()!.type === 'input') {
+                <mat-form-field appearance="outline" class="property-field">
+                  <mat-label>Field Type</mat-label>
+                  <mat-select
+                    formControlName="fieldType"
+                    [disabled]="readonly"
+                    (selectionChange)="onNodePropertyChange('fieldType', $event.value)">
+                    <mat-option value="text">Text</mat-option>
+                    <mat-option value="email">Email</mat-option>
+                    <mat-option value="number">Number</mat-option>
+                    <mat-option value="date">Date</mat-option>
+                    <mat-option value="select">Dropdown</mat-option>
+                    <mat-option value="checkbox">Checkbox</mat-option>
+                    <mat-option value="signature">Signature</mat-option>
+                    <mat-option value="picture">Picture</mat-option>
+                    <mat-option value="map">Location</mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix>input</mat-icon>
+                </mat-form-field>
+
+                <div class="property-checkbox">
+                  <mat-checkbox
+                    formControlName="required"
+                    [disabled]="readonly"
+                    (change)="onCheckboxChange($event, 'required')">
+                    Required Field
+                  </mat-checkbox>
+                </div>
+
+                <mat-form-field appearance="outline" class="property-field">
+                  <mat-label>Placeholder</mat-label>
+                  <input
+                    matInput
+                    formControlName="placeholder"
+                    [readonly]="readonly"
+                    (blur)="onInputBlur($event, 'placeholder')">
+                  <mat-icon matSuffix>text_snippet</mat-icon>
+                </mat-form-field>
+              }
+            </div>
+
+            <!-- Advanced Properties -->
+            @if (selectedNode()!.type === 'input') {
+              <div class="property-section">
+                <h4>Advanced Properties</h4>
+
+                <mat-form-field appearance="outline" class="property-field">
+                  <mat-label>Description</mat-label>
+                  <textarea
+                    matInput
+                    formControlName="description"
+                    [readonly]="readonly"
+                    (blur)="onInputBlur($event, 'description')"
+                    rows="3">
+                  </textarea>
+                  <mat-icon matSuffix>description</mat-icon>
+                </mat-form-field>
+              </div>
+            }
+          </form>
+        </div>
+      }
+    </mat-expansion-panel>
+  </div>
+
+  <!-- Node Context Menu -->
+  <mat-menu #nodeMenu="matMenu">
+    <button mat-menu-item [disabled]="readonly" (click)="removeSelectedNode()">
+      <mat-icon>delete</mat-icon>
+      <span>Remove Node</span>
+    </button>
+    <button mat-menu-item [disabled]="readonly">
+      <mat-icon>content_copy</mat-icon>
+      <span>Duplicate Node</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item>
+      <mat-icon>info</mat-icon>
+      <span>Node Information</span>
+    </button>
+  </mat-menu>
+
+  <!-- Loading Overlay -->
+  @if (isLoading()) {
+    <div class="loading-overlay">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading flow designer...</p>
+    </div>
+  }
+</div>

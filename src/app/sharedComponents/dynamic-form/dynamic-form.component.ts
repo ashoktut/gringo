@@ -13,7 +13,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Observable } from 'rxjs';
 
 import { FormConfigService, FormConfiguration } from '../../services/form-config.service';
-import { FormSubmissionService } from '../../services/form-submission.service';
+import { FormSubmissionHybridService } from '../../services/form-submission-hybrid.service';
+import { SupabaseSyncService } from '../../services/supabase-sync.service';
 import { ReusableFormComponent, FormSection } from '../reusable-form/reusable-form.component';
 
 export interface DynamicFormConfig {
@@ -57,8 +58,12 @@ export class DynamicFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly formConfigService = inject(FormConfigService);
-  private readonly formSubmissionService = inject(FormSubmissionService);
+  private readonly formSubmissionService = inject(FormSubmissionHybridService);
+  private readonly syncService = inject(SupabaseSyncService);
   private readonly snackBar = inject(MatSnackBar);
+
+  // Sync status for UI display
+  syncStatus$ = this.syncService.syncStatus$;
 
   // Configuration inputs
   @Input() config: DynamicFormConfig = { formType: 'rfq' };
@@ -306,37 +311,34 @@ export class DynamicFormComponent implements OnInit {
       }
     };
 
-    // Submit to service
+    // Submit to service (hybrid service uses async/await)
     this.formSubmissionService.createSubmission(
       this.config.formType,
       this.formTitle(),
       submissionData,
       this.formSections()
-    ).subscribe({
-      next: (submission) => {
-        console.log('✅ Form submitted successfully:', submission.submissionId);
+    ).then((submission) => {
+      console.log('✅ Form submitted successfully:', submission.submissionId);
 
-        const result: FormSubmissionResult = {
-          success: true,
-          submissionId: submission.submissionId,
-          data: formData
-        };
+      const result: FormSubmissionResult = {
+        success: true,
+        submissionId: submission.submissionId,
+        data: formData
+      };
 
-        this.showSuccessMessage();
-        this.formSubmit.emit(result);
-        this.isDirty.set(false);
-      },
-      error: (error) => {
-        console.error('❌ Error submitting form:', error);
+      this.showSuccessMessage();
+      this.formSubmit.emit(result);
+      this.isDirty.set(false);
+    }).catch((error: Error) => {
+      console.error('❌ Error submitting form:', error);
 
-        const result: FormSubmissionResult = {
-          success: false,
-          error: error.message
-        };
+      const result: FormSubmissionResult = {
+        success: false,
+        error: error.message
+      };
 
-        this.showErrorMessage(`Error submitting ${this.config.formType}`);
-        this.formSubmit.emit(result);
-      }
+      this.showErrorMessage(`Error submitting ${this.config.formType}`);
+      this.formSubmit.emit(result);
     });
   }
 

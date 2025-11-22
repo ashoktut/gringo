@@ -1,8 +1,8 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Output, EventEmitter } from '@angular/core';
 import { Router } from '@angular/router';
 import { EntityManagementComponent, EntityManagementConfig, ManagedEntity, EntityService } from '../../../sharedComponents/entity-management/entity-management.component';
 import { FormConfigService, FormConfiguration } from '../../../services/form-config.service';
-import { FormSubmissionService } from '../../../services/form-submission.service';
+import { FormSubmissionHybridService } from '../../../services/form-submission-hybrid.service';
 import { FormSection } from '../../../sharedComponents/reusable-form/reusable-form.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable, combineLatest } from 'rxjs';
@@ -52,8 +52,11 @@ interface ConfigurationWithStats extends ManagedEntity {
 export class ConfigManagementComponent {
   private router = inject(Router);
   private formConfigService = inject(FormConfigService);
-  private submissionService = inject(FormSubmissionService);
+  private submissionService = inject(FormSubmissionHybridService);
   private snackBar = inject(MatSnackBar);
+
+  @Output() editConfiguration = new EventEmitter<FormConfiguration>();
+  @Output() deleteConfiguration = new EventEmitter<FormConfiguration>();
 
   entityConfig: EntityManagementConfig<ConfigurationWithStats> = {
     entityName: 'Configuration',
@@ -105,6 +108,14 @@ export class ConfigManagementComponent {
         color: 'primary',
         type: 'menu-item',
         handler: (config: ConfigurationWithStats) => this.onConfigSelected(config)
+      },
+      {
+        id: 'edit',
+        label: 'Edit in Designer',
+        icon: 'design_services',
+        color: 'primary',
+        type: 'menu-item',
+        handler: (config: ConfigurationWithStats) => this.onEditConfiguration(config)
       },
       {
         id: 'view',
@@ -270,6 +281,23 @@ export class ConfigManagementComponent {
     this.router.navigate(['/forms', config.formType]);
   }
 
+  onEditConfiguration(config: ConfigurationWithStats): void {
+    const formConfig: FormConfiguration = {
+      id: config.id,
+      name: config.name,
+      formType: config.formType,
+      version: config.version,
+      isDefault: config.isDefault,
+      isActive: config.isActive,
+      sections: config.sections,
+      metadata: {
+        ...config.metadata,
+        createdBy: config.metadata.createdBy ?? ''
+      }
+    };
+    this.editConfiguration.emit(formConfig);
+  }
+
   onConfigCreated(config: ConfigurationWithStats): void {
     this.snackBar.open(`Configuration "${config.name}" created successfully`, 'Close', {
       duration: 3000
@@ -289,6 +317,8 @@ export class ConfigManagementComponent {
     this.snackBar.open(`Configuration deleted successfully`, 'Close', {
       duration: 3000
     });
+    // Note: We don't emit deleteConfiguration here as the entity is already deleted
+    // The event handlers expect the full config object, but we only have the ID
   }
 
   onViewForm(config: ConfigurationWithStats): void {

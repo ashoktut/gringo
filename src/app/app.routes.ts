@@ -1,10 +1,13 @@
 import { Routes } from '@angular/router';
+import { MainLayoutComponent } from './layouts/main-layout.component';
+import { AuthLayoutComponent } from './layouts/auth-layout.component';
+import { authGuard } from './guards/auth.guard';
+import { publicGuard } from './guards/public.guard';
 import { LoginComponent } from './pages/user/login/login.component';
 import { RegisterComponent } from './pages/user/register/register.component';
 import { ForgotPasswordComponent } from './pages/user/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/user/reset-password/reset-password.component';
 import { HomeComponent } from './pages/home/home.component';
-import { RfqComponent } from './pages/reps/rfq/rfq.component';
-import { RqrComponent } from './pages/reps/rqr/rqr.component';
 import { SubmissionsComponent } from './pages/submissions/submissions.component';
 import { TemplatesComponent } from './pages/templates/templates.component';
 import { StorageManagementComponent } from './pages/storage-management/storage-management.component';
@@ -13,30 +16,123 @@ import { ConfigManagementComponent } from './pages/form-builder/config-managemen
 import { DynamicFormComponent } from './sharedComponents/dynamic-form/dynamic-form.component';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent },
-  { path: 'register', component: RegisterComponent },
-  { path: 'forgot-password', component: ForgotPasswordComponent },
-  { path: 'home', component: HomeComponent },
+  {
+    path: 'auth',
+    component: AuthLayoutComponent,
+    children: [
+      { path: 'login', component: LoginComponent, canActivate: [publicGuard] },
+      { path: 'register', component: RegisterComponent, canActivate: [publicGuard] },
+      { path: 'forgot-password', component: ForgotPasswordComponent, canActivate: [publicGuard] },
+      { path: 'reset-password', component: ResetPasswordComponent }, // No guard - accessible via email link
+      { path: '', redirectTo: 'login', pathMatch: 'full' }
+    ]
+  },
+  {
+    path: '',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      { path: 'home', component: HomeComponent },
 
-  // Legacy specific routes for backward compatibility
-  { path: 'rfq', component: RfqComponent },
-  { path: 'rqr', component: RqrComponent },
+      // Enhanced Dynamic Form Routes
+      {
+        path: 'forms/:formType',
+        component: DynamicFormComponent,
+        data: {
+          title: 'Dynamic Form',
+          enableRepeatMode: true,
+          enableCompanySelector: true,
+          enableDrafts: true,
+          enableValidation: true
+        }
+      },
+      // Form-specific enhancement routes for menu
+      { path: 'rfq', redirectTo: 'forms/rfq', pathMatch: 'full' },
+      { path: 'rqr', redirectTo: 'forms/rqr', pathMatch: 'full' },
 
-  // Generic dynamic form routes
-  { path: 'forms/:formType', component: DynamicFormComponent },
-  { path: 'forms/:formType/repeat', component: DynamicFormComponent },
-  { path: 'forms/:formType/company/:companyId', component: DynamicFormComponent },
 
-  // Enhanced routes with dynamic form support
-  { path: 'submissions', component: SubmissionsComponent },
-  { path: 'submissions/:formType', component: SubmissionsComponent },
-  { path: 'templates', component: TemplatesComponent },
-  { path: 'templates/:formType', component: TemplatesComponent },
+      // Enhanced Submissions Routes
+      {
+        path: 'submissions',
+        component: SubmissionsComponent,
+        data: { title: 'All Submissions', enableTypeFilter: true }
+      },
+      {
+        path: 'submissions/:formType',
+        component: SubmissionsComponent,
+        data: { title: 'Form Submissions', enableTypeFilter: true }
+      },
 
-  // Management routes
-  { path: 'storage-management', component: StorageManagementComponent },
-  { path: 'form-builder', component: FormBuilderComponent },
-  { path: 'config-management', component: ConfigManagementComponent },
+      // Enhanced Template Routes
+      {
+        path: 'templates',
+        component: TemplatesComponent,
+        data: {
+          title: 'Template Management',
+          enableCategoryFilter: true,
+          enableFormTypeFilter: true
+        }
+      },
+      {
+        path: 'templates/:formType',
+        component: TemplatesComponent,
+        data: {
+          title: 'Form Templates',
+          enableCategoryFilter: true,
+          enableFormTypeFilter: true
+        }
+      },
 
-  { path: '', redirectTo: '/home', pathMatch: 'full' }
+      // Configuration and Management Routes
+      {
+        path: 'config-management',
+        component: ConfigManagementComponent,
+        data: {
+          title: 'Configuration Management',
+          requiresAdmin: true
+        }
+      },
+      {
+        path: 'form-builder',
+        component: FormBuilderComponent,
+        data: {
+          title: 'Form Builder',
+          requiresAdmin: true
+        }
+      },
+      {
+        path: 'storage-management',
+        component: StorageManagementComponent,
+        data: {
+          title: 'Storage Management',
+          requiresAdmin: true
+        }
+      },
+
+      // RBAC Management Routes (Company Admin only)
+      {
+        path: 'role-management',
+        loadComponent: () => import('./pages/role-management/role-management.component').then(m => m.RoleManagementComponent),
+        data: {
+          title: 'Role Management',
+          requiresAdmin: true
+        }
+      },
+      {
+        path: 'user-management',
+        loadComponent: () => import('./pages/user-management/user-management.component').then(m => m.UserManagementComponent),
+        data: {
+          title: 'User Management',
+          requiresAdmin: true
+        }
+      },
+
+      // Default route for authenticated users
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+    ]
+  },
+
+  // Wildcard route to redirect to home for any other path
+  { path: '**', redirectTo: '' }
 ];
+

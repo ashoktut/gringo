@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "prestart": "node load-env.js",
     "start": "ng serve",
+    "prebuild": "node load-env.js",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
@@ -21,6 +23,7 @@
     "@angular/router": "^20.2.1",
     "@google-cloud/storage": "^7.17.0",
     "@mapbox/maki": "^8.2.0",
+    "@supabase/supabase-js": "^2.80.0",
     "@types/maplibre-gl": "^1.14.0",
     "docx": "^9.5.1",
     "docxtemplater": "^3.65.3",
@@ -44,6 +47,8 @@
     "@types/file-saver": "^2.0.7",
     "@types/html2pdf.js": "^0.10.0",
     "@types/jasmine": "~5.1.9",
+    "@types/node": "^24.10.0",
+    "dotenv": "^17.2.3",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.4",
     "karma-chrome-launcher": "~3.2.0",

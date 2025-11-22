@@ -95,95 +95,107 @@ import { DocumentTemplateComponent } from '../../sharedComponents/document-templ
           </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <mat-tab-group *ngIf="!currentFormType"
-                        class="form-type-tabs"
-                        animationDuration="300ms"
-                        [(selectedIndex)]="selectedTabIndex"
-                        (selectedTabChange)="onTabChange($event)">
+          @if (!currentFormType) {
+            <mat-tab-group class="form-type-tabs"
+                          animationDuration="300ms"
+                          [(selectedIndex)]="selectedTabIndex"
+                          (selectedTabChange)="onTabChange($event)">
 
-            <!-- All Templates Tab -->
-            <mat-tab label="ALL TEMPLATES">
-              <div class="templates-grid" *ngIf="allTemplates.length > 0; else noTemplatesAll">
-                <div *ngFor="let template of allTemplates" class="template-card">
-                  <div class="template-content">
-                    <div class="template-header">
-                      <mat-icon class="template-icon">{{ getTemplateIcon(template.type) }}</mat-icon>
-                      <h3>{{ template.name }}</h3>
-                      <mat-chip class="form-type-chip">{{ template.formType.toUpperCase() }}</mat-chip>
-                    </div>
-                    <!-- Template actions would go here -->
+              <!-- All Templates Tab -->
+              <mat-tab label="ALL TEMPLATES">
+                @if (allTemplates.length > 0) {
+                  <div class="templates-grid">
+                    @for (template of allTemplates; track template.id) {
+                      <div class="template-card">
+                        <div class="template-content">
+                          <div class="template-header">
+                            <mat-icon class="template-icon">{{ getTemplateIcon(template.type) }}</mat-icon>
+                            <h3>{{ template.name }}</h3>
+                            <mat-chip class="form-type-chip">{{ template.formType.toUpperCase() }}</mat-chip>
+                          </div>
+                          <!-- Template actions would go here -->
+                        </div>
+                      </div>
+                    }
                   </div>
-                </div>
-              </div>
-              
-              <ng-template #noTemplatesAll>
-                <div class="no-templates">
-                  <mat-icon>description</mat-icon>
-                  <h3>No Templates Available</h3>
-                  <p>Upload your first template using the upload section above.</p>
-                </div>
-              </ng-template>
-            </mat-tab>
-
-            <!-- Individual Form Type Tabs -->
-            <mat-tab *ngFor="let formType of availableFormTypes"
-                     [label]="formType.toUpperCase()">
-              <div class="form-type-content">
-                <div class="templates-grid" *ngIf="getTemplatesForFormType(formType).length > 0; else noTemplatesForm">
-                  <div *ngFor="let template of getTemplatesForFormType(formType)" class="template-card">
-                    <!-- Template card content would go here -->
-                  </div>
-                </div>
-                
-                <ng-template #noTemplatesForm>
+                } @else {
                   <div class="no-templates">
-                    <mat-icon>note_add</mat-icon>
-                    <h3>No {{ formType.toUpperCase() }} Templates</h3>
-                    <p>Upload a template specifically for {{ formType }} forms.</p>
+                    <mat-icon>description</mat-icon>
+                    <h3>No Templates Available</h3>
+                    <p>Upload your first template using the upload section above.</p>
                   </div>
-                </ng-template>
-              </div>
-            </mat-tab>
+                }
+              </mat-tab>
 
-          </mat-tab-group>
+              <!-- Individual Form Type Tabs -->
+              @for (formType of availableFormTypes; track formType) {
+                <mat-tab [label]="formType.toUpperCase()">
+                  <div class="form-type-content">
+                    @if (getTemplatesForFormType(formType).length > 0) {
+                      <div class="templates-grid">
+                        @for (template of getTemplatesForFormType(formType); track template.id) {
+                          <div class="template-card">
+                            <!-- Template card content would go here -->
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="no-templates">
+                        <mat-icon>note_add</mat-icon>
+                        <h3>No {{ formType.toUpperCase() }} Templates</h3>
+                        <p>Upload a template specifically for {{ formType }} forms.</p>
+                      </div>
+                    }
+                  </div>
+                </mat-tab>
+              }
+
+            </mat-tab-group>
+          }
 
           <!-- Single Form Type View -->
-          <div *ngIf="currentFormType" class="single-form-view">
-            <div class="templates-grid" *ngIf="filteredTemplates.length > 0; else noTemplatesSingle">
-              <div *ngFor="let template of filteredTemplates" class="template-card">
-                <!-- Template card content would go here -->
-              </div>
+          @if (currentFormType) {
+            <div class="single-form-view">
+              @if (filteredTemplates.length > 0) {
+                <div class="templates-grid">
+                  @for (template of filteredTemplates; track template.id) {
+                    <div class="template-card">
+                      <!-- Template card content would go here -->
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="no-templates">
+                  <mat-icon>note_add</mat-icon>
+                  <h3>No {{ currentFormType.toUpperCase() }} Templates</h3>
+                  <p>Upload a template for {{ currentFormType }} forms.</p>
+                </div>
+              }
             </div>
-            
-            <ng-template #noTemplatesSingle>
-              <div class="no-templates">
-                <mat-icon>note_add</mat-icon>
-                <h3>No {{ currentFormType.toUpperCase() }} Templates</h3>
-                <p>Upload a template for {{ currentFormType }} forms using the upload section above.</p>
-              </div>
-            </ng-template>
-          </div>
-
+          }
         </mat-card-content>
       </mat-card>
 
       <!-- Quick Actions -->
-      <mat-card class="quick-actions" *ngIf="availableFormTypes.length > 0">
-        <mat-card-header>
-          <mat-card-title>Quick Actions</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="actions-grid">
-            <button mat-raised-button color="primary"
-                    *ngFor="let formType of availableFormTypes"
-                    [routerLink]="['/templates', formType]">
-              <mat-icon>{{ getFormTypeIcon(formType) }}</mat-icon>
-              {{ formType.toUpperCase() }} Templates
-              <mat-chip class="count-chip">{{ getTemplatesForFormType(formType).length }}</mat-chip>
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      @if (availableFormTypes.length > 0) {
+        <mat-card class="quick-actions">
+          <mat-card-header>
+            <mat-card-title>Quick Actions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="actions-grid">
+              @for (formType of availableFormTypes; track formType) {
+                <button mat-raised-button color="primary"
+                        [routerLink]="['/templates', formType]">
+                  <mat-icon>{{ getFormTypeIcon(formType) }}</mat-icon>
+                  {{ formType.toUpperCase() }} Templates
+                  <mat-chip class="count-chip">{{ getTemplatesForFormType(formType).length }}</mat-chip>
+                </button>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      }
 
     </div>
   `,

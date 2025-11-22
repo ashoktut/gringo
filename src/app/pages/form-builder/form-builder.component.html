@@ -1,0 +1,371 @@
+<div class="dashboard-container">
+  <!-- Header Section -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-info">
+        <div class="header-avatar">
+          <mat-icon>build</mat-icon>
+        </div>
+        <div class="header-text">
+          <h1 class="header-title">Form Configuration Builder</h1>
+          <p class="header-subtitle">Create and manage dynamic form configurations with multiple design approaches</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button mat-raised-button color="primary" (click)="createNewConfiguration()" class="create-button">
+          <mat-icon>add_circle</mat-icon>
+          Create New Configuration
+        </button>
+        <button mat-icon-button [matMenuTriggerFor]="settingsMenu" class="settings-button">
+          <mat-icon>settings</mat-icon>
+        </button>
+        <mat-menu #settingsMenu="matMenu">
+          <button mat-menu-item (click)="toggleSidebar('left')">
+            <mat-icon>view_sidebar</mat-icon>
+            Toggle Components Panel
+          </button>
+          <button mat-menu-item (click)="toggleSidebar('right')">
+            <mat-icon>info</mat-icon>
+            Toggle Properties Panel
+          </button>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="exportAllConfigurations()">
+            <mat-icon>download</mat-icon>
+            Export Configurations
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Layout -->
+  <div class="dashboard-layout">
+    <!-- Left Sidebar - Component Palette -->
+    <aside class="left-sidebar" [class.collapsed]="leftSidebarCollapsed()">
+      <div class="sidebar-header">
+        <h3>Component Palette</h3>
+        <button mat-icon-button (click)="toggleSidebar('left')" class="collapse-button">
+          <mat-icon>{{ leftSidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+        </button>
+      </div>
+
+      <div class="sidebar-content" *ngIf="!leftSidebarCollapsed()">
+        <!-- Input Components Section -->
+        <mat-expansion-panel class="component-section" [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="section-icon">input</mat-icon>
+              Input Components
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="component-grid">
+            <div class="component-item"
+                 *ngFor="let component of inputComponents"
+                 draggable="true"
+                 (dragstart)="onComponentDragStart($event, component)">
+              <mat-icon>{{ component.icon }}</mat-icon>
+              <span>{{ component.label }}</span>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Logic Gates Section -->
+        <mat-expansion-panel class="component-section">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="section-icon">psychology</mat-icon>
+              Logic Gates
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="component-grid">
+            <div class="component-item"
+                 *ngFor="let gate of logicGates"
+                 draggable="true"
+                 (dragstart)="onComponentDragStart($event, gate)">
+              <mat-icon>{{ gate.icon }}</mat-icon>
+              <span>{{ gate.label }}</span>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Organizational Section -->
+        <mat-expansion-panel class="component-section">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="section-icon">account_tree</mat-icon>
+              Form Structure
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="component-grid">
+            <div class="component-item"
+                 *ngFor="let org of organizationalComponents"
+                 draggable="true"
+                 (dragstart)="onComponentDragStart($event, org)">
+              <mat-icon>{{ org.icon }}</mat-icon>
+              <span>{{ org.label }}</span>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Designer Selection Section -->
+      <section class="designer-selection-section">
+        <div class="section-header">
+          <h2>Choose Your Design Approach</h2>
+          <p>Select the designer that best fits your form complexity and requirements</p>
+        </div>
+
+        <div class="designer-selector">
+          <mat-button-toggle-group
+            [value]="selectedDesigner()"
+            (change)="selectedDesigner.set($event.value)"
+            class="designer-toggle-group">
+            <mat-button-toggle value="flow" class="designer-toggle">
+              <div class="toggle-content">
+                <mat-icon>account_tree</mat-icon>
+                <span class="toggle-label">Flow Designer</span>
+                <mat-chip class="feature-chip new-chip">NEW</mat-chip>
+              </div>
+            </mat-button-toggle>
+            <mat-button-toggle value="visual" class="designer-toggle">
+              <div class="toggle-content">
+                <mat-icon>view_quilt</mat-icon>
+                <span class="toggle-label">Visual Editor</span>
+                <mat-chip class="feature-chip classic-chip">CLASSIC</mat-chip>
+              </div>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+      </section>
+
+      <!-- Configuration Management Section -->
+      <section class="config-management-section">
+        <div class="section-header">
+          <h2>Configuration Management</h2>
+          <p>View and manage your form configurations</p>
+        </div>
+
+        <div class="config-management-container">
+          <app-config-management
+            (editConfiguration)="editConfiguration($event)"
+            (deleteConfiguration)="deleteConfiguration($event)">
+          </app-config-management>
+        </div>
+      </section>
+
+      <!-- Active Designer Workspace -->
+      <section class="designer-workspace-section">
+        <div class="section-header">
+          <h2>Designer Workspace</h2>
+          <p>Create and edit your form configurations</p>
+        </div>
+
+        <!-- Current Configuration Info -->
+        <div class="current-config-info" *ngIf="editingConfig()">
+          <mat-card class="config-info-card">
+            <mat-card-content>
+              <div class="config-info-content">
+                <div class="config-icon-wrapper">
+                  <mat-icon class="config-icon">edit_note</mat-icon>
+                </div>
+                <div class="config-details">
+                  <h4 class="config-name">Currently Editing: {{ editingConfig()?.name }}</h4>
+                  <div class="config-meta">
+                    <div class="config-chips">
+                      <mat-chip selected>
+                        <mat-icon matChipAvatar>category</mat-icon>
+                        {{ editingConfig()?.formType }}
+                      </mat-chip>
+                      <mat-chip selected>
+                        <mat-icon matChipAvatar>tag</mat-icon>
+                        v{{ editingConfig()?.version }}
+                      </mat-chip>
+                      <mat-chip selected *ngIf="editingConfig()?.isDefault">
+                        <mat-icon matChipAvatar>star</mat-icon>
+                        Default
+                      </mat-chip>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Designer Container -->
+        <div class="designer-container">
+          <!-- Flow Form Designer -->
+          <div *ngIf="selectedDesigner() === 'flow'" class="designer-wrapper flow-wrapper">
+            <app-flow-form-designer
+              [initialConfiguration]="editingConfig() ?? undefined"
+              [readonly]="false"
+              (configurationChange)="onFlowConfigurationChange($event)"
+              (nodeSelected)="onNodeSelected($event)"
+              (blueprintCreated)="onBlueprintCreated($event)">
+            </app-flow-form-designer>
+          </div>
+
+          <!-- Visual Form Editor -->
+          <div *ngIf="selectedDesigner() === 'visual'" class="designer-wrapper visual-wrapper">
+            <app-visual-form-editor
+              *ngIf="editingConfig()"
+              [configuration]="editingConfig()"
+              (save)="onConfigurationSaved($event)"
+              (cancel)="onEditorCancelled()">
+            </app-visual-form-editor>
+
+            <!-- Prompt for Visual Editor -->
+            <div *ngIf="!editingConfig()" class="no-config-prompt">
+              <mat-card class="prompt-card">
+                <mat-card-content>
+                  <div class="prompt-content">
+                    <mat-icon class="prompt-icon">info_outline</mat-icon>
+                    <h3 class="prompt-title">Configuration Required</h3>
+                    <p class="prompt-text">
+                      The Visual Editor requires an existing configuration to edit.
+                      Choose an option below to get started.
+                    </p>
+                    <div class="prompt-actions">
+                      <button
+                        mat-raised-button
+                        color="primary"
+                        (click)="createNewConfiguration()"
+                        class="prompt-button primary-action">
+                        <mat-icon>add_circle</mat-icon>
+                        Create New Configuration
+                      </button>
+                      <button
+                        mat-stroked-button
+                        color="accent"
+                        (click)="selectedDesigner.set('flow')"
+                        class="prompt-button">
+                        <mat-icon>account_tree</mat-icon>
+                        Try Flow Designer Instead
+                      </button>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Right Sidebar - Properties & Settings -->
+    <aside class="right-sidebar" [class.collapsed]="rightSidebarCollapsed()">
+      <div class="sidebar-header">
+        <h3>Properties & Settings</h3>
+        <button mat-icon-button (click)="toggleSidebar('right')" class="collapse-button">
+          <mat-icon>{{ rightSidebarCollapsed() ? 'chevron_left' : 'chevron_right' }}</mat-icon>
+        </button>
+      </div>
+
+      <div class="sidebar-content" *ngIf="!rightSidebarCollapsed()">
+        <!-- Designer Information -->
+        <mat-expansion-panel class="properties-section" [expanded]="true">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="section-icon">info</mat-icon>
+              Designer Info
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="designer-info-content">
+            <div class="info-card" [class.active-card]="selectedDesigner() === 'flow'">
+              <div class="card-header">
+                <mat-icon class="card-icon flow-icon">account_tree</mat-icon>
+                <h4>Flow Designer</h4>
+              </div>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <mat-icon class="feature-icon">check_circle</mat-icon>
+                  <span>Visual flow creation</span>
+                </div>
+                <div class="feature-item">
+                  <mat-icon class="feature-icon">psychology</mat-icon>
+                  <span>Advanced rule engine</span>
+                </div>
+                <div class="feature-item">
+                  <mat-icon class="feature-icon">security</mat-icon>
+                  <span>Patent-safe assembly</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-card" [class.active-card]="selectedDesigner() === 'visual'">
+              <div class="card-header">
+                <mat-icon class="card-icon visual-icon">view_quilt</mat-icon>
+                <h4>Visual Editor</h4>
+              </div>
+              <div class="feature-list">
+                <div class="feature-item">
+                  <mat-icon class="feature-icon">touch_app</mat-icon>
+                  <span>Drag-and-drop interface</span>
+                </div>
+                <div class="feature-item">
+                  <mat-icon class="feature-icon">flash_on</mat-icon>
+                  <span>Quick form creation</span>
+                </div>
+                <div class="feature-item">
+                  <mat-icon class="feature-icon">visibility</mat-icon>
+                  <span>Direct visual layout</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Preferences -->
+        <mat-expansion-panel class="properties-section">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="section-icon">tune</mat-icon>
+              Preferences
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="preferences-content">
+            <div class="preference-item">
+              <label>Default Designer</label>
+              <mat-button-toggle-group
+                [value]="defaultDesigner()"
+                (change)="setDefaultDesigner($event.value)"
+                class="preference-toggle">
+                <mat-button-toggle value="flow">Flow</mat-button-toggle>
+                <mat-button-toggle value="visual">Visual</mat-button-toggle>
+              </mat-button-toggle-group>
+            </div>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Statistics -->
+        <mat-expansion-panel class="properties-section">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon class="section-icon">analytics</mat-icon>
+              Statistics
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="stats-content">
+            <div class="stat-item">
+              <mat-icon>description</mat-icon>
+              <div class="stat-info">
+                <span class="stat-value">{{ configurations().length }}</span>
+                <span class="stat-label">Configurations</span>
+              </div>
+            </div>
+            <div class="stat-item">
+              <mat-icon>edit</mat-icon>
+              <div class="stat-info">
+                <span class="stat-value">{{ editingConfig() ? 1 : 0 }}</span>
+                <span class="stat-label">Currently Editing</span>
+              </div>
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </div>
+    </aside>
+  </div>
+</div>
